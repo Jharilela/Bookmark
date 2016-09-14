@@ -1,0 +1,56 @@
+<ion-view hide-nav-bar="true">
+	<ion-header-bar>
+	<button class="button button-clear button-positive " ng-click="goBack()">
+		<i class="ion-chevron-left"></i>
+	</button>
+	 
+	</ion-header-bar>
+
+	<ion-content class="padding">
+		<div class="row">
+		  <div class="col">
+		  	<img ng-src="{{bookImage}}" width="{{imageWidth}}">
+		  </div>
+		  <div class="col">
+			<button class="button button-block button-energized" ng-click="test1()">
+			  Buy it
+			</button><br>
+			<button class="button button-block button-balanced" ng-click="test2()">
+			  Borrow it
+			</button><br>
+			<button class="button button-block button-royal" ng-click="test3()">
+			  Wish to read
+			</button><br>
+			<button class="button button-block button-positive">
+			  Have it
+			</button>
+		  </div>
+		</div>
+		<h3>Title</h3>
+		{{book.title}}<br>
+		<h3>Source</h3>
+		{{book.type}}<br>
+		<div ng-if="book.subTitle!=undefined">
+			<h3>Subtitle</h3>
+			{{book.subTitle}}<br>
+		</div>
+		<div ng-if=" book.authors!=undefined">
+			<h3>Authors</h3>
+			<div ng-if="angular.isObject(book.authors) == false">
+				{{book.authors}}<br>
+			</div>
+			<div ng-if="angular.isObject(book.authors) == true">
+				<div ng-repeat="author in book.authors track by $index" style="display:inline">
+				<div ng-if="$index>0" style="display:inline">,</div>
+				{{author.name}}
+				</div>
+				<br>
+			</div>
+		</div>
+		<div ng-if="book.description!=undefined">
+			<h3>Description</h3>
+			{{book.description}}<br>
+		</div>
+
+	</ion-content>
+</ion-view>

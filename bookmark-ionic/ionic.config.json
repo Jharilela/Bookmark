@@ -1,0 +1,12 @@
+{
+  "name": "bookmark",
+  "app_id": "832bfd09",
+  "gulpStartupTasks": [
+    "sass",
+    "watch"
+  ],
+  "watchPatterns": [
+    "www/**/*",
+    "!www/lib/**/*"
+  ]
+}

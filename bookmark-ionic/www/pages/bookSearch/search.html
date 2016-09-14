@@ -1,0 +1,20 @@
+<ion-view hide-nav-bar="true">
+
+	  <ion-header-bar class="bar-has-input item-input-inset" id="container">
+	    <label class="item-input-wrapper no-bg">
+	      <i class="icon ion-search placeholder-icon"></i>
+		  <input type="text" placeholder="Search" ng-model="search.searchingText" >
+	    </label>
+	    <div class="buttons">
+			  <button class="button button-positive button-clear" ng-click="searching()" style="margin-left:10px" >OK</button>
+			</div>
+    </ion-header-bar>
+
+  <ion-content class="padding" >    
+	<div  style="width:100%" class="row" ng-repeat="(i, rows) in search.books">
+		<div  style="display:inline;width:33%" ng-repeat="(j,books) in rows">
+			<img ng-src="{{books.imageLink}}" style="height:120px;margin-left: 25%" title="{{books.title}}" ng-click="search.bookDetail(i, j)">
+		</div>
+	</div>
+  </ion-content>
+</ion-view>

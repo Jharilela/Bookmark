@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+    <title></title>
+
+
+    
+    <link href="css/ionic.app.css" rel="stylesheet">
+   
+
+    <!-- HMAC-sha256 keyed-hash message authentication code and base 64 encoder -->
+    <script src="lib/crypto-js/crypto-js.js"></script>
+
+    <!-- ionic/angularjs js -->
+    <script src="lib/ionic/js/ionic.bundle.js"></script>
+
+    <!-- ng-Progress library -->
+    <script src="lib/ngprogress/build/ngprogress.js"></script>
+    <link rel="stylesheet" href="lib/ngprogress/ngProgress.css">
+
+    <!-- cordova script (this will be a 404 during development) -->
+    <script src="cordova.js"></script>
+
+    <!-- your app's js -->
+    <script src="index.js"></script>
+    <script src="router.js"></script>
+    
+    <!-- social Controllers -->
+    <script src="pages/social/wall.js"></script>
+
+    <!-- chatRoom Controllers -->
+    <script src="pages/chatRoom/chatList.js"></script>
+
+    <!-- bookList Controllers -->
+    <script src="pages/bookList/list.js"></script>
+
+    <!-- search Controllers -->
+    <script src="pages/bookSearch/search.js"></script>
+    <script src="pages/bookSearch/search.srv.js"></script>
+
+    <!-- detail Controllers -->
+    <script src="pages/bookDetails/detail.js"></script>
+    <script src="pages/bookDetails/detail.srv.js"></script>
+
+    <!-- profile Controllers -->
+    <script src="pages/profile/home.js"></script>
+    
+
+  </head>
+  <body ng-app="bookmark">
+    <!--
+      The nav bar that will be updated as we navigate between views.
+    -->
+    <ion-nav-bar class="bar-stable">
+      <ion-nav-back-button class="button-icon icon ion-ios7-arrow-back">
+      </ion-nav-back-button>
+    </ion-nav-bar>
+    <!--
+      The views will be rendered in the <ion-nav-view> directive below
+      Templates are in the /templates folder (but you could also
+      have templates inline in this html file if you'd like).
+    -->
+    <ion-nav-view></ion-nav-view>
+  </body>
+</html>
