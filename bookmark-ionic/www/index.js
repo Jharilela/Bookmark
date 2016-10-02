@@ -9,8 +9,10 @@ angular.module('bookmark', [
   'ionic', 
   'bookmark.router', 
   'bookmark.controllers', 
+  'bookmark.constants',
   'bookmark.services',
-  'ngProgress'
+  'ngProgress',
+  'firebase'
   ])
 
 .run(function($ionicPlatform) {
@@ -41,6 +43,8 @@ angular.module('bookmark', [
         return $delegate;
     });
 });
+
+angular.module('bookmark.constants', [])
 
 angular.module('bookmark.controllers', [])
 

@@ -3,11 +3,11 @@
 	  <ion-header-bar class="bar-has-input item-input-inset" id="container">
 	    <label class="item-input-wrapper no-bg">
 	      <i class="icon ion-search placeholder-icon"></i>
-		  <input type="text" placeholder="Search" ng-model="search.searchingText" >
+		  <input type="text" placeholder="Search" ng-model="search.searchingText" ng-keyup="$event.keyCode == 13 && searching()">
 	    </label>
 	    <div class="buttons">
-			  <button class="button button-positive button-clear" ng-click="searching()" style="margin-left:10px" >OK</button>
-			</div>
+			<button class="button button-positive button-clear" ng-click="searching()" style="margin-left:10px" >OK</button>
+		</div>
     </ion-header-bar>
 
   <ion-content class="padding" >    

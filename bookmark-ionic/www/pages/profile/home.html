@@ -1,5 +1,28 @@
-<ion-view view-title="Profile">
+<ion-view hide-nav-bar="true">
+	<ion-header-bar>
+	<button class="button button-clear button-positive " ui-sref="register">
+		Sign in
+	</button>
+	 
+	</ion-header-bar>
+
   <ion-content class="padding">
-    <h2>Welcome to home.html</h2>
+  	<div ng-if="user!=null">
+	First Name : {{user.firstName}}<br>
+	Last Name : {{user.lastName}}<br>
+	Email : {{user.email}}<br>
+	Phone Number : {{user.phoneNumber}}<br>
+	Country : {{user.country}}<br>
+    <img ng-src="{{user.photoURL}}" style="max-width: 140px;">
+    </div>
+
+     <button class="button button-block button-balanced" ng-click="logout()">
+     Logout
+    </button>
+
+    <button class="button button-block button-energized" ng-click="loadUser()">
+    	Load user
+    </button>
+
   </ion-content>
 </ion-view>

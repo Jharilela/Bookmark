@@ -1,0 +1,51 @@
+<ion-view hide-nav-bar="true">
+	<ion-header-bar>
+	<button class="button button-clear button-positive " ng-click="goBack()">
+		<i class="ion-chevron-left"></i>
+	</button>
+	<button class="button button-clear button-positive " ui-sref="newUser">
+		New User
+	</button>
+	 
+	</ion-header-bar>
+
+  <ion-content class="padding">
+  	<div ng-if="user!=null">
+	{{user.displayName}}<br>
+	{{user.email}}<br>
+    <img ng-src="{{user.photoURL}}" style="max-width: 140px;">
+    </div>
+
+    <button class="button button-block button-positive" ng-click="fbLogin()">
+    <i class="ion-social-facebook" style="color: white"></i> Facebook Login
+    </button>
+
+    <button class="button button-block button-assertive" ng-click="googleLogin()">
+    <i class="ion-social-google" style="color: white"></i>  Google Login
+    </button>
+
+    <button class="button button-block button-stable" ng-click="devLogin()">
+    <i class="ion-android-person" style="color: black"></i> Developer Login
+    </button>
+
+    <div class="list">
+	  <label class="item item-input">
+	    <span class="input-label">Email</span>
+	    <input type="text" ng-model="register.email">
+	    <i class="icon ion-checkmark-round" style="color:green" ng-show="validateEmail(register.email)==true && register.email!=null && register.email.length>0"></i>
+	    <i class="icon ion-close-round" style="color:red" ng-show="validateEmail(register.email)==false && register.email!=null && register.email.length>0"></i>
+	  </label>
+	  <label class="item item-input">
+	    <span class="input-label">Password</span>
+	    <input type="password" ng-model="register.password">
+	  </label>
+	</div>
+	<div ng-if="register.errorMessage!=''" class="register-errorMessage">
+	{{register.errorMessage}}
+	</div>
+	<div class="button-bar">
+	  <a class="button button-dark" ng-click="emailLogin()">Sign in</a>
+	  <a class="button button-dark" ng-click="emailRegister()">Register</a>
+	</div>
+  </ion-content>
+</ion-view>

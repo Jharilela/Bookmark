@@ -2,7 +2,7 @@
 angular.module('bookmark.services')
 .factory('searchSrv', searchSrv)
 
-function searchSrv ($http, $q, ngProgressFactory){
+function searchSrv ($http, $q, ngProgressFactory, searchAPI){
 	var vm = this;
 	if(vm.progressbar == undefined){
 		vm.progressbar = ngProgressFactory.createInstance();
@@ -21,7 +21,7 @@ function searchSrv ($http, $q, ngProgressFactory){
 	function searchGoogleBooks(searchItem, noOfItems, type){
 		console.log('loading-status', vm.progressbar.status())
 		var startTime = (new Date()).getTime();
-		var apiKey = "AIzaSyAddSUeEA3pwRLVJ8s8WOZditZlkt-Vwkc"
+		var apiKey = searchAPI.googleKey;
 		searchItem = searchItem.trim().split(/[^a-zA-Z 0-9]+/g).join("").split(" ").join("+")
 		if(type!=null && type !=undefined && type!="")
 			type = type+':'
@@ -100,10 +100,10 @@ function searchSrv ($http, $q, ngProgressFactory){
 		var requestURI = "/onca/xml"
 		var endpoint = "webservices.amazon.com"
 		//the access key is obtained from the aws console , https://console.aws.amazon.com/console/home
-		var awsAccessKeyId = "AKIAIL3KQVMU2S4BQCTQ"
-		var awsSecretKey = "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"
+		var awsAccessKeyId = searchAPI.awsAccessKeyId
+		var awsSecretKey = searchAPI.awsSecretKey
 		// the associate id is obtained from the aws affilites program, https://affiliate-program.amazon.com
-		var awsAssociateId = "bookmark0bf-20"
+		var awsAssociateId = searchAPI.awsAssociateId
 
 		var req = 
 		"AWSAccessKeyId="+awsAccessKeyId+"&"+
@@ -253,7 +253,7 @@ function searchSrv ($http, $q, ngProgressFactory){
 	function searchGoodReadsBooks(searchItem){
 		var startTime = (new Date()).getTime();
 		searchItem = searchItem.trim().split(/[^a-zA-Z 0-9]+/g).join("").split(" ").join("+")
-		var apiKey = "guQ6kGMzvAe3tYTYzytr2A";
+		var apiKey = searchAPI.goodReadsKey;
 		var gUrl = "https://www.goodreads.com/search/index.xml?"+
 		"q="+searchItem+"&"+
 		// "format=json&"+

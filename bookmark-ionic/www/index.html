@@ -6,7 +6,7 @@
     <title></title>
 
 
-    
+    <!--scss files-->
     <link href="css/ionic.app.css" rel="stylesheet">
    
 
@@ -23,9 +23,32 @@
     <!-- cordova script (this will be a 404 during development) -->
     <script src="cordova.js"></script>
 
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/3.4.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/3.4.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/3.4.0/firebase-database.js"></script>
+    <!-- Leave out Storage -->
+    <!-- <script src="https://www.gstatic.com/firebasejs/3.4.0/firebase-storage.js"></script> -->
+
+    <script src="https://cdn.firebase.com/libs/angularfire/2.0.2/angularfire.min.js"></script>
+    <script>
+        var firebaseConfig = {
+            apiKey: "AIzaSyB8wRVDXnWxEqFnjwPelunnrfbdoCBEzzg",
+            authDomain: "bookmark-140216.firebaseapp.com",
+            databaseURL: "https://bookmark-140216.firebaseio.com",
+            storageBucket: "bookmark-140216.appspot.com",
+            messagingSenderId: "316498021139"
+          }
+
+          firebase.initializeApp(firebaseConfig)
+          var ref = firebase.database().ref()
+          //var ref = new Firebase(firebaseConfig.databaseURL);
+    </script>
+
     <!-- your app's js -->
     <script src="index.js"></script>
     <script src="router.js"></script>
+    <script src="constants.js"></script>
     
     <!-- social Controllers -->
     <script src="pages/social/wall.js"></script>
@@ -46,6 +69,9 @@
 
     <!-- profile Controllers -->
     <script src="pages/profile/home.js"></script>
+    <script src="pages/profile/register.js"></script>
+    <script src="pages/profile/newUser.js"></script>
+    <script src="pages/profile/profile.srv.js"></script>
     
 
   </head>

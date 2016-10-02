@@ -9,7 +9,7 @@ angular.module('bookmark.router', [])
   $stateProvider
 
   // setup an abstract state for the tabs directive
-    .state('tab', {
+  .state('tab', {
     url: '/tab',
     abstract: true,
     templateUrl: 'pages/tabs/tabs.html'
@@ -41,7 +41,7 @@ angular.module('bookmark.router', [])
     views: {
       'tab-bookList': {
         templateUrl: 'pages/bookList/list.html',
-        controller: 'bookListCtrl'
+        controller: 'bookListCtrl as bookList'
       }
     }
   })
@@ -69,10 +69,24 @@ angular.module('bookmark.router', [])
     views: {
       'tab-profile': {
         templateUrl: 'pages/profile/home.html',
-        controller: 'profileCtrl'
+        controller: 'profileCtrl as profile'
       }
     }
-  });
+  })
+
+  .state('register',{
+    url: '/register',
+    templateUrl:'/pages/profile/register.html',
+    controller:'registerCtrl as register'
+  })
+
+  .state('newUser',{
+    url: '/newUser',
+    templateUrl: '/pages/profile/newUser.html',
+    controller: 'newUserCtrl as newUser'
+  })
+
+  ;
 
   // if none of the above states are matched, use this as the fallback
   $urlRouterProvider.otherwise('/tab/search');

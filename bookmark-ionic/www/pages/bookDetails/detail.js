@@ -1,5 +1,5 @@
 angular.module('bookmark.controllers')
-.controller('bookDetailCtrl', function($scope,$rootScope, $state, $stateParams, $window, $ionicHistory, detailSrv){
+.controller('bookDetailCtrl', function($scope,$rootScope, $state, $stateParams, $window, $ionicHistory, detailSrv, profileSrv){
 	console.log('bookDetailCtrl loaded ', $stateParams);
 	var vm = this;
 	$rootScope.angular = angular;
@@ -27,8 +27,8 @@ angular.module('bookmark.controllers')
 	    $ionicHistory.goBack();
 	  };
 
-	$scope.test1 = function(){
-		detailSrv.getAmazonDetails($scope.book)
+	$scope.ownBook = function(){
+		profileSrv.ownBook($scope.book)
 	}
 	$scope.test2 = function(){
 		detailSrv.getGoogleDetails($scope.book);
@@ -38,6 +38,9 @@ angular.module('bookmark.controllers')
 		.then(function(res){
 			$scope.book = res
 		})
+	}
+	$scope.test4 = function(){
+		detailSrv.getBookCover($scope.book);
 	}
 
 })

@@ -1,5 +1,8 @@
 <ion-view view-title="BookList">
   <ion-content class="padding">
-    <h2>Welcome to list.html</h2>
+    <h2 ng-if="bookList.length==0">Loading...</h2>
+    <div ng-repeat="books in bookList" style="display: inline">
+    	<img ng-src="{{books.imageLink}}" style="height:120px;display: inline" title="{{books.title}}" ui-sref="bookDetail({source:'bookList', book: books})">
+    </div>
   </ion-content>
 </ion-view>

@@ -16,7 +16,7 @@ angular.module('bookmark.controllers')
   }
               
   $scope.searching = function(){
-  	console.log('ok is pressed 1')
+  	console.log('ok is pressed')
   	searchSrv.progressbar.start();
   	searchSrv.progressbar.set(2);
   	if(vm.searchingText!="" && vm.searchingText!=" ")

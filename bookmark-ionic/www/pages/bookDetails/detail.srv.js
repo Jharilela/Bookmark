@@ -2,12 +2,13 @@
 angular.module('bookmark.services')
 .factory('detailSrv', detailSrv)
 
-function detailSrv($http){
+function detailSrv($http, searchAPI){
 	return {
 		getDetails : getDetails,
 		getAmazonDetails : getAmazonDetails,
 		getGoogleDetails : getGoogleDetails,
-		getGoodReadsDetails : getGoodReadsDetails
+		getGoodReadsDetails : getGoodReadsDetails,
+		getBookImage : getBookImage
 	}
 
 	function getDetails(book){
@@ -28,7 +29,7 @@ function detailSrv($http){
 	function getGoodReadsDetails(book){
 		console.log('getting GoodReads Details')
 		var startTime = (new Date()).getTime();
-		var apiKey = "guQ6kGMzvAe3tYTYzytr2A";
+		var apiKey = searchAPI.goodReadsKey;
 		var gUrl = "https://www.goodreads.com/book/show.xml?"+
 		"id="+book.goodReadsId+"&"+
 		"key="+apiKey;
@@ -82,5 +83,8 @@ function detailSrv($http){
 			console.log('newBook', newBook)
 		}
 
+	}
+	function getBookImage(book){
+		
 	}
 }	
