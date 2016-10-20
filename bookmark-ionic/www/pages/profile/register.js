@@ -1,15 +1,43 @@
 angular.module('bookmark.controllers')
 
-.controller('registerCtrl', function($scope, profileSrv, $firebaseObject, $firebaseAuth, $ionicHistory) {
-  console.log('registerCtrl - loaded')
-  $scope.auth = profileSrv.auth;
-  $scope.user;
+.controller('registerCtrl', function($scope, $cordovaOauth, profileSrv, constants, $firebaseObject, $firebaseAuth, $ionicHistory, $state) {
+	console.log('registerCtrl - loaded')
+	$scope.auth = profileSrv.auth;
+	$scope.user;
 
-  var vm = this;
-  vm.email;
-  vm.password;
-  vm.errorMessage='';
-  $scope.validateEmail = profileSrv.validateEmail
+	var vm = this;
+	vm.email;
+	vm.password;
+	vm.errorMessage='';
+	$scope.validateEmail = profileSrv.validateEmail
+
+	$scope.$on("$ionicView.beforeEnter", function(event, data){
+	   // handle event
+	   vm.errorMessage='';
+	});
+
+
+  	profileSrv.auth.$onAuthStateChanged(function(firebaseUser) {
+      if (firebaseUser) {
+        profileSrv.getUser()
+        .then(function(user){
+        	$scope.user = user;
+        	$state.go("tab.bookList")
+        	console.log('loading user', $scope.user)
+        })
+        .catch(function(error){
+        	if(error=="new user"){
+        		$state.go("newUser")
+        	}
+        	else{
+        		$scope.errorMessage = error;
+        	}
+        })
+      } 
+      else {
+        console.log("Signed out");
+      } 
+    });
 
 	$scope.goBack = function() {
 	    $ionicHistory.goBack();
@@ -29,11 +57,41 @@ angular.module('bookmark.controllers')
 
   	$scope.fbLogin = function(){
 	  	// login with Facebook
-	  	$scope.auth.$signInWithPopup("facebook").then(authSuccess).catch(authFail);
+	  	if(ionic.Platform.isIOS()){
+	  		console.log('loging in with Facebook Oauth')
+	  		$cordovaOauth.facebook(constants.facebookAppId, ["email"])
+	  		.then(function(result) {
+	           console.log("Result "+JSON.stringify(result))
+	           console.log('access token '+result.access_token)
+	           var credential = firebase.auth.FacebookAuthProvider.credential(result.access_token);
+	           $scope.auth.$signInWithCredential(credential).then(authSuccess).catch(authFail);
+			})
+	  		.catch(function(error){
+	  			console.log("Error -> " + error);
+	  		})
+	  	}
+	  	else{
+	  		$scope.auth.$signInWithPopup("facebook").then(authSuccess).catch(authFail);
+	  	}
   	}
 
   	$scope.googleLogin = function(){
-  		$scope.auth.$signInWithPopup("google").then(authSuccess).catch(authFail);
+  		if(ionic.Platform.isIOS()){
+  			console.log('loging in with Google Oauth')
+	  		$cordovaOauth.google(constants.googleClientId, ["email"])
+	  		.then(function(result) {
+	           console.log("Result "+JSON.stringify(result))
+	            console.log('access token '+result.access_token)
+	            var credential = firebase.auth.GoogleAuthProvider.credential(result.id_token);
+	        	$scope.auth.$signInWithCredential(credential).then(authSuccess).catch(authFail);
+			})
+			.catch(function(error) {
+			    console.log("Error -> " + error);
+			});
+  		}
+  		else{
+  			$scope.auth.$signInWithPopup("google").then(authSuccess).catch(authFail);
+  		}
   	}
 
   	$scope.devLogin = function(){

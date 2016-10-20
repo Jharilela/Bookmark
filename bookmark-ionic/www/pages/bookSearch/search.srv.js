@@ -6,16 +6,15 @@ function searchSrv ($http, $q, ngProgressFactory, searchAPI){
 	var vm = this;
 	if(vm.progressbar == undefined){
 		vm.progressbar = ngProgressFactory.createInstance();
-		vm.progressbar.setParent(document.getElementById('container'));
 		vm.progressbar.setHeight('2px');
 	}
-
 	return {
 		searchGoogleBooks : searchGoogleBooks,
 		searchAmazonBooks : searchAmazonBooks,
 		searchGoodReadsBooks : searchGoodReadsBooks,
 		searchBookList : searchBookList,
-		progressbar: vm.progressbar
+		progressbar: vm.progressbar,
+		findSimilarName : findSimilarName
 	}
 
 	function searchGoogleBooks(searchItem, noOfItems, type){
@@ -328,6 +327,7 @@ function searchSrv ($http, $q, ngProgressFactory, searchAPI){
 
 	function searchBookList(searchItem, selectedService){
 		console.log('searching '+ searchItem);
+		vm.progressbar.setParent(document.getElementById('search-container'));
 	  	var startTime = (new Date()).getTime();
 
 	  	vm.progressbar.setColor('#1784F4');
@@ -424,7 +424,7 @@ function searchSrv ($http, $q, ngProgressFactory, searchAPI){
     	//the prefix s stands for item in searchItem
     	// console.log('searchItem author', searchItem.authors, typeof searchItem.authors)
     	var iTitle = searchItem.title;
-    	var iAuthor = (searchItem.authors!=undefined?searchItem.authors.join(','):"-")
+    	var iAuthor = (searchItem.authors!=undefined && typeof searchItem.authors == "object"?searchItem.authors.join(','):"-")
     	var iDay = (searchItem.publishedDay!=undefined?searchItem.publishedDay:"-")
     	var iMonth = (searchItem.publishedMonth!=undefined?searchItem.publishedMonth:"-")
     	var iYear = (searchItem.publishedYear!=undefined?searchItem.publishedYear:"-")
@@ -444,11 +444,12 @@ function searchSrv ($http, $q, ngProgressFactory, searchAPI){
     		// console.log('r: '+r)
     		var globalSimilarWords = 0;
 	    	//the prefix r stands for reference in searchRefence
-	    	var rTitle = searchRef[r].obj.title;
-	    	var rAuthor = searchRef[r].obj.authors!=undefined?searchRef[r].obj.authors.join(" , "):"-"
-	    	var rDay = (searchRef[r].obj.publishedDay!=undefined?searchRef[r].obj.publishedDay:"-")
-	    	var rMonth = (searchRef[r].obj.publishedMonth!=undefined?searchRef[r].obj.publishedMonth:"-")
-	    	var rYear = (searchRef[r].obj.publishedYear!=undefined?searchRef[r].obj.publishedYear:"-")
+	    	var ref = searchRef[r].obj==undefined?searchRef[r]:searchRef[r].obj
+	    	var rTitle = ref.title;
+	    	var rAuthor = ref.authors!=undefined && typeof searchItem.authors == "object"?ref.authors.join(" , "):"-"
+	    	var rDay = (ref.publishedDay!=undefined?ref.publishedDay:"-")
+	    	var rMonth = (ref.publishedMonth!=undefined?ref.publishedMonth:"-")
+	    	var rYear = (ref.publishedYear!=undefined?ref.publishedYear:"-")
 	    	rTitle = rTitle.split(/[^a-zA-Z 0-9]+/g).join("").split(" ").filter(function(n){ return n != "" });
 	    	rAuthor = rAuthor.split(',').join(' ').toUpperCase().split(" ").filter(function(n){ return n != "" })
 	    	var authorExist = false
@@ -476,12 +477,12 @@ function searchSrv ($http, $q, ngProgressFactory, searchAPI){
 	    	}
 
 
-	    	if(searchRef[r].obj.authors!=undefined && searchItem.authors!=undefined){
-		    	for(var x = 0; x< searchRef[r].obj.authors.length; x++){
+	    	if(ref.authors!=undefined && searchItem.authors!=undefined){
+		    	for(var x = 0; x< ref.authors.length; x++){
 		    		for(var y=0; y<searchItem.authors.length; y++){
-		    			// console.log('searchRef[x]: '+x, searchRef[r].obj.authors[x], typeof searchRef[r].obj.authors[x])
+		    			// console.log('searchRef[x]: '+x, ref.authors[x], typeof ref.authors[x])
 		    			// console.log('searchItem[y]: '+y, searchItem.authors[y], typeof searchItem.authors[y])
-		    			if(searchRef[r].obj.authors[x].toUpperCase() == searchItem.authors[y].toUpperCase()){
+		    			if(ref.authors[x].toUpperCase() == searchItem.authors[y].toUpperCase()){
 		    				authorExist = true;
 		    			}
 		    		}

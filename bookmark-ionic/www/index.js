@@ -12,13 +12,25 @@ angular.module('bookmark', [
   'bookmark.constants',
   'bookmark.services',
   'ngProgress',
-  'firebase'
+  'firebase',
+  'ngCordovaOauth'
   ])
 
+.factory("Auth", ["$firebaseAuth",
+  function($firebaseAuth) {
+    return $firebaseAuth();
+  }
+])
+
 .run(function($ionicPlatform) {
+  console.log('is iOS device', ionic.Platform.isIOS())
+    if(ionic.Platform.isIOS()){
+      alert('iOS developer mode')
+    }
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)
+
     if (window.cordova && window.cordova.plugins && window.cordova.plugins.Keyboard) {
       cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
       cordova.plugins.Keyboard.disableScroll(true);
@@ -31,17 +43,35 @@ angular.module('bookmark', [
   });
 })
 
+.run(["$rootScope", "$state", function($rootScope, $state) {
+  $rootScope.$on("$stateChangeError", function(event, toState, toParams, fromState, fromParams, error) {
+    // We can catch the error thrown when the $requireSignIn promise is rejected
+    // and redirect the user back to the home page
+    console.log()
+    if (error === "AUTH_REQUIRED") {
+      console.log('this $state requires AUTH')
+      $state.go("register");
+    }
+  });
+}])
+
+.run(["Auth", function(Auth){
+  console.log('getting authentication ', Auth)
+  var ref = firebase.database().ref()
+  console.log('ref', ref)
+}])
+
 .config(function($provide) {
-    $provide.decorator('$state', function($delegate, $stateParams) {
-        $delegate.forceReload = function() {
-            return $delegate.go($delegate.current, $stateParams, {
-                reload: true,
-                inherit: false,
-                notify: true
-            });
-        };
-        return $delegate;
-    });
+  $provide.decorator('$state', function($delegate, $stateParams) {
+      $delegate.forceReload = function() {
+          return $delegate.go($delegate.current, $stateParams, {
+              reload: true,
+              inherit: false,
+              notify: true
+          });
+      };
+      return $delegate;
+  });
 });
 
 angular.module('bookmark.constants', [])

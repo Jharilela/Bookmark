@@ -12,7 +12,15 @@ angular.module('bookmark.router', [])
   .state('tab', {
     url: '/tab',
     abstract: true,
-    templateUrl: 'pages/tabs/tabs.html'
+    templateUrl: 'pages/tabs/tabs.html',
+    resolve: {
+      // controller will not be loaded until $waitForSignIn resolves
+      // Auth refers to our $firebaseAuth wrapper in the factory below
+      "currentAuth": ["Auth", function(Auth) {
+        // $waitForSignIn returns a promise so the resolve waits for it to complete
+        return Auth.$requireSignIn();
+      }]
+    }
   })
 
   // Each tab has its own nav history stack:
@@ -22,7 +30,15 @@ angular.module('bookmark.router', [])
     views: {
       'tab-social': {
         templateUrl: 'pages/social/wall.html',
-        controller: 'socialCtrl'
+        controller: 'socialCtrl',
+        resolve: {
+          // controller will not be loaded until $waitForSignIn resolves
+          // Auth refers to our $firebaseAuth wrapper in the factory below
+          "currentAuth": ["Auth", function(Auth) {
+            // $waitForSignIn returns a promise so the resolve waits for it to complete
+            return Auth.$requireSignIn();
+          }]
+        }
       }
     }
   })
@@ -32,7 +48,12 @@ angular.module('bookmark.router', [])
       views: {
         'tab-chatRoom': {
           templateUrl: 'pages/chatRoom/chatList.html',
-          controller: 'chatCtrl'
+          controller: 'chatCtrl',
+          resolve: {
+            "currentAuth": ["Auth", function(Auth) {
+              return Auth.$requireSignIn();
+            }]
+          }
         }
       }
     })
@@ -41,7 +62,12 @@ angular.module('bookmark.router', [])
     views: {
       'tab-bookList': {
         templateUrl: 'pages/bookList/list.html',
-        controller: 'bookListCtrl as bookList'
+        controller: 'bookListCtrl as bookList',
+        resolve: {
+          "currentAuth": ["Auth", function(Auth) {
+            return Auth.$requireSignIn();
+          }]
+        }
       }
     }
   })
@@ -52,6 +78,11 @@ angular.module('bookmark.router', [])
       params:{ source:null,
                 book: null},
       cache: false,
+      resolve: {
+        "currentAuth": ["Auth", function(Auth) {
+          return Auth.$requireSignIn();
+        }]
+      }
     })
 
   .state('tab.search', {
@@ -59,7 +90,12 @@ angular.module('bookmark.router', [])
     views: {
       'tab-search': {
         templateUrl: 'pages/bookSearch/search.html',
-        controller: 'searchCtrl as search'
+        controller: 'searchCtrl as search',
+        resolve: {
+          "currentAuth": ["Auth", function(Auth) {
+            return Auth.$requireSignIn();
+          }]
+        }
       }
     }
   })
@@ -69,26 +105,46 @@ angular.module('bookmark.router', [])
     views: {
       'tab-profile': {
         templateUrl: 'pages/profile/home.html',
-        controller: 'profileCtrl as profile'
+        controller: 'profileCtrl as profile',
+        resolve: {
+          "currentAuth": ["Auth", function(Auth) {
+            return Auth.$requireSignIn();
+          }]
+        }
       }
     }
   })
 
   .state('register',{
     url: '/register',
-    templateUrl:'/pages/profile/register.html',
-    controller:'registerCtrl as register'
+    templateUrl:'./pages/profile/register.html',
+    controller:'registerCtrl as register',
+    resolve: {
+      "currentAuth": ["Auth", function(Auth) {
+        return Auth.$waitForSignIn();
+      }]
+    }
   })
 
   .state('newUser',{
     url: '/newUser',
-    templateUrl: '/pages/profile/newUser.html',
-    controller: 'newUserCtrl as newUser'
+    templateUrl: './pages/profile/newUser.html',
+    controller: 'newUserCtrl as newUser',
+    resolve: {
+      "currentAuth": ["Auth", function(Auth) {
+        return Auth.$requireSignIn();
+      }]
+    }
   })
 
   ;
 
-  // if none of the above states are matched, use this as the fallback
-  $urlRouterProvider.otherwise('/tab/search');
+  // if none of the above states are matched, use this as the callback
+  $urlRouterProvider.otherwise(function($injector){
+    var auth = $injector.get('Auth')
+    console.log('auth', auth)
+    var $state = $injector.get('$state')
+    return $state.go('register')
+  });
 
 })

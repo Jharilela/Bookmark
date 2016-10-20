@@ -22,27 +22,26 @@
 
     <!-- cordova script (this will be a 404 during development) -->
     <script src="cordova.js"></script>
+    <!--<script src="lib/ngCordova/dist/ng-cordova.min.js"></script>-->
+    <script src="lib/ng-cordova-oauth/dist/ng-cordova-oauth.min.js"></script>
 
     <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/3.4.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/3.4.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/3.4.0/firebase-database.js"></script>
-    <!-- Leave out Storage -->
+    <script src="lib/firebase/firebase-app.js"></script>
+    <script src="lib/firebase/firebase-auth.js"></script>
+    <script src="lib/firebase/firebase-database.js"></script>
     <!-- <script src="https://www.gstatic.com/firebasejs/3.4.0/firebase-storage.js"></script> -->
-
-    <script src="https://cdn.firebase.com/libs/angularfire/2.0.2/angularfire.min.js"></script>
+    <script src="lib/angularfire/dist/angularfire.min.js"></script>
     <script>
-        var firebaseConfig = {
-            apiKey: "AIzaSyB8wRVDXnWxEqFnjwPelunnrfbdoCBEzzg",
-            authDomain: "bookmark-140216.firebaseapp.com",
-            databaseURL: "https://bookmark-140216.firebaseio.com",
-            storageBucket: "bookmark-140216.appspot.com",
-            messagingSenderId: "316498021139"
-          }
+    var firebaseConfig = {
+        apiKey: "AIzaSyA2LUTJpW7oGxg-hgBijd4zoaS6BqIDzts",
+        authDomain: "bookmark-140216.firebaseapp.com",
+        databaseURL: "https://bookmark-140216.firebaseio.com",
+        storageBucket: "bookmark-140216.appspot.com",
+        messagingSenderId: "316498021139"
+      };
 
           firebase.initializeApp(firebaseConfig)
           var ref = firebase.database().ref()
-          //var ref = new Firebase(firebaseConfig.databaseURL);
     </script>
 
     <!-- your app's js -->
@@ -72,6 +71,9 @@
     <script src="pages/profile/register.js"></script>
     <script src="pages/profile/newUser.js"></script>
     <script src="pages/profile/profile.srv.js"></script>
+
+    <!--Temporary Storage-->
+    <script src="storage/tempStorage.js"></script>
     
 
   </head>

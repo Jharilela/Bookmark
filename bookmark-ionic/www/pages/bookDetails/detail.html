@@ -7,6 +7,10 @@
 	</ion-header-bar>
 
 	<ion-content class="padding">
+		<div ng-if="bookDetail.message.content!=''" ng-class="{' detail-successMessage' : bookDetail.message.type=='success', 'detail-errorMessage' : bookDetail.message.type=='error'}">
+			<i ng-class="{'icon ion-checkmark-circled' : bookDetail.message.type=='success', 'ion-android-cancel' : bookDetail.message.type=='error'}"></i>
+			{{bookDetail.message.content}}
+		</div>
 		<div class="row">
 		  <div class="col">
 		  	<img ng-src="{{bookImage}}" width="{{imageWidth}}">
@@ -24,6 +28,9 @@
 			<button class="button button-block button-positive" ng-click="ownBook()">
 			  On my shelf
 			</button>
+			<button class="button button-block " ng-click="testFunction()">
+			  Test Function 
+			</button><br>
 		  </div>
 		</div>
 		<h3>Title</h3>

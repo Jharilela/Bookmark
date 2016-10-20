@@ -1,8 +1,12 @@
 angular.module('bookmark.controllers')
-.controller('bookDetailCtrl', function($scope,$rootScope, $state, $stateParams, $window, $ionicHistory, detailSrv, profileSrv){
+.controller('bookDetailCtrl', function($scope,$rootScope, $state, $stateParams, $window,  $timeout, $ionicHistory, detailSrv, profileSrv){
 	console.log('bookDetailCtrl loaded ', $stateParams);
 	var vm = this;
 	$rootScope.angular = angular;
+	vm.message = {
+		type : 'neutral',
+		content : ''
+	}
 
 	var windowWidth = $window.innerWidth;
 	$scope.imageWidth = 0.6 * windowWidth;
@@ -29,18 +33,32 @@ angular.module('bookmark.controllers')
 
 	$scope.ownBook = function(){
 		profileSrv.ownBook($scope.book)
-	}
-	$scope.test2 = function(){
-		detailSrv.getGoogleDetails($scope.book);
-	}
-	$scope.test3 = function(){
-		detailSrv.getGoodReadsDetails($scope.book)
-		.then(function(res){
-			$scope.book = res
+		.then(function(log){
+			console.log('success : ', log)
+			vm.message = {
+				type : 'success',
+				content: log
+			}
+		})
+		.catch(function(error){
+			console.log('error : ',error)
+			vm.message = {
+				type : 'error',
+				content : error
+			}
+		})
+		.finally(function(){
+			console.log('vm.message', vm.message)
+			$timeout(removeMessage, 3000);
 		})
 	}
-	$scope.test4 = function(){
-		detailSrv.getBookCover($scope.book);
+	$scope.testFunction = function(){
+		profileSrv.addBook($scope.book);
+	}
+
+	function removeMessage(){
+		vm.message.type = "neutral";
+		vm.message.content = "";
 	}
 
 })

@@ -1,13 +1,12 @@
 <ion-view hide-nav-bar="true">
-	<ion-header-bar>
-	<button class="button button-clear button-positive " ng-click="goBack()">
-		<i class="ion-chevron-left"></i>
-	</button>
-	<button class="button button-clear button-positive " ui-sref="newUser">
-		New User
-	</button>
-	 
-	</ion-header-bar>
+<!-- 	<ion-header-bar>
+		<button class="button button-clear button-positive " ng-click="goBack()">
+			<i class="ion-chevron-left"></i>
+		</button>
+		<button class="button button-clear button-positive " ui-sref="newUser">
+			New User
+		</button>
+	</ion-header-bar> -->
 
   <ion-content class="padding">
   	<div ng-if="user!=null">
@@ -19,7 +18,6 @@
     <button class="button button-block button-positive" ng-click="fbLogin()">
     <i class="ion-social-facebook" style="color: white"></i> Facebook Login
     </button>
-
     <button class="button button-block button-assertive" ng-click="googleLogin()">
     <i class="ion-social-google" style="color: white"></i>  Google Login
     </button>

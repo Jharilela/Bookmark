@@ -3,8 +3,6 @@ angular.module('bookmark.controllers')
   	console.log('newUserCtrl - loaded')
   	var vm = this;
   	$scope.auth = profileSrv.auth;
-  	
-  	vm.user = $firebaseObject(profileSrv.ref.child('users').child($scope.auth.$getAuth().uid));
   	$scope.errorMessage = "";
   	
 
@@ -20,7 +18,7 @@ angular.module('bookmark.controllers')
 		else{
 			return false;
 		}
-	}
+	} 
 
 	$scope.validateFirstName = function(){
 		if($scope.isEmpty(vm.user.firstName, "First name")){
@@ -88,15 +86,14 @@ angular.module('bookmark.controllers')
 			$scope.errorMessage = "";
 			console.log('no errorMessage')
 			vm.user.provider = $scope.auth.$getAuth().providerData[0].providerId
-			vm.user.books = [];
-			vm.user.friends = [];
+			
+			profileSrv.saveUser(vm.user)
+			.then(function(){
+				$state.go("tab.profile");
+			})
+			.catch(function(error){
 
-			vm.user.$save().then(function() {
-		        console.log('Profile saved!');
-		        $state.go("tab.profile");
-		      }).catch(function(error) {
-		        console.log('Error! ');
-		      });
+			})
 		}
 	}
 })
