@@ -6,7 +6,7 @@ angular.module('bookmark.controllers')
 	$scope.status = "fetching"
   	profileSrv.auth.$onAuthStateChanged(function(firebaseUser) {
 	  if (firebaseUser) {
-		profileSrv.getBooksOwned()
+		profileSrv.getBooksOwned("full")
 		.then(function(bookList){
 			$scope.bookList = bookList
 			console.log('bookList', $scope.bookList)

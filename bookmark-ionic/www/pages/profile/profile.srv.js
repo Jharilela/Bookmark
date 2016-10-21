@@ -98,13 +98,48 @@ function profileSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray, 
 		})
 	    return deferred.promise;
 	}
-	function getBooksOwned(){
+	function getBookCollection(){
 		var deferred = $q.defer();
-	    $firebaseArray(userRef.child("booksOwned")).$loaded()
-	    .then(function(booksOwned){
-	    	deferred.resolve(booksOwned)
+	    $firebaseArray(bookRef).$loaded()
+	    .then(function(bookCollection){
+	    	console.log('book collection loaded successfully')
+	    	deferred.resolve(bookCollection)
 	    })
 	    .catch(function(error){
+	    	console.log('failed to load book collection : ',error)
+	    	deferred.reject("error fetching booksOwned")
+	    })
+		return deferred.promise;
+	}
+	function getBooksOwned(type){
+		var deferred = $q.defer();
+	    $firebaseArray(userRef.child("booksOwned")).$loaded()
+	    .then(function(bookKeys){
+	    	console.log('booksOwned loaded successfully')
+	    	if(type == "keys"){
+		    	deferred.resolve(bookKeys)
+		    }
+		    else if(type == "full"){
+		    	getBookCollection()
+		    	.then(function(bookCollections){
+		    		var bookList = [];
+		    		angular.forEach(bookCollections, function(bookCollection) {
+			          	angular.forEach(bookKeys, function(bookKey){
+			          		if(bookCollection.$id == bookKey.key){
+			          			bookList.push(bookCollection)
+			          		}
+			          	})
+			       	});
+			       	deferred.resolve(bookList)
+		    	})
+		    	.catch(function(error){
+		    		deferred.reject("cannot load user's books from collection")
+		    	})
+
+		    }
+	    })
+	    .catch(function(error){
+	    	console.log("failed to load booksOwned : ",error)
 	    	deferred.reject("error fetching booksOwned")
 	    })
 		return deferred.promise;
@@ -112,18 +147,17 @@ function profileSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray, 
 	function addBook(book){
 		//add books to the books collection
 		var deferred = $q.defer();
-		$firebaseArray(bookRef).$loaded()
+		getBookCollection()
 		.then(function(bookCollection){
-			console.log('book collection loaded successfully')
-			if(bookExists(bookCollection, book)){
+			if(bookExists(bookCollection, book).bool){
 				console.log("book exist. Not adding to collection")
 				deferred.reject("not adding book to collection because book exists")
 			}
 			else{
-				bookCollection.$add(book)
+				bookCollection.$add(cleanObj(book))
 				.then(function(reference){
 					console.log('book added to collection successfully : ', reference.key)
-					deferred.resolve("book added to collection")
+					deferred.resolve(reference.key)
 				})
 				.catch(function(error){
 					console.log('error adding book to collection ',error)
@@ -132,7 +166,6 @@ function profileSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray, 
 			}
 		})
 		.catch(function(error){
-			console.log('failed to load book collection : ',error)
 			deferred.reject("failed to load book colleciton")
 		})
 		return deferred.promise;
@@ -142,24 +175,65 @@ function profileSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray, 
 		console.log('adding book to ownedBooks library')
 		var deferred = $q.defer();
 
-		$firebaseArray(userRef.child("booksOwned")).$loaded()
-		.then(function(bookList){
-			//bookList is an array of Strings containing bookIDS
-			//book is an object containing the book details
+		function addOwnedBooks(refKey){
+			getBooksOwned('keys')
+			.then(function(booksOwned){
+				console.log('booksOwned ', booksOwned)
+				var userHasBook = false;
+				angular.forEach(booksOwned, function(value) {
+		        	if(value.key == refKey){
+		        		userHasBook = true;
+		        		console.log('user already has the book');
+		        		deferred.reject("user already has book")
+		        	}
+		        });
+		        if(!userHasBook){
+		        	console.log('adding book to user\'s library')
+			        booksOwned.$add({
+						key : refKey,
+						status : "available",
+						secondParty : {
+							uid : "",
+							name : "",
+							status : "",
+							requestTimestamp : "",
+							initialDate : "",
+							returnDate : ""
+						}
+					})
+					deferred.resolve("books added successfully")
+			    }
+			})
+			.catch(function(error){
+				console.log('ownBook - cannot get booksOwned')
+				deferred.reject("cannot get user's books")
+			})
+		}
 
-			//perform 2 search asynchronously 
-				//1. we need to check if book exists in user's library
-					//collect all the books in the array of bookIDS stored from the book collection
-					//then we need to compare the book object with others already in the user's list
-					//if book is not found, we want to add it to the the user's bok owned list
-					//if book is found, exit the asynchronous function and say that book already exists in user's library
-				//2. we need to check if the book already exists in firebase book collections 
-					//if it doesnt exist, we need to add the book, then pass the key back and add they key to the owned books library
-					//if the book exists, well and good. This means we can add the key to the user's library
+		getBookCollection()
+		.then(function(bookCollection){
+			var bookExist = bookExists(bookCollection, book)
+			if(bookExist.bool){
+				var bookKey = bookCollection.$keyAt(bookExist.index)
+				console.log('book exists in collection, key : '+bookKey)
+				addOwnedBooks(bookKey)
+			}
+			else{
+				console.log('adding book to collection')
+				addBook(book)
+				.then(function(key){
+					console.log('book has been added with key : '+key)
+					addOwnedBooks(key)
+				})
+				.catch(function(error){
+					console.log('ownBook - cannot add book to collection')
+					deferred.reject("cannot add books to server")
+				})
+			}
 		})
 		.catch(function(error){
-			console.log("user's books cannot be loaded ", error)
-			deferred.reject("sorry, your books cannot be loaded right now. \n Please try again ")
+			console.log("cannot get bookCollection ", error)
+			deferred.reject("cannot load books on server")
 		})
 		return deferred.promise;
 	}
@@ -193,13 +267,9 @@ function profileSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray, 
 			return false;
 	}
 	function bookExists (bookList, newBook){
-		var bookExist = false;
 		var similar = searchSrv.findSimilarName(bookList, newBook)
 		console.log('findSimilarname ', similar)
-		if(similar.bool == true)
-			bookExist = true;
-		return bookExist;
+		return similar;
 	}
-
 
 }

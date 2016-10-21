@@ -52,9 +52,6 @@ angular.module('bookmark.controllers')
 			$timeout(removeMessage, 3000);
 		})
 	}
-	$scope.testFunction = function(){
-		profileSrv.addBook($scope.book);
-	}
 
 	function removeMessage(){
 		vm.message.type = "neutral";
