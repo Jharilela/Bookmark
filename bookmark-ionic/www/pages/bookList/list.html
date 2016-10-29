@@ -1,8 +1,19 @@
-<ion-view view-title="BookList">
+<ion-view hide-nav-bar="true">
   <ion-content class="padding">
-    <h2 ng-if="status=='fetching'">Loading...</h2>
-    <div ng-repeat="books in bookList" style="display: inline">
+  
+  	<h2>Books you own</h2>
+    <h3 ng-if="ownBooksStatus=='fetching'" style="color:grey">Loading...</h3>
+    <h3 ng-if="ownBooksStatus!='fetching' && ownedBooks.length<=0" style="color:grey">empty</h3>
+    <div ng-repeat="books in ownedBooks" style="display: inline">
     	<img ng-src="{{books.imageLink}}" style="height:120px;display: inline" title="{{books.title}}" ui-sref="bookDetail({source:'bookList', book: books})">
     </div>
+
+    <h2>Wish list</h2>
+    <h3 ng-if="wishedBooksStatus=='fetching'" style="color:grey">Loading...</h3>
+    <h3 ng-if="wishedBooksStatus!='fetching' && wishedBooks.length<=0" style="color:grey">empty</h3>
+    <div ng-repeat="books in wishedBooks" style="display: inline">
+    	<img ng-src="{{books.imageLink}}" style="height:120px;display: inline" title="{{books.title}}" ui-sref="bookDetail({source:'bookList', book: books})">
+    </div>
+
   </ion-content>
 </ion-view>

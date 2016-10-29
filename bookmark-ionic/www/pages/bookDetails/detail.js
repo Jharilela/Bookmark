@@ -52,6 +52,27 @@ angular.module('bookmark.controllers')
 			$timeout(removeMessage, 3000);
 		})
 	}
+	$scope.wishToRead = function(){
+		profileSrv.addToWishList($scope.book)
+		.then(function(log){
+			console.log('success : ', log)
+			vm.message = {
+				type : 'success',
+				content: log
+			}
+		})
+		.catch(function(error){
+			console.log('error : ',error)
+			vm.message = {
+				type : 'error',
+				content : error
+			}
+		})
+		.finally(function(){
+			console.log('vm.message', vm.message)
+			$timeout(removeMessage, 3000);
+		})
+	}
 
 	function removeMessage(){
 		vm.message.type = "neutral";

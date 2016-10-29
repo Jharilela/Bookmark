@@ -9830,6 +9830,14 @@ a.button {
 .search_progress-bar {
   margin-top: -10px; }
 
+.search_suggestions {
+  font-size: 15px;
+  color: blue;
+  margin-top: auto;
+  margin-bottom: auto;
+  margin-left: 39px;
+  display: block; }
+
 .register-errorMessage {
   background-color: #ec8a8a;
   border: solid 4px #ee4646;

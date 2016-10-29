@@ -7,13 +7,14 @@ function profileSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray, 
 	var vm = this;
 	var auth = $firebaseAuth();
 	var ref = firebase.database().ref()
-	var userRef,bookRef;
+	var userRef,bookRef,searchRef;
 
 	auth.$onAuthStateChanged(function(firebaseUser) {
 	  if (firebaseUser) {
 	    console.log("Signed in as:", firebaseUser.uid);
 	    userRef = ref.child("users").child(auth.$getAuth().uid)
 	    bookRef = ref.child("books")
+	    searchRef = ref.child("search")
 	  } else {
 	    console.log("profileSrv - Signed out");
 	    $state.go("register")
@@ -29,12 +30,15 @@ function profileSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray, 
 		validateName : validateName,
 		validatePhoneNumber : validatePhoneNumber,
 		validateEmail : validateEmail,
+		getSearchCollection : getSearchCollection,
 		getBooksOwned : getBooksOwned,
-		addBook : addBook,
+		getWishList : getWishList,
+		logSearch : logSearch,
+		suggestSearch : suggestSearch,
 		ownBook : ownBook,
 		lendBook : lendBook,
 		borrowBook : borrowBook,
-		wishToReadBook : wishToReadBook
+		addToWishList : addToWishList
 	}
 
 	function isNewUser(uid){
@@ -111,6 +115,51 @@ function profileSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray, 
 	    })
 		return deferred.promise;
 	}
+	function getSearchCollection(){
+		var deferred = $q.defer();
+	    $firebaseArray(searchRef).$loaded()
+	    .then(function(searches){
+	    	console.log('search collections loaded successfully')
+	    	deferred.resolve(searches)
+	    })
+	    .catch(function(error){
+	    	console.log('failed to load search collections : ',error)
+	    	deferred.reject("error fetching search collections")
+	    })
+		return deferred.promise;
+	}
+	function getWishList(type){
+		var deferred = $q.defer();
+	    $firebaseArray(userRef.child("wishList")).$loaded()
+	    .then(function(wishListKeys){
+	    	console.log('wish list loaded successfully')
+	    	if(type == "keys"){
+		    	deferred.resolve(wishListKeys)
+		    }
+		    else if(type == "full"){
+		    	getBookCollection()
+		    	.then(function(bookCollections){
+		    		var bookList = [];
+		    		angular.forEach(bookCollections, function(bookCollection) {
+			          	angular.forEach(wishListKeys, function(wishListKey){
+			          		if(bookCollection.$id == wishListKey.key){
+			          			bookList.push(bookCollection)
+			          		}
+			          	})
+			       	});
+			       	deferred.resolve(bookList)
+		    	})
+		    	.catch(function(error){
+		    		deferred.reject("cannot load user's books from collection")
+		    	})
+		    }
+	    })
+	    .catch(function(error){
+	    	console.log('failed to load wish list : ',error)
+	    	deferred.reject("error fetching wish list books")
+	    })
+		return deferred.promise;
+	}
 	function getBooksOwned(type){
 		var deferred = $q.defer();
 	    $firebaseArray(userRef.child("booksOwned")).$loaded()
@@ -144,7 +193,7 @@ function profileSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray, 
 	    })
 		return deferred.promise;
 	}
-	function addBook(book){
+	function addBookToCollection(book){
 		//add books to the books collection
 		var deferred = $q.defer();
 		getBookCollection()
@@ -220,7 +269,7 @@ function profileSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray, 
 			}
 			else{
 				console.log('adding book to collection')
-				addBook(book)
+				addBookToCollection(book)
 				.then(function(key){
 					console.log('book has been added with key : '+key)
 					addOwnedBooks(key)
@@ -243,28 +292,261 @@ function profileSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray, 
 	function borrowBook(){
 		//borrow a book from another user
 	}
-	function wishToReadBook(){
-		//add book to wishList
-	}
-	function cleanObj(obj){
-		for (var propName in obj) { 
-		    if (obj[propName] === null || obj[propName] === undefined) {
-		      delete obj[propName];
-		    }
+	function addToWishList(book){
+		book = cleanObj(book)
+		console.log('adding book to wish list')
+		var deferred = $q.defer();
+
+		function addBookToWishList(refKey){
+			$q.all([getWishList("keys"), getBooksOwned('keys')])
+			.then(function(data){
+				console.log('data', data)
+				var wishListKeys = data[0]
+				var ownedBookKeys = data[1]
+
+				var userWishesBook = false;
+				angular.forEach(wishListKeys, function(wishListKey) {
+		        	if(wishListKey.key == refKey){
+		        		userWishesBook = true;
+		        		console.log('user already wishes the book')
+		        		deferred.reject('book already in wishList')
+		        	}
+		        });
+
+				var userHasBook = false;
+				angular.forEach(ownedBookKeys, function(ownedBookKeys) {
+		        	if(ownedBookKeys.key == refKey){
+		        		userHasBook = true;
+		        		console.log('user already has the book');
+		        		deferred.reject("book already in library")
+		        	}
+		        });
+
+				if(!userHasBook && !userWishesBook){
+		        	console.log('adding book to user\'s wish list')
+			        wishListKeys.$add({
+						key : refKey,
+						timestamp : Date.now()/1000 | 0
+					})
+					deferred.resolve("books added successfully")
+			    }
+			})
+			.catch(function(error){
+				console.log('error adding book to wishList', error)
+				deferred.reject("cannot add book to wishList")
+			})
 		}
-		return obj;
+
+		getBookCollection()
+		.then(function(bookCollection){
+			var bookExist = bookExists(bookCollection, book)
+			if(bookExist.bool){
+				var bookKey = bookCollection.$keyAt(bookExist.index)
+				console.log('book exists in collection, key : '+bookKey)
+				addBookToWishList(bookKey)
+			}
+			else{
+				console.log('adding book to collection')
+				addBookToCollection(book)
+				.then(function(key){
+					console.log('book has been added with key : '+key)
+					addBookToWishList(key)
+				})
+				.catch(function(error){
+					console.log('wishList - cannot add book to collection')
+					deferred.reject("cannot add book to server")
+				})
+			}
+		})
+		.catch(function(error){
+			console.log("cannot get bookCollection ", error)
+			deferred.reject("cannot load books on server")
+		})
+		return deferred.promise;
 	}
-	function addObj(to, obj){
-		for(var propName in obj){
-			to[propName] = obj[propName]
-		}
-		return to;
+	function logSearch(keyword, timestamp){
+		//1. Log to SearchDb
+			//check if it exists
+			//if exists, increase the counter
+			//if it doesnt exist, add it with a counter value of 1
+			//also include timestamp and names that are greater than 90% similarity but not 100%, with count and timestamps
+		var deferred = $q.defer();
+		getSearchCollection()
+		.then(function(searchCollection){
+			console.log('searchCollection', searchCollection)
+			var keywordExist = false;
+			var similarBooks =[];
+
+			//check if the keyword exist in the search collection 
+			angular.forEach(searchCollection, function(searches, index){
+				var similarity = levenshtein(searches.keyword, keyword)
+				console.log('comparing book '+searches.keyword+' : '+keyword+' = '+similarity)
+				//if the word exists, then we increase the counter by 1
+				if(similarity>80){
+					similarBooks.push({
+						key : searchCollection.$keyAt(index),
+						index : index,
+						searches : searches,
+						similarity : similarity
+					})
+				}
+			})
+			//if the keyword doesnt already exist in the search Collection, we add a new one
+			if(similarBooks.length == 0){
+				searchCollection.$add({
+					keyword : keyword,
+					count : 1,
+					verified : false
+				})
+				.then(function(reference){
+					$firebaseArray(searchRef.child(reference.key).child("timestamp")).$add(timestamp)
+					deferred.resolve('added keyword to search Collection successfully')
+				})
+				.catch(function(error){
+					console.log('error adding new keyword to search Collection ', error)
+					deferred.reject('error adding new keyword to search Collection')
+				})
+			}
+			else
+			{
+				similarBooks.sort(dynamicSortMultiple("-similarity"));
+
+				var similarity = similarBooks[0].similarity
+				var index = similarBooks[0].index
+				var key = similarBooks[0].key
+				var searches = similarBooks[0].searches
+
+				if(similarity>99){
+					console.log('book made 100% hit, counter increasing')
+					searches.count++;
+					searchCollection.$save(index)
+					$firebaseArray(searchRef.child(searchCollection.$keyAt(index)).child("timestamp")).$add(timestamp)
+					console.log("logSearch - keyword exists in searchCollection")
+					deferred.resolve("keyword exists in searchCollection");
+					keywordExist = true;
+				}
+				//if the word doesnt exist, but a simmilar one does, the add it to the similar keywords
+				else if(similarity>=81 && similarity<100){
+					console.log('book made >81% hit, checking if the same keyword exist or new one should be added')
+					keywordExist = true;
+
+					$firebaseArray(searchRef.child(searchCollection.$keyAt(index)).child("similarKeywords")).$loaded()
+					.then(function(similarKeywords){
+						console.log('similarKeywords', similarKeywords)
+						var secondKeywordExist = false;
+						angular.forEach(similarKeywords, function(similarKeyword, secondIndex){
+							var secondSimilarity = levenshtein(similarKeyword.keyword, keyword)
+
+							//if the keyword exist in the similar keyword sectio, increase the counter by one
+							if(secondSimilarity == 100){
+								similarKeyword.count++;
+								similarKeywords.$save(secondIndex)
+								$firebaseArray(searchRef.child(searchCollection.$keyAt(index)).child("similarKeywords").child(similarKeywords.$keyAt(secondIndex)).child("timestamp")).$add(timestamp)
+								console.log("logSearch - keyword matches similar keyword")
+								secondKeywordExist = true;
+
+								//if the similar keyword has greater counts than the keyword itself, the program reconfigures firebase to make the similar keyword the actual keyword
+								if(similarKeyword.count >= (searches.count+5) && searches.verified == false){
+									angular.forEach(similarKeyword, function(objValue, objName){
+										if(objName.charAt(0)!='$'){
+											console.log("similarKeyword."+objName+" : ",similarKeyword[objName]);
+											console.log("searches."+objName+" : ",searches[objName]);
+											var temp1 = similarKeyword[objName];
+											var temp2 = searches[objName]
+											similarKeyword[objName] = temp2;
+											similarKeywords.$save(secondIndex)
+											searches[objName] = temp1;
+											searchCollection.$save(index)
+										}
+									})
+
+									//we delete all the similar keywords relevant to the old keyword but not to the new keyword
+									angular.forEach(similarKeywords, function(similarKeywordList, thirdIndex){
+										var thirdSimilarity = levenshtein(similarKeywordList.keyword, searches.keyword)
+										if(thirdSimilarity>=81){
+											console.log("similar keyword -> "+similarKeywordList.keyword+" = can stay ")
+										}
+										else{
+											console.log("similar keyword -> "+similarKeywordList.keyword+" = will be removed ")
+											similarKeywords.$remove(thirdIndex);
+										}
+									})
+								}
+
+								deferred.resolve("keyword matches similar keywords")
+							}
+						})
+
+						//if the keyword is new in the similar Keywords section, add a new one
+						if(!secondKeywordExist){
+							$firebaseArray(searchRef.child(searchCollection.$keyAt(index)).child("similarKeywords")).$add({
+								keyword : keyword,
+								count : 1
+							})
+							.then(function(secondRef){
+								$firebaseArray(searchRef.child(searchCollection.$keyAt(index)).child("similarKeywords").child(secondRef.key).child("timestamp")).$add(timestamp)
+								console.log("logSearch - added similar Keyword successfully")
+							})
+							.catch(function(error){
+								console.log('logSearch - failed to add similar keyword')
+								deferred.reject("failed to add similar keyword")
+							})
+						}
+					})
+					.catch(function(error){
+						console.log('logSearch - failed to load similarKeywords ', error)
+						deferred.reject("failed to load similarKeywords")
+					})
+				}
+			}
+		})
+		.catch(function(error){
+			console.log("failed to load search collection : ", error)
+			deferred.reject("failed to load search collection")
+		})
+		return deferred.promise;
+
+		//2. Log to user's searchHistory
+			//check if it exists
+			//if exists ,increase the counter
+			//if it doesnt, add it with a counter of 1
 	}
-	function isEmpty(obj){
-		if(obj == undefined || obj == null)
-			return true;
-		else
-			return false;
+	function suggestSearch(text){
+		var deferred = $q.defer()
+		var similarWords = [];
+		if(text.length ==0 || /\w/.test(text)==false) deferred.resolve(similarWords)
+		getSearchCollection()
+		.then(function(searchCollection){
+			angular.forEach(searchCollection,function(searches, index){
+				var similarity = levenshtein(searches.keyword, text)
+				if(similarity>=81 || searches.keyword.startsWith(text.toLowerCase())){
+					//console.log("searches.keyword : "+searches.keyword)
+					similarWords.push({
+						keyword : searches.keyword,
+						similarity : similarity
+					})
+				}
+			})
+			similarWords.sort(dynamicSortMultiple("-similarity"))
+			deferred.resolve(similarWords)
+		})
+		.catch(function(error){
+			console.log("failed to load search collection : ", error)
+			deferred.reject("failed to load search collection")
+		})
+		return deferred.promise;
+	}
+	function didYouMean(text){
+		var deferred = $q.defer()
+		getSearchCollection()
+		.then(function(searchCollection){
+			
+		})
+		.catch(function(error){
+			console.log("failed to load search collection : ", error)
+			deferred.reject("failed to load search collection")
+		})
+		return deferred.promise;
 	}
 	function bookExists (bookList, newBook){
 		var similar = searchSrv.findSimilarName(bookList, newBook)

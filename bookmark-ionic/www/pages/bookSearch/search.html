@@ -1,13 +1,21 @@
 <ion-view hide-nav-bar="true">
 
-	  <ion-header-bar class="bar-has-input item-input-inset" id="search-container">
+	<ion-header-bar class="bar-has-input item-input-inset" id="search-container">
 	    <label class="item-input-wrapper no-bg">
 	      <i class="icon ion-search placeholder-icon"></i>
-		  <input type="text" placeholder="Search" ng-model="search.searchingText" ng-keyup="$event.keyCode == 13 && searching()">
+		  <input type="text" placeholder="Search" ng-model="search.searchingText" ng-keyup="$event.keyCode == 13 && searching()" ng-change="typing()">
 	    </label>
 	    <div class="buttons">
 			<button class="button button-positive button-clear" ng-click="searching()" style="margin-left:10px" >OK</button>
 		</div>
+    </ion-header-bar>
+    <ion-header-bar class="bar-subheader" ng-if="search.suggestedKeywords.length>0" ng-style="{'height' : subheaderHeight}" >
+	    <ion-list>
+		  <label class="search_suggestions"  ng-repeat="suggestedKeywords in search.suggestedKeywords" ng-click="search.searchingText=suggestedKeywords.keyword; searching()">
+		    {{suggestedKeywords.keyword}}
+		  </label>
+		</ion-list>
+	    <!--<button class="button icon ion-close-circled button-assertive button-clear"></button>-->
     </ion-header-bar>
 
   <ion-content class="padding" >    
