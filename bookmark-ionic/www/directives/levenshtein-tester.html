@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title> Levenshien testing </title>
+</head>
+<script src="basic.js"></script>
+<script src="levenshtein.js"></script>
+<script type="text/javascript">
+	function test() {
+		var ref= document.getElementById("ref").value
+		var word = document.getElementById("word").value
+		var longest = ref.length>word.length?ref.length:word.length
+
+		var result = levenshtein(ref, word,true)
+
+		var pct = (longest - result) / longest 
+		document.getElementById("result").innerHTML = Math.round(pct* 10000)/100 + "%";
+		document.getElementById("log10").innerHTML = (Math.round(log10(pct*10) *10000)/100)+"%";
+		document.getElementById("sine").innerHTML = 
+		Math.round((0.5+(0.5*(Math.sin((pct*Math.PI)-(Math.PI/2)))))*10000)/100 + "%"
+	}
+</script>
+<body>
+	<input type="text" id="ref" placeholder="ref"><br>
+	<input type="text" id="word" placeholder="word"><br>
+	<input type="button" value="Levenshien" onclick="test()"><br>
+	Result : <span id="result"></span><br>
+	Log : <span id="log10"></span><br>
+	Sine : <span id="sine"></span><br>
+</body>
+</html>
