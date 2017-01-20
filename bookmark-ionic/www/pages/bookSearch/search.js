@@ -1,5 +1,5 @@
 angular.module('bookmark.controllers')
-.controller('searchCtrl', function($scope, profileSrv ,searchSrv, ngProgressFactory, $state) {
+.controller('searchCtrl', function($scope, firebaseSrv ,searchSrv, ngProgressFactory, $state) {
 	console.log('searchCtrl - loaded')
 	var vm = this;
 
@@ -9,6 +9,7 @@ angular.module('bookmark.controllers')
 	vm.showProgress = true;
 	vm.progress = 0;
 	vm.suggestedKeywords = [];
+	vm.didYouMeanKeyword = ""
 	$scope.subheaderHeight = "22px";
 
 	vm.bookDetail = function(i, j){
@@ -17,19 +18,31 @@ angular.module('bookmark.controllers')
 	  	$state.go('bookDetail', {source:"search", book: vm.books[i][j]});
 	}
 
-	$scope.typing = function(){
-		profileSrv.suggestSearch(vm.searchingText)
-		.then(function(keywords){
-			vm.suggestedKeywords = keywords
-			if(keywords.length==0) vm.suggestedKeywords = []
-			$scope.subheaderHeight = (5+(22*keywords.length))+"px"
-		})
-		.catch(function(error){
-			console.log("unable to get suggested search")
-		})
-	}
+	// $scope.typing = function(){
+	// 	firebaseSrv.suggestSearch(vm.searchingText)
+	// 	.then(function(keywords){
+	// 		vm.suggestedKeywords = keywords
+	// 		if(keywords.length==0) vm.suggestedKeywords = []
+	// 		$scope.subheaderHeight = (5+(22*keywords.length))+"px"
+	// 	})
+	// 	.catch(function(error){
+	// 		console.log("unable to get suggested search")
+	// 	})
+	// }
 	              
 	$scope.searching = function(){
+		$scope.suggestedKeywords = [];
+		firebaseSrv.suggestSearch(vm.searchingText)
+		.then(function(keywords){
+			if(keywords.length>0 && keywords[0].similarity<100)
+			vm.didYouMeanKeyword = keywords[0].keyword
+			console.log("didYouMeanKeyword ",vm.didYouMeanKeyword)
+		})
+		.catch(function(error){
+			vm.didYouMeanKeyword = ""
+			console.log("unable to get suggested search")
+		})
+		
 	  	console.log('searching '+vm.searchingText)
 	  	vm.suggestedKeywords = [];
 	  	searchSrv.progressbar.start();
@@ -58,13 +71,20 @@ angular.module('bookmark.controllers')
 		    // vm.books = bookList;
 		  	console.log('items', vm.books)
 	  	}
-	  	profileSrv.logSearch(vm.searchingText.toLowerCase(), (Date.now()/1000 | 0 ))
+	  	firebaseSrv.logSearch(vm.searchingText.toLowerCase(), (Date.now()/1000 | 0 ))
 	  	//console.log(levenshtein("HARRY porter","Harry potter"))
 	}
 
 	function printBooksError(err){
 		searchSrv.progressbar.complete();
 		console.log('err', err)
+	}
+
+	$scope.resetBookSearch = function(){
+		vm.searchingText=vm.didYouMeanKeyword; 
+		vm.didYouMeanKeyword = "";
+		vm.books = [];
+		searchSrv.progressbar.set(0);
 	}
 
 })

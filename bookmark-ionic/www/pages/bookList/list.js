@@ -1,6 +1,6 @@
 angular.module('bookmark.controllers')
 
-.controller('bookListCtrl', function($scope, profileSrv, $ionicLoading) {
+.controller('bookListCtrl', function($scope, firebaseSrv, $ionicLoading) {
 	console.log('bookListCtrl - loaded')
 	$scope.ownedBooks = [];
 	$scope.wishedBooks = [];
@@ -13,7 +13,7 @@ angular.module('bookmark.controllers')
 		   getBooks()
 	});
 
-  	profileSrv.auth.$onAuthStateChanged(function(firebaseUser) {
+  	firebaseSrv.auth.$onAuthStateChanged(function(firebaseUser) {
 	  if (firebaseUser) {
 		getBooks()
 		refeshable = true	
@@ -28,7 +28,7 @@ angular.module('bookmark.controllers')
 	})
 
 	function getBooks(){
-		profileSrv.getBooksOwned("full")
+		firebaseSrv.getBooksOwned("currentUser", "full")
 		.then(function(ownedBooks){
 			$scope.ownedBooks = ownedBooks
 			console.log('ownedBooks', $scope.ownedBooks)
@@ -39,7 +39,7 @@ angular.module('bookmark.controllers')
 			$scope.ownBooksStatus="fetch ownedBooks failed"
 		})	
 
-		profileSrv.getWishList("full")
+		firebaseSrv.getWishList("currentUser", "full")
 		.then(function(wishedBooks){
 			$scope.wishedBooks = wishedBooks
 			console.log('wishedBooks', $scope.wishedBooks)

@@ -13,7 +13,9 @@ angular.module('bookmark', [
   'bookmark.services',
   'ngProgress',
   'firebase',
-  'ngCordovaOauth'
+  'ngCordova',
+  'ngCordovaOauth',
+  'cropme'
   ])
 
 .factory("Auth", ["$firebaseAuth",
@@ -72,7 +74,11 @@ angular.module('bookmark', [
       };
       return $delegate;
   });
-});
+})
+
+.config(['$ionicConfigProvider', function($ionicConfigProvider){
+  $ionicConfigProvider.tabs.position('bottom'); // other values: top
+}]);
 
 angular.module('bookmark.constants', [])
 

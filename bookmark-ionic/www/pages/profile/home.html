@@ -1,28 +1,73 @@
 <ion-view hide-nav-bar="true">
-	<ion-header-bar>
-	<button class="button button-clear button-positive " ui-sref="register">
-		Sign in
+  <ion-header-bar ng-hide="showCrop">
+	<button class="button button-clear button-positive ">
+		
+	</button>
+	<button class="button button-clear button-positive" ng-click="logout()">
+		Log out
 	</button>
 	 
-	</ion-header-bar>
+  </ion-header-bar>
 
   <ion-content class="padding">
+  	<div ng-if="user==null" class="chatList__loading--text">
+	  	Loading...
+  	</div>
   	<div ng-if="user!=null">
-	First Name : {{user.firstName}}<br>
-	Last Name : {{user.lastName}}<br>
-	Email : {{user.email}}<br>
-	Phone Number : {{user.phoneNumber}}<br>
-	Country : {{user.country}}<br>
-    <img ng-src="{{user.photoURL}}" style="max-width: 140px;">
+	  	<a ng-hide="wantToTakePicture" class="button button-positive home__photo-icon edit" ng-click="wantToTakePicture = true" ng-style="{'margin-right':'{{profile.editWidth}}px'}">
+		  	<i class="icon ion-edit "></i>
+	  	</a>
+	  	<a ng-show="wantToTakePicture" class="button button-positive home__photo-icon camera" ng-click="takePicture('camera')" ng-style="{'margin-left':'{{profile.cameraWidth}}px'}">
+		  	<i class="icon ion-camera "></i>
+	  	</a>
+	  	<a ng-show="wantToTakePicture" class="button button-positive home__photo-icon cancel" ng-click="wantToTakePicture = false" ng-style="{'margin-left':'{{profile.cancelWidth}}px'}">
+		  	<i class="icon ion-close-round "></i>
+	  	</a>
+	  	<a ng-show="wantToTakePicture" class="button button-positive home__photo-icon gallery" ng-click="takePicture('photoLibrary')" ng-style="{'margin-right':'{{profile.galleryWidth}}px'}">
+		  	<i class="icon ion-images "></i>
+	  	</a>
+
+	  	<img ng-src="{{user.profilePictureUrl}}" class="profile-picture medium photo-location home"><br>
+	  	<div class="list">
+		    <div class="item row" style="border-color: transparent;">
+		    	<div class="col col-33">First Name</div>
+		    	<div class="col">{{user.firstName}}</div>
+		    </div>
+		    <div class="item row" style="border-color: transparent;">
+		    	<div class="col col-33">Last Name</div>
+		    	<div class="col">{{user.lastName}}</div>
+		    </div>
+		    <div class="item row" style="border-color: transparent;">
+		    	<div class="col col-33">Email</div>
+		    	<div class="col">{{user.email}}</div>
+		    </div>
+		    <div class="item row" style="border-color: transparent;">
+		    	<div class="col col-33">Phone Number</div>
+		    	<div class="col">{{user.phoneNumber}}</div>
+		    </div>
+		    <div class="item row" style="border-color: transparent;">
+		    	<div class="col col-33">Country</div>
+		    	<div class="col">{{user.country}}</div>
+		    </div>
+		    <div class="item row" style="border-color: transparent;">
+		    	<div class="col col-33">G-place 1</div>
+		    	<div class="col">
+			        <input type="text" style="width:100%" placeholder="Location" location-suggestion location="location1" ng-model="location1.name">
+		    	</div>
+		    </div>
+		    <div class="item row" style="border-color: transparent;">
+		    	<div class="col col-33">G-place 2</div>
+		    	<div class="col">
+			        <input type="text" style="width:100%" placeholder="Location" location-suggestion location="location2" ng-model="location2.name">
+		    	</div>
+		    </div>
+		    <div class="item row" style="border-color: transparent;" ng-if="distance!=''">
+		    	<div class="col col-33">Distance</div>
+		    	<div class="col">
+			        {{distance}} m
+		    	</div>
+		    </div>
+		</div>
     </div>
-
-     <button class="button button-block button-balanced" ng-click="logout()">
-     Logout
-    </button>
-
-    <button class="button button-block button-energized" ng-click="loadUser()">
-    	Load user
-    </button>
-
   </ion-content>
 </ion-view>

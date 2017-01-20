@@ -9,12 +9,18 @@
     <!--scss files-->
     <link href="css/ionic.app.css" rel="stylesheet">
    
-
     <!-- HMAC-sha256 keyed-hash message authentication code and base 64 encoder -->
     <script src="lib/crypto-js/crypto-js.js"></script>
 
     <!-- ionic/angularjs js -->
     <script src="lib/ionic/js/ionic.bundle.js"></script>
+
+    <!-- Image cropping library for angularJs -->
+    <script src="lib/angular-sanitize/angular-sanitize.min.js"></script>
+    <script src="lib/angular-touch/angular-touch.min.js"></script>
+    <script src="lib/angular-superswipe/superswipe.js"></script>
+    <script src="lib/cropme/cropme.js"></script>
+    <link rel="stylesheet" href="lib/cropme/cropme.css">
 
     <!-- ng-Progress library -->
     <script src="lib/ngprogress/build/ngprogress.js"></script>
@@ -22,32 +28,35 @@
 
     <!-- cordova script (this will be a 404 during development) -->
     <script src="cordova.js"></script>
-    <!--<script src="lib/ngCordova/dist/ng-cordova.min.js"></script>-->
+    <script src="lib/ngCordova/dist/ng-cordova.min.js"></script>
     <script src="lib/ng-cordova-oauth/dist/ng-cordova-oauth.min.js"></script>
 
     <!-- Firebase -->
     <script src="lib/firebase/firebase-app.js"></script>
     <script src="lib/firebase/firebase-auth.js"></script>
     <script src="lib/firebase/firebase-database.js"></script>
-    <!-- <script src="https://www.gstatic.com/firebasejs/3.4.0/firebase-storage.js"></script> -->
+    <script src="https://www.gstatic.com/firebasejs/3.4.0/firebase-storage.js"></script>
     <script src="lib/angularfire/dist/angularfire.min.js"></script>
     <script>
-    var firebaseConfig = {
-        apiKey: "AIzaSyA2LUTJpW7oGxg-hgBijd4zoaS6BqIDzts",
-        authDomain: "bookmark-140216.firebaseapp.com",
-        databaseURL: "https://bookmark-140216.firebaseio.com",
-        storageBucket: "bookmark-140216.appspot.com",
-        messagingSenderId: "316498021139"
-      };
+        var firebaseConfig = 
+        {
+            apiKey: "AIzaSyA2LUTJpW7oGxg-hgBijd4zoaS6BqIDzts",
+            authDomain: "bookmark-140216.firebaseapp.com",
+            databaseURL: "https://bookmark-140216.firebaseio.com",
+            storageBucket: "bookmark-140216.appspot.com",
+            messagingSenderId: "316498021139"
+        };
 
-          firebase.initializeApp(firebaseConfig)
-          var ref = firebase.database().ref()
+        firebase.initializeApp(firebaseConfig)
+        var ref = firebase.database().ref()
+        var storage = firebase.storage()
     </script>
 
     <!-- your app's js -->
     <script src="index.js"></script>
     <script src="router.js"></script>
     <script src="constants.js"></script>
+    <script src="firebaseSrv.js"></script>
 
     <!--Custom directives-->
     <script src="directives/basic.js"></script>
@@ -57,7 +66,8 @@
     <script src="pages/social/wall.js"></script>
 
     <!-- chatRoom Controllers -->
-    <script src="pages/chatRoom/chatList.js"></script>
+    <script src="pages/chat/chatList.js"></script>
+    <script src="pages/chat/chatRoom.js"></script>
 
     <!-- bookList Controllers -->
     <script src="pages/bookList/list.js"></script>
@@ -74,10 +84,14 @@
     <script src="pages/profile/home.js"></script>
     <script src="pages/profile/register.js"></script>
     <script src="pages/profile/newUser.js"></script>
-    <script src="pages/profile/profile.srv.js"></script>
+    <script src="pages/profile/location.js"></script>
+    <script src="pages/profile/userProfile.js"></script>
 
     <!--Temporary Storage-->
     <script src="storage/tempStorage.js"></script>
+
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA2LUTJpW7oGxg-hgBijd4zoaS6BqIDzts&libraries=places,geometry&sensor=false">
+    </script>
 
   </head>
   <body ng-app="bookmark">

@@ -43,12 +43,12 @@ angular.module('bookmark.router', [])
     }
   })
 
-  .state('tab.chatRoom', {
-      url: '/chatRoom',
+  .state('tab.chatList', {
+      url: '/chatList',
       views: {
-        'tab-chatRoom': {
-          templateUrl: 'pages/chatRoom/chatList.html',
-          controller: 'chatCtrl',
+        'tab-chatList': {
+          templateUrl: 'pages/chat/chatList.html',
+          controller: 'chatListCtrl as chatList',
           resolve: {
             "currentAuth": ["Auth", function(Auth) {
               return Auth.$requireSignIn();
@@ -57,6 +57,20 @@ angular.module('bookmark.router', [])
         }
       }
     })
+
+  .state('chatRoom', {
+    url:'/chatRoom',
+    templateUrl : 'pages/chat/chatRoom.html',
+    controller : 'chatRoomCtrl as chatRoom',
+    cache : false,
+    params : { chatId : null},
+    resolve: {
+      "currentAuth": ["Auth", function(Auth) {
+        return Auth.$requireSignIn();
+      }]
+    }
+  })
+
   .state('tab.bookList', {
     url: '/bookList',
     views: {
@@ -114,6 +128,19 @@ angular.module('bookmark.router', [])
       }
     }
   })
+  .state('userProfile', {
+      url: '/userProfile',
+      templateUrl: 'pages/profile/userProfile.html',
+      controller: 'userProfileCtrl as userProfile',
+      params:{ user:null,
+                book : null},
+      cache: false,
+      resolve: {
+        "currentAuth": ["Auth", function(Auth) {
+          return Auth.$requireSignIn();
+        }]
+      }
+    })
 
   .state('register',{
     url: '/register',
@@ -129,12 +156,7 @@ angular.module('bookmark.router', [])
   .state('newUser',{
     url: '/newUser',
     templateUrl: './pages/profile/newUser.html',
-    controller: 'newUserCtrl as newUser',
-    resolve: {
-      "currentAuth": ["Auth", function(Auth) {
-        return Auth.$requireSignIn();
-      }]
-    }
+    controller: 'newUserCtrl as newUser'
   })
 
   ;

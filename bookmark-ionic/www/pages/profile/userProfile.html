@@ -1,0 +1,38 @@
+<ion-view hide-nav-bar="true">
+  <ion-header-bar ng-hide="showCrop">
+	<button class="button button-clear button-positive " ng-click="goBack()">
+		<i class="ion-chevron-left"></i>
+	</button>
+  </ion-header-bar>
+
+  <ion-content class="padding">
+  	<img ng-src="{{user.profilePictureUrl}}" class="profile-picture medium photo-location home"><br>
+  	<a class="button button-positive home__photo-icon edit" ng-style="{'margin-right':'{{editWidth}}px'}" ng-click="message()">
+	  	<i class="icon ion-chatboxes "></i>
+  	</a>
+
+  	<center><h2>{{user.firstName}} {{user.lastName}}</h2></center>
+  	<br>
+
+  	<h3>Books owned</h3>
+  	<h4 ng-if="ownBooksStatus=='fetching'" style="color:grey">Loading...</h4>
+    <h4 ng-if="ownBooksStatus!='fetching' && ownedBooks.length<=0" style="color:grey">empty</h4>
+  	<!-- <div ng-repeat="bookOwned in user.booksOwned" ng-if="booksOwned!=undefined && booksOwned.length>0">
+	  	{{bookOwned.title}}
+  	</div> -->
+  	<div ng-repeat="books in ownedBooks" style="display: inline">
+    	<img ng-src="{{books.imageLink}}" style="height:120px;display: inline" title="{{books.title}}" ui-sref="bookDetail({source:'bookList', book: books})">
+    </div>
+
+  	<h3>Wishes to read</h3>
+  	<h4 ng-if="ownBooksStatus=='fetching'" style="color:grey">Loading...</h4>
+    <h4 ng-if="ownBooksStatus!='fetching' && ownedBooks.length<=0" style="color:grey">empty</h4>
+  	<!-- <div ng-repeat="bookOwned in user.booksOwned" ng-if="booksOwned!=undefined && booksOwned.length>0">
+	  	{{bookOwned.title}}
+  	</div> -->
+  	<div ng-repeat="books in wishedBooks" style="display: inline">
+    	<img ng-src="{{books.imageLink}}" style="height:120px;display: inline" title="{{books.title}}" ui-sref="bookDetail({source:'bookList', book: books})">
+    </div>
+
+  </ion-content>
+</ion-view>

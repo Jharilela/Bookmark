@@ -4,14 +4,17 @@
       <i class="ion-chevron-left"></i>
     </button>
     <div class="h1 title">New user</div>
-    <button class="button button-clear button-positive " ng-click="save()">
-      Save
+    <button ng-if="step==1" ng-show="step==1" class="button button-clear button-positive " ng-click="saveData();">
+      Next
+    </button>
+    <button ng-if="step==2" ng-show="step==2" class="button button-clear button-positive " ng-click="finish()">
+      Finish
     </button>
 	</ion-header-bar>
 
   <ion-content class="padding">
 
-  <div class="list">
+  <div class="list" ng-if="step==1">
     <label class="item item-input item-floating-label">
       <span class="input-label" ng-style="newUser.user.firstName!='' ? {color:'black'} : {color:'red'}">First Name</span>
       <input type="text" placeholder="First Name" ng-model="newUser.user.firstName">
@@ -23,6 +26,10 @@
     <label class="item item-input item-floating-label">
       <span class="input-label">Email</span>
       <input type="text" placeholder="Email" ng-model="newUser.user.email">
+    </label>
+    <label ng-show="createNewUser" class="item item-input item-floating-label">
+      <span class="input-label">Password</span>
+      <input type="password" placeholder="Password" ng-model="newUser.user.password">
     </label>
     <label class="item item-input item-floating-label">
       <span class="input-label" ng-style="newUser.user.phoneNumber!='' ? {color:'black'} : {color:'red'}">Phone number</span>
@@ -287,9 +294,20 @@
       </select>    
     </label>
 
-    <button class="button button-block button-positive" ng-click="save()">Save</button>
     <div class="register-errorMessage" ng-if="errorMessage!=''">{{errorMessage}}</div>
   </div>
 
+  <div ng-if="step==2" class="newUser-container">
+    <img ng-src="{{profilePicture}}" class="profile-picture full photo-location newUser" >
+    <a class="button button-positive newUser__photo-icon camera" ng-click="takePicture('camera')">
+        <i class="icon ion-camera"></i>
+    </a>
+    <a class="button button-positive newUser__photo-icon gallery" ng-click="takePicture('photoLibrary')">
+        <i class="icon ion-images"></i>
+    </a>
+    <div class="newUser__photo--text">
+        Upload a photo of yourself
+    </div>
+   </div>
   </ion-content>
 </ion-view>

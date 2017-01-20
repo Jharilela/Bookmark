@@ -1,5 +1,5 @@
 angular.module('bookmark.controllers')
-.controller('bookDetailCtrl', function($scope,$rootScope, $state, $stateParams, $window,  $timeout, $ionicHistory, detailSrv, profileSrv){
+.controller('bookDetailCtrl', function($scope,$rootScope, $state, $stateParams, $window,  $timeout, $ionicHistory, detailSrv, firebaseSrv){
 	console.log('bookDetailCtrl loaded ', $stateParams);
 	var vm = this;
 	$rootScope.angular = angular;
@@ -17,11 +17,22 @@ angular.module('bookmark.controllers')
 	$scope.bookImage = ($scope.book.largeImageLink == undefined) ? $scope.book.imageLink : $scope.book.largeImageLink;
 	$scope.bookAuthor = $scope.book.authors;
 
+	firebaseSrv.searchBookOwners($scope.book)
+	.then(function(bookOwners){
+		console.log("bookOwners ",bookOwners)
+		$scope.bookOwners = bookOwners;
+	})
+	.catch(function(error){
+		console.log("error finding book owners ",error)
+	})
+
 	if($scope.book.subTitle!=undefined && $scope.book.title.toUpperCase().indexOf($scope.book.subTitle.toUpperCase())>=0){
 		$scope.book.title = $scope.book.title.substring(0,$scope.book.title.toUpperCase().indexOf($scope.book.subTitle.toUpperCase())).trim()
 		if($scope.book.title.charAt($scope.book.title.length-1)==":")
 			$scope.book.title = $scope.book.title.substring(0,$scope.book.title.length-1)
 	}
+
+	$scope.$on("$ionicView.enter")
 
 	if($scope.book.authors!=undefined && typeof $scope.book.authors=="object" && $scope.book.authors.length > 0)
 		$scope.book.authors = $scope.book.authors.join(", ");
@@ -32,7 +43,7 @@ angular.module('bookmark.controllers')
 	  };
 
 	$scope.ownBook = function(){
-		profileSrv.ownBook($scope.book)
+		firebaseSrv.ownBook($scope.book)
 		.then(function(log){
 			console.log('success : ', log)
 			vm.message = {
@@ -53,7 +64,7 @@ angular.module('bookmark.controllers')
 		})
 	}
 	$scope.wishToRead = function(){
-		profileSrv.addToWishList($scope.book)
+		firebaseSrv.addToWishList($scope.book)
 		.then(function(log){
 			console.log('success : ', log)
 			vm.message = {

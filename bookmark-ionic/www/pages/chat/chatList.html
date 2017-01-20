@@ -1,0 +1,47 @@
+<ion-view hide-nav-bar="true">
+	<ion-header-bar class="bar-has-input item-input-inset">
+		<div ng-hide="showSearch">
+			<button class="button icon ion-ios-search-strong button-clear button-positive " ng-click="pressSearchButton()"> 
+			</button>
+		</div>
+		<div ng-show="showSearch" style="width: 100%;display: inherit;">
+			<label class="item-input-wrapper no-bg">
+		    	<i class="icon ion-search placeholder-icon"></i>
+				<input type="text" placeholder="Search people" ng-model="inputText" ng-change="searching()">
+		    </label>
+		    <div class="buttons">
+				<button class="button button-positive button-clear" ng-click="pressSearchButton()" style="margin-left:10px" >Cancel</button>
+			</div>
+		</div>
+	</ion-header-bar>
+	
+	
+
+	<ion-content class="padding" has-header="true">
+		<div class="list">
+			<div ng-show="showSearch">Existing chats</div>
+			<div ng-show="loading" class="chatList__loading--text" style="padding-bottom: 20px;">Loading ... </div>
+			<a ng-repeat="chat in chats" ui-sref="chatRoom({chatId : chat.$id})" class="classList_listItem-text">
+				<div class="item item-avatar" >
+					<img ng-src="{{chat.icon}}" >
+					<div  ng-repeat="user in chat.users">
+						<div ng-if="user.name!=currentUser.fullName" >
+							<h2 >{{user.name}}</h2>
+						</div>
+					</div>
+					<p> Click to open the message</p>
+				</div>
+			</a>
+			<div ng-show="showSearch"> 
+				All users
+				<a ng-repeat="bookmarkUser in bookmarkUsers" ng-click="newChat(bookmarkUser); pressSearchButton()">
+					<div class="item item-avatar" >
+						<img ng-src="{{bookmarkUser.profilePictureUrl}}" >
+						<h2 >{{bookmarkUser.firstName}} {{bookmarkUser.lastName}}</h2>
+					</div>
+				</a>
+			</div>
+		</div>
+		<canvas id="canvas"></canvas>
+	</ion-content>
+</ion-view>

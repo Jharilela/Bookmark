@@ -1,0 +1,60 @@
+<ion-view hide-nav-bar="true">
+	<ion-header-bar>
+
+		<button class="button icon ion-chevron-left button-clear button-positive " ng-click="goBack()"></button>
+		<h1 class="title">
+			<div ng-repeat="user in chat.users">
+				<div ng-if="user.name!=currentUser.fullName">
+					{{user.name}}
+				</div>
+			</div>
+		</h1>
+		<img ng-src="{{chatIcon}}" class="chatRoom-avatar chatRoom-avatar--main">
+	</ion-header-bar>
+
+	<ion-content has-bouncing="true" class="has-header has-footer" 
+              delegate-handle="userMessageScroll">
+		<div ng-repeat="message in chat.messages" class="message-wrapper"
+                  >
+                  <!-- on-hold="onMessageHold($event, $index, message)" -->
+      
+            <div ng-if="message.from !== currentUser.$id">
+                      
+              	<img class="profile-pic left" 
+                          ng-src="{{getProfilePicture(message.from)}}" onerror="onProfilePicError(this)" />
+      
+                <div class="chat-bubble left">
+      
+                    <div class="message" ng-bind-html="message.content | nl2br" autolinker>
+                    </div>
+                </div>
+            </div>
+      
+            <div ng-if="message.from == currentUser.$id">
+                    
+                <img class="profile-pic right" ng-src="{{currentUser.profilePictureUrl}}" onerror="onProfilePicError(this)" />
+                    
+                <div class="chat-bubble right">
+      
+                    <div class="message" ng-bind-html="message.content | nl2br" autolinker>
+                    </div>
+                </div>
+            </div>
+      
+            <div class="cf"></div>
+      
+        </div>
+	</ion-content>
+
+	<form name="sendMessageForm" ng-submit="sendMessage(sendMessageForm)" novalidate>
+        <ion-footer-bar class="bar-stable item-input-inset message-footer" keyboard-attach>
+            <label class="item-input-wrapper">
+                <textarea ng-model="inputMessage" value="" placeholder="Send a message..." required minlength="1" maxlength="1500" msd-elastic style="width: 100%"></textarea>
+            </label>
+            <div class="footer-btn-wrap">
+                <button class="button button-icon icon ion-android-send footer-btn" type="submit" ng-disabled="!inputMessage || inputMessage === ''">
+                </button>
+             </div>
+        </ion-footer-bar>
+    </form>
+</ion-view>

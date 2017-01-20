@@ -9,41 +9,80 @@
 	</ion-header-bar> -->
 
   <ion-content class="padding">
-  	<div ng-if="user!=null">
-	{{user.displayName}}<br>
-	{{user.email}}<br>
-    <img ng-src="{{user.photoURL}}" style="max-width: 140px;">
-    </div>
+  	<div style="width:100%;margin: 40px auto 70px;text-align: center;" ng-hide="emailChosen">
+  		Sign up or Create an account<br>to enjoy the features of bookmark
+  	</div>
 
-    <button class="button button-block button-positive" ng-click="fbLogin()">
-    <i class="ion-social-facebook" style="color: white"></i> Facebook Login
-    </button>
-    <button class="button button-block button-assertive" ng-click="googleLogin()">
-    <i class="ion-social-google" style="color: white"></i>  Google Login
-    </button>
-
-    <button class="button button-block button-stable" ng-click="devLogin()">
-    <i class="ion-android-person" style="color: black"></i> Developer Login
+    <button ng-hide="emailChosen" class="button button-block button-positive" ng-click="fbLogin()">
+    	<div class="row" style="padding: 0px">
+    		<div class="col col-33" style="text-align: right">
+			    <i class="icon ion-social-facebook"></i>
+		    </div>
+		    <div class="col" style="text-align: left; padding-left: 20px">
+	    		Facebook
+		    </div>
+    	</div>
     </button>
 
-    <div class="list">
-	  <label class="item item-input">
-	    <span class="input-label">Email</span>
-	    <input type="text" ng-model="register.email">
-	    <i class="icon ion-checkmark-round" style="color:green" ng-show="validateEmail(register.email)==true && register.email!=null && register.email.length>0"></i>
-	    <i class="icon ion-close-round" style="color:red" ng-show="validateEmail(register.email)==false && register.email!=null && register.email.length>0"></i>
-	  </label>
-	  <label class="item item-input">
-	    <span class="input-label">Password</span>
-	    <input type="password" ng-model="register.password">
-	  </label>
-	</div>
-	<div ng-if="register.errorMessage!=''" class="register-errorMessage">
-	{{register.errorMessage}}
-	</div>
-	<div class="button-bar">
-	  <a class="button button-dark" ng-click="emailLogin()">Sign in</a>
-	  <a class="button button-dark" ng-click="emailRegister()">Register</a>
+    <button ng-hide="emailChosen" class="button button-block button-assertive" ng-click="googleLogin()">
+	    <div class="row" style="padding: 0px">
+    		<div class="col col-33" style="text-align: right">
+			    <i class="icon ion-social-google"></i>
+		    </div>
+		    <div class="col" style="text-align: left; padding-left: 20px">
+	    		Google
+		    </div>
+    	</div>
+    </button>
+
+    <button ng-hide="emailChosen" class="button button-block button-dark" ng-click="devLogin()">
+	    <div class="row" style="padding: 0px">
+    		<div class="col col-33" style="text-align: right">
+			    <i class="icon ion-android-person"></i>
+		    </div>
+		    <div class="col" style="text-align: left; padding-left: 20px;">
+	    		Developer
+		    </div>
+    	</div>
+    </button>
+
+    <button class="button button-block button-stable" ng-click="pressEmail()">
+    	<div class="row" style="padding: 0px">
+    		<div class="col col-33" style="text-align: right">
+			    <i class="icon ion-email"></i>
+		    </div>
+		    <div class="col" style="text-align: left; padding-left: 20px">
+	    		Email
+		    </div>
+    	</div>
+    </button>
+
+    <div ng-show="emailChosen">
+	    <div class="list">
+		  <label class="item item-input">
+		    <span class="input-label">Email</span>
+		    <input type="text" ng-model="register.email">
+		    <i class="icon ion-checkmark-round" style="color:green" ng-show="validateEmail(register.email)==true && register.email!=null && register.email.length>0"></i>
+		    <i class="icon ion-close-round" style="color:red" ng-show="validateEmail(register.email)==false && register.email!=null && register.email.length>0"></i>
+		  </label>
+		  <label class="item item-input">
+		    <span class="input-label">Password</span>
+		    <input type="password" ng-model="register.password">
+		  </label>
+		  <label class="item item-icon-right" ng-click="emailLogin()" style="background-color: #f4f4f4 !important;">
+			  <a>
+			  	Sign in
+			  	<i class="icon ion-arrow-right-c"></i>
+			  </a>
+		  </label>
+		</div>
+		<div ng-if="register.errorMessage!=''" class="register-errorMessage">
+		{{register.errorMessage}}
+		</div>
+
+		<div style="width:100%;margin: 30px auto ;text-align: center;">
+		Dont have an account ? <a ng-click="emailRegister()">Register here</a>
+		</div>
 	</div>
   </ion-content>
 </ion-view>

@@ -1,25 +1,34 @@
 angular.module('bookmark.controllers')
 
-.controller('registerCtrl', function($scope, $cordovaOauth, profileSrv, constants, $firebaseObject, $firebaseAuth, $ionicHistory, $state) {
+.controller('registerCtrl', function($scope, $cordovaOauth, firebaseSrv, constants, $firebaseObject, $firebaseAuth, $ionicHistory, $state) {
 	console.log('registerCtrl - loaded')
-	$scope.auth = profileSrv.auth;
+	$scope.auth = firebaseSrv.auth;
 	$scope.user;
 
 	var vm = this;
 	vm.email;
 	vm.password;
 	vm.errorMessage='';
-	$scope.validateEmail = profileSrv.validateEmail
+	$scope.emailChosen = false;
+	$scope.validateEmail = firebaseSrv.validateEmail
 
 	$scope.$on("$ionicView.beforeEnter", function(event, data){
 	   // handle event
 	   vm.errorMessage='';
 	});
 
+	$scope.pressEmail =function(){
+		if($scope.emailChosen)
+			$scope.emailChosen=false;
+		else
+			$scope.emailChosen=true;
+		vm.errorMessage=""
+	}
 
-  	profileSrv.auth.$onAuthStateChanged(function(firebaseUser) {
+
+  	firebaseSrv.auth.$onAuthStateChanged(function(firebaseUser) {
       if (firebaseUser) {
-        profileSrv.getUser()
+        firebaseSrv.getUser()
         .then(function(user){
         	$scope.user = user;
         	$state.go("tab.bookList")
@@ -57,7 +66,7 @@ angular.module('bookmark.controllers')
 
   	$scope.fbLogin = function(){
 	  	// login with Facebook
-	  	if(ionic.Platform.isIOS()){
+	  	if(ionic.Platform.isIOS() || ionic.Platform.isAndroid()){
 	  		console.log('loging in with Facebook Oauth')
 	  		$cordovaOauth.facebook(constants.facebookAppId, ["email"])
 	  		.then(function(result) {
@@ -76,7 +85,7 @@ angular.module('bookmark.controllers')
   	}
 
   	$scope.googleLogin = function(){
-  		if(ionic.Platform.isIOS()){
+  		if(ionic.Platform.isIOS() || ionic.Platform.isAndroid()){
   			console.log('loging in with Google Oauth')
 	  		$cordovaOauth.google(constants.googleClientId, ["email"])
 	  		.then(function(result) {
@@ -101,11 +110,11 @@ angular.module('bookmark.controllers')
   	$scope.emailLogin = function()
   	{
 	  	console.log('email login '+ vm.email + " " + typeof vm.email)
-		if(profileSrv.validateEmail(vm.email) && vm.password.length>=6)
+		if(firebaseSrv.validateEmail(vm.email) && vm.password.length>=6)
 		{
 		  	$scope.auth.$signInWithEmailAndPassword(vm.email, vm.password).then(authSuccess).catch(authFail);
 		}
-		else if(profileSrv.validateEmail(vm.email)==false)
+		else if(firebaseSrv.validateEmail(vm.email)==false)
 		{
 			vm.errorMessage = 'Invalid email'
 		}
@@ -116,18 +125,8 @@ angular.module('bookmark.controllers')
 	}
 
 	$scope.emailRegister = function(){
-	  	console.log('email register')
-	  	if(profileSrv.validateEmail(vm.email) && vm.password.length>=6)
-		{
-	  		$scope.auth.$createUserWithEmailAndPassword(vm.email, vm.password).then(authSuccess).catch(authFail);
-		}
-		else if(profileSrv.validateEmail(vm.email)==false)
-		{
-			vm.errorMessage = 'Invalid email'
-		}
-		else if(vm.password.length<6)
-		{
-			vm.errorMessage = "password must contain atleast 6 characters"
-		}
+		console.log('registering via email')
+		$state.go("newUser")
+		$scope.emailChosen = false;
 	}
 })

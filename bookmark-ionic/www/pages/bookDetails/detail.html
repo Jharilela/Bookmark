@@ -55,6 +55,12 @@
 			<h3>Description</h3>
 			{{book.description}}<br>
 		</div>
+		<div ng-if="bookOwners && bookOwners.length>0">
+			<h3>Borrow from</h3>
+			<div ng-repeat="owner in bookOwners" class="bookDetails_bookOwner-thumbnail--container">
+				<img ng-src="{{owner.profilePictureUrl}}" class="bookDetails_bookOwner-thumbnail" ui-sref="userProfile({user : owner})">
+			</div>
+		</div>
 
 	</ion-content>
 </ion-view>

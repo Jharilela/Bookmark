@@ -1,0 +1,81 @@
+$profilePicture-fullDiameter : 300px;
+$profilePicture-mediumDiameter : 200px;
+$photo-margin : 30px;
+
+.profile-picture{
+	border-radius: 100%; 
+}
+.profile-picture.medium{
+	width: $profilePicture-mediumDiameter; 
+	height: $profilePicture-mediumDiameter;
+}
+.profile-picture.full{
+	width: $profilePicture-fullDiameter; 
+	height: $profilePicture-fullDiameter;
+}
+
+.register-errorMessage{
+	background-color: #ec8a8a;
+    border: solid 4px #ee4646;
+    font-family: sans-serif;
+    font-size: small;
+    padding: 10px;
+}
+
+.newUser__photo--text{
+	text-align: center;
+    display: block;
+    color: #999;
+}
+
+.photo-location{
+	display:block;
+	position: relative;
+}
+.photo-location.newUser{
+	margin:($profilePicture-fullDiameter / 10) auto;
+}
+.photo-location.home{
+	margin:($profilePicture-mediumDiameter / 10) auto ($profilePicture-fullDiameter / 10);
+}
+
+.newUser__photo-icon{
+	border-radius:100%;
+	position: absolute;
+	z-index: 9;
+	top:0px;
+	margin-top: ($profilePicture-fullDiameter) - ($photo-margin);
+}
+.newUser__photo-icon.camera{
+	left:0px;
+	margin-left: $photo-margin;
+}
+.newUser__photo-icon.gallery{
+	right: 0px;
+	margin-right: $photo-margin;
+}
+
+.home__photo-icon{
+	border-radius:100%;
+	position: absolute;
+	z-index: 9;
+	top:0px;
+	margin-top: ($profilePicture-mediumDiameter);
+}
+.home__photo-icon.camera{
+	left:0px;
+}
+.home__photo-icon.cancel{
+	left: 0px;
+}
+.home__photo-icon.gallery{
+	right: 0px;
+}
+.home__photo-icon.edit{
+	right: 0px;
+	margin-top: ($profilePicture-mediumDiameter) - ($photo-margin);
+}
+
+.newUser-container{
+	position: relative;
+}
