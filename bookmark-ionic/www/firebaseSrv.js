@@ -44,6 +44,7 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 		logSearch : logSearch,
 		suggestSearch : suggestSearch,
 		ownBook : ownBook,
+		removeUserBook : removeUserBook,
 		lendBook : lendBook,
 		borrowBook : borrowBook,
 		addToWishList : addToWishList,
@@ -141,7 +142,9 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 		$firebaseArray(allUserRef).$loaded()
 		.then(function(allUsers){
 			var returnUsers = [];
+			console.log('allUsers', allUsers)
 			angular.forEach(allUsers, function(allUser, key1){
+				if(allUser.$id != auth.$getAuth().uid)
 				angular.forEach(allUser.booksOwned, function(bookOwned, key2){
 					console.log('bookOwned', bookOwned)
 					if(bookOwned.title && levenshtein(bookOwned.title, book.title)>90){
@@ -167,16 +170,18 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 			uid = auth.$getAuth().uid
 		var deferred = $q.defer();
 		var profilePicRef = storageRef.child("profilePicture").child(uid+".png")
-
-		profilePicRef.getDownloadURL()
-		.then(function(url){
-			deferred.resolve(url)
-		})
-		.catch(function(err){
-			storageRef.child("profilePicture").child("defaultPersonImage.png").getDownloadURL()
+		profilePicRef.getMetadata()
+		.then(function(metadata) {
+		  profilePicRef.getDownloadURL()
 			.then(function(url){
-				deferred.resolve(url);
+				deferred.resolve(url)
 			})
+			.catch(function(err){
+				storageRef.child("profilePicture").child("defaultPersonImage.png").getDownloadURL().then(function(url){deferred.resolve(url);})
+			})
+		})
+		.catch(function(error) {
+		  storageRef.child("profilePicture").child("defaultPersonImage.png").getDownloadURL().then(function(url){deferred.resolve(url);})
 		})
 		return deferred.promise;
 	}
@@ -411,20 +416,35 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 		var deferred = $q.defer();
 
 		function addOwnedBooks(refKey){
-			getBooksOwned('keys')
-			.then(function(booksOwned){
-				console.log('booksOwned ', booksOwned)
+			console.log('adding ownedBooks')
+			$q.all([getWishList('currentUser','keys'), getBooksOwned('currentUser','keys')])
+			.then(function(data){
+				console.log('data', data)
+				var wishListKeys = data[0]
+				var ownedBookKeys = data[1]
+
+				console.log('ownedBookKeys ', ownedBookKeys)
 				var userHasBook = false;
-				angular.forEach(booksOwned, function(value) {
-		        	if(value.key == refKey){
+				var userWishesBook = false;
+
+				
+		        angular.forEach(ownedBookKeys, function(ownedBookKey) {
+		        	if(ownedBookKey.key == refKey){
 		        		userHasBook = true;
 		        		console.log('user already has the book');
-		        		deferred.reject("user already has book")
+		        		deferred.reject("book already in library")
 		        	}
 		        });
-		        if(!userHasBook){
+		        angular.forEach(wishListKeys, function(wishListKey) {
+		        	if(wishListKey.key == refKey){
+		        		userWishesBook = true;
+		        		console.log('user already wishes the book')
+		        		deferred.reject('book already in wishList')
+		        	}
+		        });
+		        if(!userHasBook && !userWishesBook){
 		        	console.log('adding book to user\'s library')
-			        booksOwned.$add({
+			        ownedBookKeys.$add({
 						key : refKey,
 						title : book.title,
 						status : "available",
@@ -436,8 +456,8 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 							initialDate : "",
 							returnDate : ""
 						}
-						//if another person is borrowing the book, their details is stored in secondParty
 					})
+					//if another person is borrowing the book, their details is stored in secondParty
 					deferred.resolve("books added successfully")
 			    }
 			})
@@ -449,6 +469,7 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 
 		getBookCollection()
 		.then(function(bookCollection){
+			console.log('book collection loaded ', bookCollection)
 			var bookExist = bookExists(bookCollection, book)
 			if(bookExist.bool){
 				var bookKey = bookCollection.$keyAt(bookExist.index)
@@ -474,6 +495,49 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 		})
 		return deferred.promise;
 	}
+	function removeUserBook(book){
+		var deferred = $q.defer();
+		console.log('removing book ',book)
+		$q.all([getWishList('currentUser','keys'), getBooksOwned('currentUser','keys')])
+		.then(function(data){
+			var wishListKeys = data[0]
+			console.log('wishListKeys', wishListKeys)
+			angular.forEach(wishListKeys, function(wishListKey, key){
+				if(wishListKey.key == book.$id){
+					console.log('removing book from wishList')
+					wishListKeys.$remove(key)
+					.then(function(ref) {
+						deferred.resolve("book removed from wishList")
+					})
+					.catch(function(error){
+						console.log("error removing book from wishList", error)
+						deferred.reject("error removing book from wishList");
+					})
+				}
+			})
+
+			var ownedBookKeys = data[1]
+			console.log('ownedBookKeys', ownedBookKeys)
+			angular.forEach(ownedBookKeys, function(ownedBookKey, key){
+				if(ownedBookKey.key == book.$id){
+					console.log('removing book from ownedBook')
+					ownedBookKeys.$remove(key)
+					.then(function(ref) {
+						deferred.resolve("book removed from ownedBooks")
+					})
+					.catch(function(error){
+						console.log("error removing book from ownedBooks", error)
+						deferred.reject("error removing book from ownedBooks");
+					})
+				}
+			})
+		})
+		.catch(function(error){
+			console.log('failed to load wishList and booksOwned while removing')
+			deferred.reject(error);
+		})
+		return deferred.promise;
+	}
 	function lendBook(){
 		//lending a book from one user to another
 	}
@@ -486,7 +550,7 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 		var deferred = $q.defer();
 
 		function addBookToWishList(refKey){
-			$q.all([getWishList("keys"), getBooksOwned('keys')])
+			$q.all([getWishList('currentUser','keys'), getBooksOwned('currentUser','keys')])
 			.then(function(data){
 				console.log('data', data)
 				var wishListKeys = data[0]
@@ -876,10 +940,15 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 					else if(user.uid == uid)
 						containsUID = true;
 				})
-				if(containsCurrentUser && containsUID)
-					deferred.resolve(true)
+				if(containsCurrentUser && containsUID){
+					var returnObj = {
+						bool : true,
+						chatRoom : chatRoom
+					}
+					deferred.resolve(returnObj)
+				}
 			})
-			deferred.resolve(false);
+			deferred.resolve({bool : false});
 		})
 		.catch(function(error){
 			console.log("unable to fetch all chats ");

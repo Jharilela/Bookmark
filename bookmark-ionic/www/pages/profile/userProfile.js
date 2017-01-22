@@ -61,8 +61,8 @@ angular.module('bookmark.controllers')
 		console.log('going to message');
 		firebaseSrv.doesChatExist($scope.user.$id)
 		.then(function(chatExist){
-			console.log('chatExists ',chatExist)
-			if(!chatExist){
+			console.log('chatExists ',chatExist.bool)
+			if(!chatExist.bool){
 				firebaseSrv.newChat([$scope.user])
 				.then(function(chat){
 					console.log("chat created", chat)
@@ -71,6 +71,9 @@ angular.module('bookmark.controllers')
 				.catch(function(error){
 					console.log("failed to initiate newChat ", error)
 				})
+			}
+			else{
+				$state.go('chatRoom', {chatId : chatExist.chatRoom.$id})
 			}
 		})
 		.catch(function(error){

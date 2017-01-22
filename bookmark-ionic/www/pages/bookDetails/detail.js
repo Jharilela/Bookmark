@@ -1,5 +1,5 @@
 angular.module('bookmark.controllers')
-.controller('bookDetailCtrl', function($scope,$rootScope, $state, $stateParams, $window,  $timeout, $ionicHistory, detailSrv, firebaseSrv){
+.controller('bookDetailCtrl', function($scope,$q,$ionicPopup, $ionicScrollDelegate, $location, LocationService ,$rootScope, $state, $stateParams, $window,  $timeout, $ionicHistory, detailSrv, firebaseSrv){
 	console.log('bookDetailCtrl loaded ', $stateParams);
 	var vm = this;
 	$rootScope.angular = angular;
@@ -17,10 +17,22 @@ angular.module('bookmark.controllers')
 	$scope.bookImage = ($scope.book.largeImageLink == undefined) ? $scope.book.imageLink : $scope.book.largeImageLink;
 	$scope.bookAuthor = $scope.book.authors;
 
-	firebaseSrv.searchBookOwners($scope.book)
-	.then(function(bookOwners){
-		console.log("bookOwners ",bookOwners)
-		$scope.bookOwners = bookOwners;
+	$q.all([firebaseSrv.getUser(), firebaseSrv.searchBookOwners($scope.book)])
+	.then(function(data){
+		var currentUser = data[0];
+		console.log("currentUser ",currentUser)
+		$scope.bookOwners = data[1];
+		console.log("bookOwners ",$scope.bookOwners)
+		angular.forEach($scope.bookOwners, function(bookOwner, key){
+	        distance = LocationService.calculateDistance(
+	        	{lat : currentUser.location.lat,
+	        	lng : currentUser.location.lng},
+	        	{lat: bookOwner.location.lat,
+	        	lng : bookOwner.location.lng})
+	        bookOwner.distance = (distance/1000).toFixed(2);+"km"
+	        console.log('distance : '+distance)
+		})
+		$scope.bookOwners.sort(dynamicSortMultiple("distance"));
 	})
 	.catch(function(error){
 		console.log("error finding book owners ",error)
@@ -52,10 +64,48 @@ angular.module('bookmark.controllers')
 			}
 		})
 		.catch(function(error){
-			console.log('error : ',error)
-			vm.message = {
-				type : 'error',
-				content : error
+			console.log('error owning book : ',error)
+			if(error == "book already in wishList"){
+				var confirmPopup = $ionicPopup.confirm({
+			     title: 'Book is in your wish list',
+			     template: '<center>Do you have this book on your shelf?</center>'
+			    });
+
+			    confirmPopup.then(function(res) {
+			     if(res) {
+			       firebaseSrv.removeUserBook($scope.book)
+			       .then(function(){
+			       		firebaseSrv.ownBook($scope.book)
+						.then(function(log){
+							console.log('success : ', log)
+							vm.message = {
+								type : 'success',
+								content: log
+							}
+						})
+						.catch(function(error){
+							vm.message = {
+								type : 'error',
+								content : error
+							}
+						})
+			       })
+			       .catch(function(error){
+			       		vm.message = {
+							type : 'error',
+							content : error
+						}
+			       })
+			     } else {
+			       console.log('User is not sure to add book to wish list');
+			     }
+			    });
+			}
+			else{
+				vm.message = {
+					type : 'error',
+					content : error
+				}
 			}
 		})
 		.finally(function(){
@@ -74,15 +124,37 @@ angular.module('bookmark.controllers')
 		})
 		.catch(function(error){
 			console.log('error : ',error)
-			vm.message = {
-				type : 'error',
-				content : error
-			}
+			// if(error == "book already in library"){
+			// 	var confirmPopup = $ionicPopup.confirm({
+			//      title: 'Book is already in your library',
+			//      template: '<center>You already have this book on your shelf</center>'
+			//     });
+
+			//     confirmPopup.then(function(res) {
+			//      if(res) {
+			//        console.log('You are sure');
+			//      } else {
+			//        console.log('You are not sure');
+			//      }
+			//     });
+			// }
+			// else{
+				vm.message = {
+					type : 'error',
+					content : error
+				}
+			// }
 		})
 		.finally(function(){
 			console.log('vm.message', vm.message)
 			$timeout(removeMessage, 3000);
 		})
+	}
+
+	$scope.borrow = function(){
+		var id = "borrowFrom"
+		$location.hash(id);
+		$ionicScrollDelegate.$getByHandle('mainScroll').anchorScroll(id);
 	}
 
 	function removeMessage(){

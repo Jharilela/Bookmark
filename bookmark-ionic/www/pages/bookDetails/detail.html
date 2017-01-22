@@ -6,7 +6,7 @@
 	 
 	</ion-header-bar>
 
-	<ion-content class="padding">
+	<ion-content class="padding" delegate-handle="mainScroll">
 		<div ng-if="bookDetail.message.content!=''" ng-class="{' detail-successMessage' : bookDetail.message.type=='success', 'detail-errorMessage' : bookDetail.message.type=='error'}">
 			<i ng-class="{'icon ion-checkmark-circled' : bookDetail.message.type=='success', 'ion-android-cancel' : bookDetail.message.type=='error'}"></i>
 			{{bookDetail.message.content}}
@@ -55,12 +55,14 @@
 			<h3>Description</h3>
 			{{book.description}}<br>
 		</div>
+		<h3 id="borrowFrom">Borrow from</h3>
 		<div ng-if="bookOwners && bookOwners.length>0">
-			<h3>Borrow from</h3>
 			<div ng-repeat="owner in bookOwners" class="bookDetails_bookOwner-thumbnail--container">
 				<img ng-src="{{owner.profilePictureUrl}}" class="bookDetails_bookOwner-thumbnail" ui-sref="userProfile({user : owner})">
+				<div>
+					{{owner.distance}}km
+				</div>
 			</div>
 		</div>
-
 	</ion-content>
 </ion-view>
