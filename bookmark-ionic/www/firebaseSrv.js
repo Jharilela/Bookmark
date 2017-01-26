@@ -46,6 +46,7 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 		ownBook : ownBook,
 		removeUserBook : removeUserBook,
 		lendBook : lendBook,
+		receiveOwnedBook : receiveOwnedBook,
 		borrowBook : borrowBook,
 		addToWishList : addToWishList,
 		newChat : newChat,
@@ -355,7 +356,7 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 
 	    $firebaseArray(user.child("booksOwned")).$loaded()
 	    .then(function(bookKeys){
-	    	console.log('booksOwned loaded successfully')
+	    	console.log('booksOwned loaded successfully', bookKeys)
 	    	if(type == "keys"){
 		    	deferred.resolve(bookKeys)
 		    }
@@ -375,13 +376,34 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 		    	.catch(function(error){
 		    		deferred.reject("cannot load user's books from collection")
 		    	})
-
+		    }
+		    else if(type == "full+keys"){
+		    	getBookCollection()
+		    	.then(function(bookCollections){
+		    		angular.forEach(bookCollections, function(bookCollection) {
+			          	angular.forEach(bookKeys, function(bookKey, key){
+			          		if(bookCollection.$id == bookKey.key){
+			          			bookKey.book = bookCollection
+			          		}
+			          	})
+			       	});
+			       	deferred.resolve(bookKeys)
+		    	})
+		    	.catch(function(error){
+		    		deferred.reject("cannot load user's books from collection")
+		    	})
 		    }
 	    })
 	    .catch(function(error){
 	    	console.log("failed to load booksOwned : ",error)
 	    	deferred.reject("error fetching booksOwned")
 	    })
+		return deferred.promise;
+	}
+	function getBookOwned(id){
+		console.log('get book owned id : ',id)
+		var deferred = $q.defer();
+		deferred.resolve($firebaseObject(userRef.child("booksOwned").child(id)))
 		return deferred.promise;
 	}
 	function addBookToCollection(book){
@@ -447,15 +469,7 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 			        ownedBookKeys.$add({
 						key : refKey,
 						title : book.title,
-						status : "available",
-						secondParty : {
-							uid : "",
-							name : "",
-							status : "",
-							requestTimestamp : "",
-							initialDate : "",
-							returnDate : ""
-						}
+						status : "available"
 					})
 					//if another person is borrowing the book, their details is stored in secondParty
 					deferred.resolve("books added successfully")
@@ -538,8 +552,87 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 		})
 		return deferred.promise;
 	}
-	function lendBook(){
-		//lending a book from one user to another
+	function lendBook(form, ownedBook){
+		var deferred = $q.defer();
+		console.log('lending book to ', form);
+		var secondParty = {};
+		secondParty.name = form.name;
+		secondParty.type = form.type
+		if(form.type=='rent'&&form.initialDate)
+			secondParty.initialDate = new Date(form.initialDate).getTime();
+		if(form.type=='rent'&&form.returnDate)
+			secondParty.returnDate = new Date(form.returnDate).getTime();
+		if(form.type=='rent' && form.rentPrice){
+			secondParty.rentPrice = form.rentPrice;
+			secondParty.rentPeriod = form.rentPeriod;
+		}
+		if(form.type=='sell' && form.sellPrice)
+			secondParty.sellPrice = form.sellPrice;
+		console.log('secondParty ',secondParty)
+
+		getBooksOwned('currentUser','keys')
+		.then(function(ownedBookKeys){
+			console.log('ownedBookKeys', ownedBookKeys)
+			var bookFound = false;
+			angular.forEach(ownedBookKeys, function(ownedBookKey, index){
+				if(ownedBookKey.$id == ownedBook.$id){
+					bookFound = true;
+					console.log('index of ownedBook : '+index)
+					ownedBookKeys[index].secondParty = secondParty;
+					ownedBookKeys.$save(index)
+					.then(function(ref){
+						console.log('lend book successful')
+						deferred.resolve('lend book successful')
+					})
+					.catch(function(error){
+						console.error('error lending/selling book ',error)
+						deferred.reject('error lending/selling book')
+					})
+				}
+			})
+			if(!bookFound){
+				console.error('failed to find book key with book to be lent/sold')
+				deferred.reject('failed to lend/sell book')
+			}
+		})
+		.catch(function(error){
+			console.error('failed to get booksOwned ', error)
+			deferred.reject('failed to lend/sell book');
+		})
+		return deferred.promise;
+	}
+	function receiveOwnedBook(ownedBook){
+		var deferred = $q.defer();
+		getBooksOwned('currentUser','keys')
+		.then(function(ownedBookKeys){
+			console.log('ownedBookKeys', ownedBookKeys)
+			var bookFound = false;
+			angular.forEach(ownedBookKeys, function(ownedBookKey, index){
+				if(ownedBookKey.$id == ownedBook.$id){
+					bookFound = true;
+					console.log('index of ownedBook : '+index)
+					ownedBookKeys[index].secondParty = null;
+					ownedBookKeys.$save(index)
+					.then(function(ref){
+						console.log('remove secondParty from ownedBook successful')
+						deferred.resolve('received owned Book successful')
+					})
+					.catch(function(error){
+						console.error('error receiving book back',error)
+						deferred.reject('error receiving book')
+					})
+				}
+			})
+			if(!bookFound){
+				console.error('failed to find book key for book being received')
+				deferred.reject('failed to receive book')
+			}
+		})
+		.catch(function(error){
+			console.error('failed to get booksOwned ', error)
+			deferred.reject('failed to receive book');
+		})
+		return deferred.promise;
 	}
 	function borrowBook(){
 		//borrow a book from another user

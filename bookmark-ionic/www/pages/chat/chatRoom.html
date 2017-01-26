@@ -2,18 +2,19 @@
 	<ion-header-bar>
 
 		<button class="button icon ion-chevron-left button-clear button-positive " ng-click="goBack()"></button>
-		<h1 class="title">
+		<h1 class="title" >
 			<div ng-repeat="user in chat.users">
-				<div ng-if="user.name!=currentUser.fullName">
+				<div ng-if="user.name!=currentUser.fullName" ui-sref="userProfile({user : user})">
 					{{user.name}}
 				</div>
 			</div>
 		</h1>
-		<img ng-src="{{chatIcon}}" class="chatRoom-avatar chatRoom-avatar--main">
+		<img ng-src="{{chatIcon}}" class="chatRoom-avatar chatRoom-avatar--main" ng-click="showModal()">
 	</ion-header-bar>
 
 	<ion-content has-bouncing="true" class="has-header has-footer" 
-              delegate-handle="userMessageScroll">
+              delegate-handle="userMessageScroll" 
+              on-swipe-left="goBack()">
 		<div ng-repeat="message in chat.messages" class="message-wrapper"
                   >
                   <!-- on-hold="onMessageHold($event, $index, message)" -->

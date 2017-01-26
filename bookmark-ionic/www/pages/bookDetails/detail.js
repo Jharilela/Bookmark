@@ -68,27 +68,14 @@ angular.module('bookmark.controllers')
 			if(error == "book already in wishList"){
 				var confirmPopup = $ionicPopup.confirm({
 			     title: 'Book is in your wish list',
-			     template: '<center>Do you have this book on your shelf?</center>'
+			     template: '<center>Remove book from wish list<br> and add it to your book collection ?</center>'
 			    });
 
 			    confirmPopup.then(function(res) {
 			     if(res) {
 			       firebaseSrv.removeUserBook($scope.book)
 			       .then(function(){
-			       		firebaseSrv.ownBook($scope.book)
-						.then(function(log){
-							console.log('success : ', log)
-							vm.message = {
-								type : 'success',
-								content: log
-							}
-						})
-						.catch(function(error){
-							vm.message = {
-								type : 'error',
-								content : error
-							}
-						})
+			       		$scope.ownBook();
 			       })
 			       .catch(function(error){
 			       		vm.message = {
@@ -124,26 +111,36 @@ angular.module('bookmark.controllers')
 		})
 		.catch(function(error){
 			console.log('error : ',error)
-			// if(error == "book already in library"){
-			// 	var confirmPopup = $ionicPopup.confirm({
-			//      title: 'Book is already in your library',
-			//      template: '<center>You already have this book on your shelf</center>'
-			//     });
+			if(error == "book already in library"){
+				var confirmPopup = $ionicPopup.confirm({
+			     title: 'Book is already in your library',
+			     template: '<center>Remove book from your collection<br> and add it to your wish list ?</center>'
+			    });
 
-			//     confirmPopup.then(function(res) {
-			//      if(res) {
-			//        console.log('You are sure');
-			//      } else {
-			//        console.log('You are not sure');
-			//      }
-			//     });
-			// }
-			// else{
+			    confirmPopup.then(function(res) {
+				    if(res) {
+				       firebaseSrv.removeUserBook($scope.book)
+				       .then(function(){
+				       		$scope.wishToRead();
+				       })
+				       .catch(function(error){
+				       		vm.message = {
+								type : 'error',
+								content : error
+							}
+				       })
+				    } 
+				    else {
+				       console.log('User is not sure to remove book from library and add it to wishList');
+				    }
+			    });
+			}
+			else{
 				vm.message = {
 					type : 'error',
 					content : error
 				}
-			// }
+			}
 		})
 		.finally(function(){
 			console.log('vm.message', vm.message)

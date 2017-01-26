@@ -24,6 +24,7 @@ function isEmpty(obj){
 	else
 		return false;
 }
+
 function dynamicSortMultiple() {
     /*
      * save the arguments object as it will be overwritten

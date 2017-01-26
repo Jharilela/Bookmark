@@ -1,0 +1,10 @@
+<div class="modal image-modal bgColor-black" ng-click="closeModal()">
+    <ion-slide-box on-slide-changed="slideChanged(index)" show-pager="true" active-slide="activeSlide">
+    	<ion-slide ng-repeat="book in booksSelected">
+	        <img ng-src="{{book.book.imageLink}}" class="fullscreen-image book" />
+	        <div style="color:white" class="fullscreen-image book-title">
+	        	{{book.title}}
+	        </div>
+        </ion-slide>
+    </ion-slide-box>
+</div>

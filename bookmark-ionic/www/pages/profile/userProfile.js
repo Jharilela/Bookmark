@@ -10,6 +10,10 @@ angular.module('bookmark.controllers')
 	$scope.wishedBooksStatus = "fetching"
 	var refeshable = false
 
+	if(!$scope.user.$id){
+		$scope.user.$id = $scope.user.uid;
+	}
+
 	$scope.$on("$ionicView.beforeEnter", function(event, data){
 	    if(refeshable)
 		   getBooks($scope.user.$id)

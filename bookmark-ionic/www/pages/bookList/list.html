@@ -1,18 +1,44 @@
 <ion-view hide-nav-bar="true">
-  <ion-content class="padding">
+  <ion-header-bar ng-if="multipleSelect">
+    <button class="button button-clear button-positive icon ion-close-round" ng-click="selectMultiple('ownedBooks',null)">
+    </button>
+    <div style="right: 0px;position: absolute;">
+      <button class="button button-clear button-positive icon ion-android-share" ng-click="lendBook()">
+      </button>
+      <button class="button button-clear button-positive icon ion-information-circled" ng-click="viewBookInfo()">
+      </button>
+      <button class="button button-clear button-positive icon ion-trash-b" ng-click="removeBooks()">
+      </button>
+    </div>
+  </ion-header-bar>
+
+  <ion-content class="padding" ng-class="{'has-header':multipleSelect}">
   
-  	<h2>Books you own</h2>
+  	<h2 style="margin: 5px 0px !important;">Books you own</h2>
     <h3 ng-if="ownBooksStatus=='fetching'" style="color:grey">Loading...</h3>
     <h3 ng-if="ownBooksStatus!='fetching' && ownedBooks.length<=0" style="color:grey">empty</h3>
-    <div ng-repeat="books in ownedBooks" style="display: inline">
-    	<img ng-src="{{books.imageLink}}" style="height:120px;display: inline" title="{{books.title}}" ui-sref="bookDetail({source:'bookList', book: books})">
+    <div ng-repeat="(i,bookRow) in ownedBooks track by i" style="padding: 0px;" class="row" >
+      <div class="row" style="padding: 0px;">
+        <div ng-repeat="(j,book) in bookRow track by j" class="col col-33" style="padding: 0px;">
+          <div class="col col-33">
+            <i class="icon ion-checkmark-round chatList__book-image--overlay" ng-if="multipleSelect && book.showOverlay" ng-click="changeVisibility('ownedBooks', i, j)" "></i>
+            <img ng-src="{{book.book.imageLink}}" style="height:120px;display: inline;" title="{{book.title}}" ng-click="multipleSelect==false ? seeBookDetail(book) : changeVisibility('ownedBooks', i, j)" on-hold="selectMultiple('ownedBooks',{row : i, col: j})" ng-style="{'opacity' : ((book.secondParty && book.secondParty.name)?0.5:1)}">
+          </div>
+        </div>
+      </div>
     </div>
 
-    <h2>Wish list</h2>
+    <h2 style="margin: 5px 0px !important;">Wish list</h2>
     <h3 ng-if="wishedBooksStatus=='fetching'" style="color:grey">Loading...</h3>
     <h3 ng-if="wishedBooksStatus!='fetching' && wishedBooks.length<=0" style="color:grey">empty</h3>
-    <div ng-repeat="books in wishedBooks" style="display: inline">
-    	<img ng-src="{{books.imageLink}}" style="height:120px;display: inline" title="{{books.title}}" ui-sref="bookDetail({source:'bookList', book: books})">
+    <div ng-repeat="bookRow in wishedBooks" style="padding: 0px;" class="row">
+      <div class="row" style="padding: 0px;">
+        <div ng-repeat="book in bookRow" class="col col-33" style="padding: 0px;">
+          <div class="col col-33">
+          	<img ng-src="{{book.imageLink}}" style="height:120px;display: inline" title="{{book.title}}" ui-sref="bookDetail({source:'bookList', book: book})">
+          </div>  
+        </div>
+      </div>
     </div>
 
   </ion-content>

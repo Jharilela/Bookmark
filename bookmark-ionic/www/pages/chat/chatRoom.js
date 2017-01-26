@@ -1,6 +1,6 @@
 angular.module('bookmark.controllers')
 
-.controller('chatRoomCtrl', function($q, $scope, $stateParams, $state, firebaseSrv) { 
+.controller('chatRoomCtrl', function($q,$ionicHistory, $scope, $stateParams, $state,$ionicModal, firebaseSrv) { 
 	console.log('chatRoomCtrl - loaded')
 	var vm = this;
 	$scope.currentUser = $stateParams.currentUser;
@@ -58,6 +58,7 @@ angular.module('bookmark.controllers')
 	})
 
 	$scope.goBack = function() {
+		// $ionicHistory.goBack();
 	    $state.go('tab.chatList');
 	};
 
@@ -75,8 +76,28 @@ angular.module('bookmark.controllers')
 		}
 	} 
 
+	$scope.viewUser = function(){
+		$state.go("userProfile",{user : user})
+	}
+
 	function onProfilePicError(ele) {
 	  this.ele.src = firebaseSrv.defaultImage; // set a fallback
+	}
+
+	$scope.showModal = function() {
+		var templateUrl = 'directives/viewProfilePicture.html'
+		$ionicModal.fromTemplateUrl(templateUrl, {
+			scope: $scope,
+			animation: 'slide-in-up'
+		}).then(function(modal) {
+			$scope.modal = modal;
+			$scope.modal.show();
+		});
+	}
+	// Close the modal
+	$scope.closeModal = function() {
+		$scope.modal.hide();
+		$scope.modal.remove()
 	}
 })
 // fitlers

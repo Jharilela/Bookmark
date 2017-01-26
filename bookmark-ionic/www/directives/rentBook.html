@@ -1,0 +1,44 @@
+<div class="model image-model bgColor-white">
+	<div class="bar bar-header" style="position: relative;">
+		<button class="button button-clear button-positive icon ion-close-round" ng-click="closeModal()">
+	    </button>
+	    <div class="title" style="display: inline;">
+	    	<div style="display: inline;" ng-style="{'color': (form.type=='rent'?'#000':'#999')}" ng-click="setFormType('rent')">Rent</div>
+	    	<div style="display: inline; color: #999"> / </div>
+	    	<div style="display: inline;" ng-style="{'color': (form.type=='sell'?'#000':'#999')}" ng-click="setFormType('sell')">Sell</div>
+	    </div>
+	    <button class="button button-clear button-positive icon ion-checkmark-round" ng-click="submitModal()" ng-disabled="isNameEmpty()">
+	    </button>
+	</div>
+    <div class="list">
+	  <label class="item item-input">
+	    <span class="input-label">Name</span>
+	    <input type="text" ng-model="form.name">
+	  </label>
+	  <label class="item item-input" ng-show="form.type=='rent'">
+	    <span class="input-label">From</span>
+	    <input type="date" ng-model="form.initialDate">
+	  </label>
+	  <label class="item item-input" ng-show="form.type=='rent'">
+	    <span class="input-label">To </span>
+	    <input type="date" ng-model="form.returnDate">
+	  </label>
+	  <label class="item item-input" ng-show="form.type=='rent'">
+	    <span class="input-label">
+	    	Rent 
+		    <select ng-model="form.rentPeriod" style="border-color: transparent;background-color: transparent;">
+		      <option>/hour</option>
+		      <option>/day</option>
+		      <option>/week</option>
+		      <option>/month</option>
+		      <option>/year</option>
+		    </select>
+	    </span>
+	    <input type="number" ng-model="form.rentPrice">
+	  </label>
+	   <label class="item item-input" ng-show="form.type=='sell'">
+	    <span class="input-label">Sell for </span>
+	    <input type="number" ng-model="form.sellPrice">
+	  </label>
+	</div>
+</div>
