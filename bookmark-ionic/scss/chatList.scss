@@ -1,7 +1,19 @@
-.chatList__book-image--overlay{
+$select_icon-size: 50px;
+$book_image-height : 120px;
+
+.bookList__book-image{
+	height: $book_image-height;
+	display: inline;
+	max-width: 100px;
+}
+
+.bookList__book-image--overlay{
 	position: absolute;
     color: rgba(255,255,255,0.8);
-    font-size: 55px;
+    font-size: $select_icon-size;
     background-color: rgba(0,0,0, 0.3);
-    height : 120px;
+    height : $book_image-height;
+    text-align: center;
+    padding-top: ($book_image-height - $select_icon-size) / 2;
 }
+

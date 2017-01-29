@@ -223,8 +223,16 @@ angular.module('bookmark.controllers')
 	function saveUser(){
 		vm.user.provider = $scope.auth.$getAuth().providerData[0].providerId
 		vm.user.type = "individual"
+		vm.user.hasProfilePicture = false;
 		delete vm.user.password;
+		console.log('NEWUSER - saving user data ',vm.user)
 		firebaseSrv.saveUser(vm.user)
+		.then(function(log){
+			console.log('saved user data successfully \n',log)
+		})
+		.catch(function(err){
+			console.log('failed to save user data \n',err)
+		})
 		.finally(function(){
 			$scope.step+=1;
 		})

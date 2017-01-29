@@ -14,8 +14,6 @@
 			</div>
 		</div>
 	</ion-header-bar>
-	
-	
 
 	<ion-content class="padding" has-header="true">
 		<div class="list">
@@ -29,7 +27,12 @@
 							<h2 >{{user.name}}</h2>
 						</div>
 					</div>
-					<p> Click to open the message</p>
+					<p ng-if="!chatList.containsActiveUsers(chat)">
+						User is no longer active
+					</p>
+					<p ng-if="chatList.containsActiveUsers(chat)"> 
+						Click to open the message
+					</p>
 				</div>
 			</a>
 			<div ng-show="showSearch"> 

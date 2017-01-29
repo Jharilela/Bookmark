@@ -25,10 +25,6 @@ angular.module('bookmark', [
 ])
 
 .run(function($ionicPlatform) {
-  console.log('is iOS device', ionic.Platform.isIOS())
-    if(ionic.Platform.isIOS()){
-      alert('iOS developer mode')
-    }
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)

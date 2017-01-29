@@ -3,7 +3,7 @@
     <button class="button button-clear button-positive icon ion-close-round" ng-click="selectMultiple('ownedBooks',null)">
     </button>
     <div style="right: 0px;position: absolute;">
-      <button class="button button-clear button-positive icon ion-android-share" ng-click="lendBook()">
+      <button class="button button-clear button-positive icon ion-android-share" ng-click="lendBook()" ng-hide="containsWishedBooks">
       </button>
       <button class="button button-clear button-positive icon ion-information-circled" ng-click="viewBookInfo()">
       </button>
@@ -17,12 +17,13 @@
   	<h2 style="margin: 5px 0px !important;">Books you own</h2>
     <h3 ng-if="ownBooksStatus=='fetching'" style="color:grey">Loading...</h3>
     <h3 ng-if="ownBooksStatus!='fetching' && ownedBooks.length<=0" style="color:grey">empty</h3>
-    <div ng-repeat="(i,bookRow) in ownedBooks track by i" style="padding: 0px;" class="row" >
+    <div ng-repeat="(i,bookRow) in ownedBooks track by i" class="row" >
       <div class="row" style="padding: 0px;">
         <div ng-repeat="(j,book) in bookRow track by j" class="col col-33" style="padding: 0px;">
-          <div class="col col-33">
-            <i class="icon ion-checkmark-round chatList__book-image--overlay" ng-if="multipleSelect && book.showOverlay" ng-click="changeVisibility('ownedBooks', i, j)" "></i>
-            <img ng-src="{{book.book.imageLink}}" style="height:120px;display: inline;" title="{{book.title}}" ng-click="multipleSelect==false ? seeBookDetail(book) : changeVisibility('ownedBooks', i, j)" on-hold="selectMultiple('ownedBooks',{row : i, col: j})" ng-style="{'opacity' : ((book.secondParty && book.secondParty.name)?0.5:1)}">
+          <div class="col col-33" style="padding: 0px;">
+            <i class="icon ion-checkmark-round bookList__book-image--overlay" ng-if="multipleSelect && book.showOverlay" ng-click="changeVisibility('ownedBooks', i, j)" ng-style="{'width' : book.imageWidth}"></i>
+            <img ng-src="{{book.book.imageLink}}" class="bookList__book-image" title="{{book.title}}" ng-click="multipleSelect==false ? gotoBookDetail(book.book) : changeVisibility('ownedBooks', i, j)" on-hold="selectMultiple('ownedBooks',{row : i, col: j})" ng-style="{'opacity' : ((book.secondParty && book.secondParty.name)?0.5:1)}" booklist-image>
+            </img>
           </div>
         </div>
       </div>
@@ -31,11 +32,12 @@
     <h2 style="margin: 5px 0px !important;">Wish list</h2>
     <h3 ng-if="wishedBooksStatus=='fetching'" style="color:grey">Loading...</h3>
     <h3 ng-if="wishedBooksStatus!='fetching' && wishedBooks.length<=0" style="color:grey">empty</h3>
-    <div ng-repeat="bookRow in wishedBooks" style="padding: 0px;" class="row">
+    <div ng-repeat="(i,bookRow) in wishedBooks" style="padding: 0px;" class="row">
       <div class="row" style="padding: 0px;">
-        <div ng-repeat="book in bookRow" class="col col-33" style="padding: 0px;">
+        <div ng-repeat="(j,book) in bookRow" class="col col-33" style="padding: 0px;">
           <div class="col col-33">
-          	<img ng-src="{{book.imageLink}}" style="height:120px;display: inline" title="{{book.title}}" ui-sref="bookDetail({source:'bookList', book: book})">
+            <i class="icon ion-checkmark-round bookList__book-image--overlay" ng-if="multipleSelect && book.showOverlay" ng-click="changeVisibility('wishedBooks', i, j)" ng-style="{'width' : book.imageWidth}"></i>
+          	<img ng-src="{{book.book.imageLink}}" class="bookList__book-image" title="{{book.title}}" on-hold="selectMultiple('wishedBooks',{row : i, col: j})" ng-click="multipleSelect==false ? gotoBookDetail(book.book) : changeVisibility('wishedBooks', i, j)" booklist-image>
           </div>  
         </div>
       </div>

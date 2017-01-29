@@ -11,7 +11,7 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 
 	auth.$onAuthStateChanged(function(firebaseUser) {
 	  if (firebaseUser) {
-	    console.log("Signed in as:", firebaseUser.uid);
+	    console.log("FIREBASE onAuthStateChanged \n Signed in as:", firebaseUser.uid);
 	    userRef = ref.child("users").child(auth.$getAuth().uid)
 	    allUserRef = ref.child("users");
 	    bookRef = ref.child("books")
@@ -32,7 +32,9 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 		getProfilePicture : getProfilePicture,
 		takePicture : takePicture,
 		uploadPicture : uploadPicture,
+		setUserProfileStatus : setUserProfileStatus,
 		saveUser : saveUser,
+		deleteUser : deleteUser,
 		searchUser : searchUser,
 		searchBookOwners : searchBookOwners,
 		validateName : validateName,
@@ -82,8 +84,7 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 		var deferred = $q.defer();
 		$firebaseObject(userRef).$loaded()
 		.then(function(user){
-			console.log("users Data loaded successfully")
-			console.log('user', user)
+			console.log("users Data loaded successfully ",user)
 			if(user.firstName == null || user.firstName == undefined){
 				console.log('new user')
 				deferred.reject("new user")
@@ -109,6 +110,100 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 		})
 
 		return deferred.promise
+	}
+	function deleteUser(){
+		console.log('deleting user');
+		$q.all([deleteProfilePicture(), removeUserFromChats(), deleteUserData()])
+		.then(function(data){
+			console.log("removing user from firebase ")
+			auth.$deleteUser()
+			.then(function() {
+			  console.log("User removed successfully!");
+			}).catch(function(error) {
+			  console.error("Error: ", error);
+			});
+		})
+		.catch(function(err){
+			console.log('error deleting user ',err)
+		})
+	}
+	function deleteProfilePicture(){
+		var deferred = $q.defer();
+		storageRef.child('profilePicture').child(auth.$getAuth().uid+".png").delete()
+		.then(function() {
+		  console.log("deleted user's profile picture successfully")
+		  deferred.resolve('profile picture deleted successfully');
+		})
+		.catch(function(error) {
+		  if(error.code && error.code=="storage/object-not-found"){
+		  	console.log('user does not have profile picture')
+		  	deferred.resolve('profile picture did not exist');
+		  }
+		  else{
+		  	console.log('error deleting profile picture ',error)
+		  	deferred.reject('error deleting profile picture');
+		  }
+		});
+		return deferred.promise;
+	}
+	function removeUserFromChats(){
+		var deferred = $q.defer();
+		var errorFound = false;
+		$firebaseArray(chatRef).$loaded()
+		.then(function(chatRooms){
+			angular.forEach(chatRooms, function(chatRoom, key1){
+				var chatContainsUser=false;
+				angular.forEach(chatRoom.users, function(user, key2){
+					if(user.uid == auth.$getAuth().uid){
+						chatContainsUser = true;
+						user.isActive = false;
+					}
+				})
+				if(chatContainsUser){
+					console.log('saving status for ', chatRoom)
+					chatRooms.$save(key1)
+					.then(function(){
+						console.log('saved successfully')
+					})
+					.catch(function(err){
+						console.error('failed to change user status to isActive : false \n',err);
+						errorFound = true;
+					})
+				}
+			})
+			if(!errorFound){
+				console.log('made user inactive in all chats')
+				deferred.resolve('made chat users inactive');
+			}
+			else{
+				deferred.reject('error occuerd in making chat users inactive')
+			}
+		})
+		.catch(function(error){
+			console.error("failed to load chatRooms ",error)
+			deferred.reject('failed to load chatRooms')
+		})
+		return deferred.promise;
+	}
+	function deleteUserData(){
+		var deferred = $q.defer();
+		$firebaseArray(allUserRef).$loaded()
+		.then(function(allUsers){
+			allUsers.$remove(allUsers.$indexFor(auth.$getAuth().uid))
+			.then(function(){
+				console.log('remove user data successfully')
+				deferred.resolve('remove user data successfully')
+			})
+			.catch(function(err){
+				console.error('failed to remove user data ',err)
+				deferred.reject('failed to remove user data')
+			})
+		})
+		.catch(function(err){
+			console.error('error loading allUsers ',err)
+			deferred.reject('error loading allUsers')
+		})
+		return deferred.promise;
 	}
 	function searchUser(name){
 		console.log("searching for user "+name);
@@ -169,21 +264,51 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 	function getProfilePicture(uid){
 		if(!uid)
 			uid = auth.$getAuth().uid
+
 		var deferred = $q.defer();
-		var profilePicRef = storageRef.child("profilePicture").child(uid+".png")
-		profilePicRef.getMetadata()
-		.then(function(metadata) {
-		  profilePicRef.getDownloadURL()
+
+		function getDefaultPicture(name){
+			storageRef.child("profilePicture").child(name+".png").getDownloadURL()
 			.then(function(url){
-				deferred.resolve(url)
+				deferred.resolve(url);
 			})
 			.catch(function(err){
-				storageRef.child("profilePicture").child("defaultPersonImage.png").getDownloadURL().then(function(url){deferred.resolve(url);})
+				deferred.reject('failed to fetch defaultPersonImage.png')
 			})
-		})
-		.catch(function(error) {
-		  storageRef.child("profilePicture").child("defaultPersonImage.png").getDownloadURL().then(function(url){deferred.resolve(url);})
-		})
+		}
+
+		if(uid == "defaultPersonImage" || uid == "defaultGroupImage" || uid=="inactivePersonImage"){
+			getDefaultPicture(uid)
+		}
+		else{
+			$firebaseArray(allUserRef).$loaded()
+			.then(function(allUsers){
+				var profilePictureExists = allUsers.$getRecord(uid) && allUsers.$getRecord(uid).hasProfilePicture
+
+				if(allUsers.$getRecord(uid)){
+					if(allUsers.$getRecord(uid).hasProfilePicture){
+						var profilePicRef = storageRef.child("profilePicture").child(uid+".png")
+						profilePicRef.getDownloadURL()
+						.then(function(url){
+							deferred.resolve(url)
+						})
+						.catch(function(err){
+							getDefaultPicture("defaultPersonImage");
+						})
+					}
+					else{
+						getDefaultPicture("defaultPersonImage");
+					}
+				}
+				else{
+					getDefaultPicture("inactivePersonImage");
+				}
+			})
+			.catch(function(err){
+				console.error('failed to load allUsers ',err);
+				deferred.reject('failed to laod allUsers')
+			})
+		}
 		return deferred.promise;
 	}
 
@@ -218,6 +343,8 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
             console.log('taking image successful ')
             uploadPicture(imageData)
             .then(function(snapshot){
+            	setUserProfileStatus(true);
+
             	getProfilePicture()
             	.then(function(url){
             		console.log("uploaded Picture successfully")
@@ -255,31 +382,49 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 		return deferred.promise;
 	}
 
+	function setUserProfileStatus(value){
+		var deferred = $q.defer();
+		$firebaseObject(userRef).$loaded()
+		.then(function(user){
+			console.log('user ',user);
+			user.hasProfilePicture = value;
+			user.$save()
+			.then(function(){
+				console.log('changed user profile status successfully');
+				deferred.resolve("changed user profile status successfully")
+			})
+			.catch(function(err){
+				console.log('error saving profile picture status ',err)
+				deferred.reject("error saving profile picture status")
+			})
+		})
+		.catch(function(err){
+			console.log('error changing status for user profile picture');
+			deferred.reject('error changing status for user profile picture')
+		})
+		return deferred.promise;
+	}
+
 	function saveUser(user){
 		var deferred = $q.defer();
-		auth.$onAuthStateChanged(function(firebaseUser) {
-		  if (firebaseUser) {
-		    userRef = ref.child("users").child(auth.$getAuth().uid)
-		    $firebaseObject(userRef).$loaded()
-			.then(function(data){
-				addObj(data, user).$save()
-				.then(function() {
-			        console.log('Profile saved!');
-			        deferred.resolve('Profile saved!');
-			      })
-				.catch(function(error) {
-			        console.log('Error! ',error);
-			        deferred.reject("error saving ")
-			      });
-			})
-			.catch(function(error){
-				console.log('Error! ', error)
-				deferred.reject("failed to fetch user data from database")
-			})
-		  } else {
-		    console.error('no user logged in')
-		  }
-		}); 
+		console.log('FIREBASE - saving user data ',user);
+	    userRef = ref.child("users").child(auth.$getAuth().uid)
+	    $firebaseObject(userRef).$loaded()
+		.then(function(data){
+			addObj(data, user).$save()
+			.then(function() {
+				console.log('Profile saved!');
+		        deferred.resolve('Profile saved!');
+		      })
+			.catch(function(error) {
+		        console.log('Error! ',error);
+		        deferred.reject("error saving ")
+		      });
+		})
+		.catch(function(error){
+			console.log('Error! ', error)
+			deferred.reject("failed to fetch user data from database")
+		})
 	    return deferred.promise;
 	}
 	function getBookCollection(){
@@ -318,7 +463,7 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 
 	    $firebaseArray(user.child("wishList")).$loaded()
 	    .then(function(wishListKeys){
-	    	console.log('wish list loaded successfully')
+	    	console.log('wish list loaded successfully ',wishListKeys)
 	    	if(type == "keys"){
 		    	deferred.resolve(wishListKeys)
 		    }
@@ -334,6 +479,22 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 			          	})
 			       	});
 			       	deferred.resolve(bookList)
+		    	})
+		    	.catch(function(error){
+		    		deferred.reject("cannot load user's books from collection")
+		    	})
+		    }
+		    else if(type=="full+keys"){
+		    	getBookCollection()
+		    	.then(function(bookCollections){
+		    		angular.forEach(bookCollections, function(bookCollection) {
+			          	angular.forEach(wishListKeys, function(wishListKey){
+			          		if(bookCollection.$id == wishListKey.key){
+			          			wishListKey.book = bookCollection
+			          		}
+			          	})
+			       	});
+			       	deferred.resolve(wishListKeys)
 		    	})
 		    	.catch(function(error){
 		    		deferred.reject("cannot load user's books from collection")
@@ -398,12 +559,6 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 	    	console.log("failed to load booksOwned : ",error)
 	    	deferred.reject("error fetching booksOwned")
 	    })
-		return deferred.promise;
-	}
-	function getBookOwned(id){
-		console.log('get book owned id : ',id)
-		var deferred = $q.defer();
-		deferred.resolve($firebaseObject(userRef.child("booksOwned").child(id)))
 		return deferred.promise;
 	}
 	function addBookToCollection(book){
@@ -919,10 +1074,6 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 				uid : user.$id , 
 				name: user.firstName+" "+user.lastName
 			}
-			getProfilePicture(user.$id)
-			.then(function(url){
-				message.profilePictureUrl = url
-			})
 			uids[uids.length] = message;
 		})
 
@@ -937,8 +1088,7 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 			uids[uids.length] = 
 			{
 				uid : currentUser.$id, 
-				name: currentUser.firstName+" "+currentUser.lastName,
-				profilePictureUrl : currentUser.profilePictureUrl
+				name: currentUser.firstName+" "+currentUser.lastName
 			}
 			chat.users = uids;
 

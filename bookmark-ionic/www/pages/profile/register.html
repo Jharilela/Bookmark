@@ -1,15 +1,6 @@
 <ion-view hide-nav-bar="true">
-<!-- 	<ion-header-bar>
-		<button class="button button-clear button-positive " ng-click="goBack()">
-			<i class="ion-chevron-left"></i>
-		</button>
-		<button class="button button-clear button-positive " ui-sref="newUser">
-			New User
-		</button>
-	</ion-header-bar> -->
-
   <ion-content class="padding">
-  	<div style="width:100%;margin: 40px auto 70px;text-align: center;" ng-hide="emailChosen">
+  	<div style="width:100%;margin: 40px auto 70px;text-align: center;" ng-hide="emailChosen" ng-click="clickText()">
   		Sign up or Create an account<br>to enjoy the features of bookmark
   	</div>
 
@@ -35,17 +26,6 @@
     	</div>
     </button>
 
-    <button ng-hide="emailChosen" class="button button-block button-dark" ng-click="devLogin()">
-	    <div class="row" style="padding: 0px">
-    		<div class="col col-33" style="text-align: right">
-			    <i class="icon ion-android-person"></i>
-		    </div>
-		    <div class="col" style="text-align: left; padding-left: 20px;">
-	    		Developer
-		    </div>
-    	</div>
-    </button>
-
     <button class="button button-block button-stable" ng-click="pressEmail()">
     	<div class="row" style="padding: 0px">
     		<div class="col col-33" style="text-align: right">
@@ -53,6 +33,17 @@
 		    </div>
 		    <div class="col" style="text-align: left; padding-left: 20px">
 	    		Email
+		    </div>
+    	</div>
+    </button>
+    
+    <button ng-hide="emailChosen" class="button button-block button-dark" ng-click="devLogin()" ng-if="count>=10">
+	    <div class="row" style="padding: 0px">
+    		<div class="col col-33" style="text-align: right">
+			    <i class="icon ion-android-person"></i>
+		    </div>
+		    <div class="col" style="text-align: left; padding-left: 20px;">
+	    		Developer
 		    </div>
     	</div>
     </button>

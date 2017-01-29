@@ -10135,8 +10135,8 @@ a.autolinker {
   background: white !important; }
 
 .fullscreen-image {
-  max-width: 80%;
-  max-height: 80%;
+  /*max-width: 80%;*/
+  /*max-height: 80%;*/
   bottom: 0;
   left: 0;
   margin: auto;
@@ -10153,7 +10153,8 @@ a.autolinker {
 
 .fullscreen-image.book-title {
   padding-top: 60%;
-  max-width: 60%; }
+  max-width: 60%;
+  color: white; }
 
 .slider {
   width: 100%;
@@ -10162,9 +10163,19 @@ a.autolinker {
 .slider-pager .slider-pager-page {
   color: #fff !important; }
 
-.chatList__book-image--overlay {
+.bookList__book-image {
+  height: 120px;
+  display: inline;
+  max-width: 100px; }
+
+.bookList__book-image--overlay {
   position: absolute;
   color: rgba(255, 255, 255, 0.8);
-  font-size: 55px;
+  font-size: 50px;
   background-color: rgba(0, 0, 0, 0.3);
-  height: 120px; }
+  height: 120px;
+  text-align: center;
+  padding-top: 35px; }
+
+.no-padding {
+  padding: 0px; }

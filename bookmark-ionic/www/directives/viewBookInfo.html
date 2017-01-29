@@ -2,8 +2,62 @@
     <ion-slide-box on-slide-changed="slideChanged(index)" show-pager="true" active-slide="activeSlide">
     	<ion-slide ng-repeat="book in booksSelected">
 	        <img ng-src="{{book.book.imageLink}}" class="fullscreen-image book" />
-	        <div style="color:white" class="fullscreen-image book-title">
-	        	{{book.title}}
+	        <div class="fullscreen-image book-title">
+	        	<div style="text-align: center;">
+	        		{{book.title}}
+	        	</div><br>
+	        	<div ng-if="book.secondParty && book.secondParty.name && book.secondParty.type=='rent'" >
+		        	<div class="row">
+		        		<div class="col">
+		        			Rent to : 
+		        		</div>
+			        	<div class="col">
+				        	{{book.secondParty.name}}
+			        	</div>
+			        </div>
+			        <div class="row" ng-if="book.secondParty.initialDate">
+		        		<div class="col">
+		        			from : 
+		        		</div>
+			        	<div class="col">
+				        	{{book.secondParty.initialDate | date:'dd/MM/yyyy'}}
+			        	</div>
+			        </div>
+			        <div class="row" ng-if="book.secondParty.returnDate">
+		        		<div class="col">
+		        			to : 
+		        		</div>
+			        	<div class="col">
+				        	{{book.secondParty.returnDate  | date:'dd/MM/yyyy'}}
+			        	</div>
+			        </div>
+			        <div class="row" ng-if="book.secondParty.rentPrice">
+		        		<div class="col">
+		        			for : 
+		        		</div>
+			        	<div class="col">
+				        	{{book.secondParty.rentPrice}} {{book.secondParty.rentPeriod}}
+			        	</div>
+			        </div>
+		        </div>
+		        <div ng-if="book.secondParty && book.secondParty.name && book.secondParty.type=='sell'" >
+			        <div class="row">
+		        		<div class="col">
+		        			Sold to : 
+		        		</div>
+			        	<div class="col">
+				        	{{book.secondParty.name}}
+			        	</div>
+			        </div>
+			        <div class="row" ng-if="book.secondParty.sellPrice">
+		        		<div class="col">
+		        			for : 
+		        		</div>
+			        	<div class="col">
+				        	{{book.secondParty.sellPrice}}
+			        	</div>
+			        </div>
+		        </div>
 	        </div>
         </ion-slide>
     </ion-slide-box>

@@ -70,7 +70,7 @@ angular.module('bookmark.controllers')
 				})
 				.catch(function(err){
 					$scope.chats[key].icon = firebaseSrv.defaultGroupImage;
-					console.err("failed to load group chat icon from the chatObj")
+					console.error("failed to load group chat icon from the chatObj")
 				})
 			}
 			else
@@ -82,7 +82,7 @@ angular.module('bookmark.controllers')
 				})
 				.catch(function(err){
 					$scope.chats[key].icon = firebaseSrv.defaultPersonImage;
-					console.err("failed to load chat Icon image from the user's profile photo")
+					console.error("failed to load chat Icon image from the user's profile photo")
 				})
 			}
 		})
@@ -170,5 +170,14 @@ angular.module('bookmark.controllers')
 
 	$scope.openChat = function(chat){
 		console.log('going to chat ', chat);
+	}
+
+	vm.containsActiveUsers = function(chat){
+		var hasActiveUsers = true;
+		angular.forEach(chat.users, function(user,key){
+			if(user.isActive==false)
+				hasActiveUsers = false;
+		})
+		return hasActiveUsers;
 	}
 })

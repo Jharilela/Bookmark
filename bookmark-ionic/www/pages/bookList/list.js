@@ -8,29 +8,37 @@ angular.module('bookmark.controllers')
 	$scope.wishedBooksStatus = "fetching"
 	var refeshable = false
 	$scope.multipleSelect = false;
+	$scope.containsWishedBooks = false;
 
 	$scope.$on("$ionicView.beforeEnter", function(event, data){
 	    if(refeshable)
 		   getBooks()
+		firebaseSrv.auth.$onAuthStateChanged(function(firebaseUser) {
+		  if (firebaseUser) {
+			getBooks()
+			refeshable = true	
+		  } 
+
+		  else {
+		    $scope.ownedBooks = [];
+		    $scope.wishedBooks = [];
+		    $scope.ownBooksStatus = "fetch failed - no user"
+		    $scope.wishedBooksStatus = "fetch failed - no user"
+		  }
+		}) 
 	});
-
-  	firebaseSrv.auth.$onAuthStateChanged(function(firebaseUser) {
-	  if (firebaseUser) {
-		getBooks()
-		refeshable = true	
-	  } 
-
-	  else {
-	    $scope.ownedBooks = [];
-	    $scope.wishedBooks = [];
-	    $scope.ownBooksStatus = "fetch failed - no user"
-	    $scope.wishedBooksStatus = "fetch failed - no user"
-	  }
-	})
 
 	function getBooks(){
 		firebaseSrv.getBooksOwned("currentUser", "full+keys")
 		.then(function(ownedBooks){
+			angular.forEach(ownedBooks, function(ownedBook, key){
+				var img = new Image();
+				img.onload = function() {
+				  ownedBook.imageWidth = scaleImage(this.width, this.height)+"px";
+				}
+				img.src = ownedBook.book.imageLink;
+			})
+
 			$scope.ownedBooks = ownedBooks.chunk(3)
 			console.log('ownedBooks', $scope.ownedBooks)
 			$scope.ownBooksStatus = "fetch ownedBoks successful"
@@ -40,11 +48,19 @@ angular.module('bookmark.controllers')
 			$scope.ownBooksStatus="fetch ownedBooks failed"
 		})	
 
-		firebaseSrv.getWishList("currentUser", "full")
+		firebaseSrv.getWishList("currentUser", "full+keys")
 		.then(function(wishedBooks){
 			$scope.wishedBooks = wishedBooks.chunk(3)
 			console.log('wishedBooks', $scope.wishedBooks)
 			$scope.wishedBooksStatus = "fetch wishedBooks successful"
+
+			angular.forEach(wishedBooks, function(wishedBook, key){
+				var img = new Image();
+				img.onload = function() {
+				  wishedBook.imageWidth = scaleImage(this.width, this.height)+"px";
+				}
+				img.src = wishedBook.book.imageLink;
+			})
 		})
 		.catch(function(error){
 			$scope.ownedBooks = [];
@@ -60,7 +76,12 @@ angular.module('bookmark.controllers')
 		}
 		else{
 			$scope.multipleSelect = false;
-			angular.forEach($scope[source], function(bookRow){
+			angular.forEach($scope.wishedBooks, function(bookRow){
+				angular.forEach(bookRow, function(book, key){
+					book.showOverlay = false;
+				})
+			})
+			angular.forEach($scope.ownedBooks, function(bookRow){
 				angular.forEach(bookRow, function(book, key){
 					book.showOverlay = false;
 				})
@@ -68,7 +89,7 @@ angular.module('bookmark.controllers')
 		}
 	}
 
-	$scope.seeBookDetail = function(book){
+	$scope.gotoBookDetail = function(book){
 		$state.go("bookDetail", {source:'bookList', book: book});
 	}
 
@@ -77,11 +98,11 @@ angular.module('bookmark.controllers')
 			$scope[source][i][j].showOverlay = true;
 		else
 			$scope[source][i][j].showOverlay = false;
+		getBooksSelected();
 	}
 
 	$scope.viewBookInfo = function(){
 		console.log('viewingBookInfo')
-		getBooksSelected();
 		if($scope.booksSelected.length > 0){
 			$ionicModal.fromTemplateUrl('directives/viewBookInfo.html', {
 				scope: $scope,
@@ -98,9 +119,17 @@ angular.module('bookmark.controllers')
 		$scope.modal.remove();
 		$scope.form = {};
 	}
+	$scope.submitModal = function(){
+		angular.forEach($scope.booksSelected, function(book , key){
+			firebaseSrv.lendBook($scope.form, book)
+			.then(function(){
+				getBooks();
+			})
+		})
+		$scope.closeModal();
+	}
 
 	$scope.lendBook = function(){
-		getBooksSelected();
 		var hasLentBooks = false;
 		var hasAvailableBooks = false
 		angular.forEach($scope.booksSelected, function(bookSelected, key){
@@ -124,7 +153,10 @@ angular.module('bookmark.controllers')
 		else if($scope.booksSelected.length > 0 && hasLentBooks && !hasAvailableBooks){
 			console.log('removing secondParty from bookSelected')
 			angular.forEach($scope.booksSelected, function(book, key){
-				firebaseSrv.receiveOwnedBook(book);
+				firebaseSrv.receiveOwnedBook(book)
+				.then(function(){
+					getBooks();
+				})
 			})
 		}
 	}
@@ -133,13 +165,6 @@ angular.module('bookmark.controllers')
 		$scope.form.type = type;
 	}
 
-	$scope.submitModal = function(){
-		getBooksSelected();
-		angular.forEach($scope.booksSelected, function(book , key){
-			firebaseSrv.lendBook($scope.form, book);
-		})
-		$scope.closeModal();
-	}
 	$scope.isNameEmpty = function(){
 		if($scope.form.name && !isEmpty($scope.form.name)){
 			return false;
@@ -150,7 +175,6 @@ angular.module('bookmark.controllers')
 	}
 
 	$scope.removeBooks = function(){
-		getBooksSelected();
 		if($scope.booksSelected.length > 0){
 			var confirmPopup = $ionicPopup.confirm({
 			 title: 'Removing book',
@@ -174,17 +198,29 @@ angular.module('bookmark.controllers')
 		$scope.booksSelected = [];
 		angular.forEach($scope['ownedBooks'], function(bookRow){
 			angular.forEach(bookRow, function(book, key){
-				if(book.showOverlay == true)
+				if(book.showOverlay == true){
+					book.type = 'ownedBooks'
 					$scope.booksSelected.push(book)
+				}
 			})
 		})
+		var containsWishedBooks = false;
 		angular.forEach($scope['wishedBooks'], function(bookRow){
 			angular.forEach(bookRow, function(book, key){
-				if(book.showOverlay == true)
+				if(book.showOverlay == true){
+					book.type = 'wishedBooks'
+					containsWishedBooks = true;
 					$scope.booksSelected.push(book)
+				}
 			})
 		})
+		$scope.containsWishedBooks = containsWishedBooks;
 		console.log('booksSelected', $scope.booksSelected)
+	}
+
+	function scaleImage(imgWidth, imgHeight){
+		var newWidth = Math.round(120/imgHeight*imgWidth)
+		return newWidth<=100?newWidth:100;
 	}
 
 })

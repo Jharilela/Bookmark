@@ -11,6 +11,7 @@ angular.module('bookmark.controllers')
 	vm.errorMessage='';
 	$scope.emailChosen = false;
 	$scope.validateEmail = firebaseSrv.validateEmail
+	$scope.count = 0;
 
 	$scope.$on("$ionicView.beforeEnter", function(event, data){
 	   // handle event
@@ -31,16 +32,16 @@ angular.module('bookmark.controllers')
         firebaseSrv.getUser()
         .then(function(user){
         	$scope.user = user;
+        	console.log('REGISTER.js - loading user', $scope.user)
         	$state.go("tab.bookList")
-        	console.log('loading user', $scope.user)
         })
         .catch(function(error){
-        	if(error=="new user"){
-        		$state.go("newUser")
-        	}
-        	else{
+        	// if(error=="new user"){
+        	// 	$state.go("newUser")
+        	// }
+        	// else{
         		$scope.errorMessage = error;
-        	}
+        	// }
         })
       } 
       else {
@@ -128,5 +129,10 @@ angular.module('bookmark.controllers')
 		console.log('registering via email')
 		$state.go("newUser")
 		$scope.emailChosen = false;
+	}
+
+	$scope.clickText = function(){
+		$scope.count++;
+		console.log('count : '+$scope.count)
 	}
 })

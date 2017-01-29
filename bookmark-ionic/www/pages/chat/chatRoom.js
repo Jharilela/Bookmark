@@ -7,7 +7,7 @@ angular.module('bookmark.controllers')
 	$scope.inputMessage = "";
 	$scope.users = [];
 	$scope.chatIcon = "";
-
+	$scope.hasInactiveUsers = false;
 
 	$q.all([firebaseSrv.getChat($stateParams.chatId), firebaseSrv.getUser()])
 	.then(function(data){
@@ -16,16 +16,27 @@ angular.module('bookmark.controllers')
 		$scope.currentUser = data[1];
 
 		var users = chatObj.users;
+		console.log('users ',users)
 		angular.forEach(users, function(user){
-			if(user.uid != $scope.currentUser.$id)
+			if(user.uid != $scope.currentUser.$id){
 				$scope.users[$scope.users.length] = user;
+			}
+			if(user.isActive==false){
+				$scope.hasInactiveUsers = true;
+			}
 		})
-		console.log('chatting with ', $scope.users)
+		console.log('chatting with 1 : ', $scope.users)
 		if($scope.users.length > 1)
 		{
 			firebaseSrv.getProfilePicture("defaultGroupImage")
 			.then(function(url){
 				$scope.chatIcon = url
+				angular.forEach($scope.users, function(user, key){
+					firebaseSrv.getProfilePicture(user.uid)
+					.then(function(url){
+						user.profilePictureUrl = url;
+					})
+				})
 			})
 			.catch(function(err){
 				$scope.chatIcon = firebaseSrv.defaultGroupImage;
@@ -37,6 +48,7 @@ angular.module('bookmark.controllers')
 			firebaseSrv.getProfilePicture($scope.users[0].uid)
 			.then(function(url){
 				$scope.chatIcon = url;
+				$scope.users[0].profilePictureUrl = url;
 			})
 			.catch(function(err){
 				$scope.chatIcon = firebaseSrv.defaultPersonImage;
@@ -51,10 +63,15 @@ angular.module('bookmark.controllers')
 	.finally(function(){
 		var users = $scope.chat.users;
 		angular.forEach($scope.users, function(user){
-			if(user.uid != currentUser.$id)
-				$scope.users[$scope.users.length] = user;
+			if(user.uid != currentUser.$id){
+				firebaseSrv.getProfilePicture(user.uid)
+				.then(function(url){
+					user.profilePictureUrl = url;
+					$scope.users[$scope.users.length] = user;
+				})
+			}
 		})
-		console.log('chatting with ', $scope.users)
+		console.log('chatting with 2 : ', $scope.users)
 	})
 
 	$scope.goBack = function() {
@@ -69,9 +86,9 @@ angular.module('bookmark.controllers')
 	}
 
 	$scope.getProfilePicture = function(uid){
-		for(var i = 0; i< $scope.chat.users.length; i++){
-			if($scope.chat.users[i].uid == uid){
-				return $scope.chat.users[i].profilePictureUrl
+		for(var i = 0; i< $scope.users.length; i++){
+			if($scope.users[i].uid == uid){
+				return $scope.users[i].profilePictureUrl
 			}
 		}
 	} 

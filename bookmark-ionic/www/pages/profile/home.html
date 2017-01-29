@@ -1,7 +1,6 @@
 <ion-view hide-nav-bar="true">
   <ion-header-bar ng-hide="showCrop">
-	<button class="button button-clear button-positive ">
-		
+	<button class="button button-clear button-positive icon ion-trash-b" ng-click="deleteUser()">
 	</button>
 	<button class="button button-clear button-positive" ng-click="logout()">
 		Log out
@@ -42,14 +41,14 @@
 		    	<div class="col">{{user.email}}</div>
 		    </div>
 		    <div class="item row" style="border-color: transparent;">
-		    	<div class="col col-33">Phone Number</div>
+		    	<div class="col col-33">Phone No.</div>
 		    	<div class="col">{{user.phoneNumber}}</div>
 		    </div>
 		    <div class="item row" style="border-color: transparent;">
 		    	<div class="col col-33">Country</div>
 		    	<div class="col">{{user.location.country}}</div>
 		    </div>
-		    <div class="item row" style="border-color: transparent;">
+		   <!--  <div class="item row" style="border-color: transparent;">
 		    	<div class="col col-33">G-place 1</div>
 		    	<div class="col">
 			        <input type="text" style="width:100%" placeholder="Location" location-suggestion location="location1" ng-model="location1.name">
@@ -66,7 +65,7 @@
 		    	<div class="col">
 			        {{distance}} m
 		    	</div>
-		    </div>
+		    </div> -->
 		</div>
     </div>
   </ion-content>
