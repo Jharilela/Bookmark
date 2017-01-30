@@ -14,8 +14,8 @@
 			</div>
 		</div>
 	</ion-header-bar>
-
-	<ion-content class="padding" has-header="true">
+	<no-internet-header></no-internet-header>
+	<ion-content class="padding" has-header="true" ng-class="{'has-subheader':!online}">
 		<div class="list">
 			<div ng-show="showSearch">Existing chats</div>
 			<div ng-show="loading" class="chatList__loading--text" style="padding-bottom: 20px;">Loading ... </div>

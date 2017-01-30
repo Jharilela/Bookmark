@@ -47,3 +47,21 @@
 .slider-pager .slider-pager-page{
     color: #fff !important;
 }
+
+.internetOffline-errorMessage--header{
+    display: block;
+    border-color: transparent;
+}
+.internetOffline-errorMessage{
+    margin: 2px 0px 10px;
+    padding:7px;
+    color: #D8000C;
+    background-color: #FFBABA;
+    border-radius:.5em;
+    text-align: center;
+}
+.internetOffline-errorMessage i{
+    margin:10px 10px 10px 0px;
+    font-size:2em;
+    vertical-align:middle;
+}

@@ -18,3 +18,18 @@ angular.module('bookmark.constants')
 		goodReadsKey : "guQ6kGMzvAe3tYTYzytr2A"
 	}
 })
+
+.directive('noInternetMessage', function() {
+  return {
+    restrict: 'E',
+    template: '<div class="internetOffline-errorMessage" ng-if="!online"><i class="icon ion-android-cancel"></i> No internet connection detected</div>'
+  };
+})
+
+.directive('noInternetHeader', function() {
+  return {
+    restrict: 'E',
+    template: '<ion-header-bar ng-if="!online" class="bar bar-subheader internetOffline-errorMessage--header"><no-internet-message></no-internet-message></ion-header-bar>'
+  };
+})
+

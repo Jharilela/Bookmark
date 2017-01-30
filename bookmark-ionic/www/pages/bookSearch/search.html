@@ -21,7 +21,8 @@
   <ion-content class="padding" >
 	<label ng-if="search.didYouMeanKeyword" class="search_suggestions" ng-click="resetBookSearch();searching()">
 			Did you mean : {{search.didYouMeanKeyword}} ?
-	</label>    
+	</label>
+	<no-internet-message></no-internet-message>
 	<div  style="width:100%" class="row" ng-repeat="(i, rows) in search.books">
 		<div  style="display:inline;width:33%" ng-repeat="(j,books) in rows">
 			<img ng-src="{{books.imageLink}}" style="height:120px;margin-left: 25%" title="{{books.title}}" ng-click="search.bookDetail(i, j)">

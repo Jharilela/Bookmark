@@ -11,10 +11,11 @@
 		</h1>
 		<img ng-src="{{chatIcon}}" class="chatRoom-avatar chatRoom-avatar--main" ng-click="showModal()">
 	</ion-header-bar>
-
+  <no-internet-header></no-internet-header>
 	<ion-content has-bouncing="true" class="has-header has-footer" 
               delegate-handle="userMessageScroll" 
-              on-swipe-left="goBack()">
+              on-swipe-left="goBack()"
+              ng-class="{'has-subheader':!online}">
 		<div ng-repeat="message in chat.messages" class="message-wrapper"
                   >
                   <!-- on-hold="onMessageHold($event, $index, message)" -->

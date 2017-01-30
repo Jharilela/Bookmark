@@ -1,11 +1,13 @@
 <ion-view hide-nav-bar="true">
   <ion-header-bar ng-hide="showCrop">
-	<button class="button button-clear button-positive icon ion-trash-b" ng-click="deleteUser()">
+	<button class="button button-clear button-positive icon ion-android-settings" ng-if="!isEditingInfo" ng-click="settings()" style="position: absolute;right: 0px;">
 	</button>
-	<button class="button button-clear button-positive" ng-click="logout()">
-		Log out
+	<button class="button button-clear button-positive" ng-if="isEditingInfo" ng-click="editInformation()">
+	Cancel
 	</button>
-	 
+	<button class="button button-clear button-positive" ng-if="isEditingInfo" ng-click="saveUserInfo()">
+	Save
+	</button>
   </ion-header-bar>
 
   <ion-content class="padding">
@@ -27,26 +29,38 @@
 	  	</a>
 
 	  	<img ng-src="{{user.profilePictureUrl}}" class="profile-picture medium photo-location home"><br>
+	  	<no-internet-message></no-internet-message>
 	  	<div class="list">
 		    <div class="item row" style="border-color: transparent;">
 		    	<div class="col col-33">First Name</div>
-		    	<div class="col">{{user.firstName}}</div>
+		    	<div class="col">
+			    	<input type="text" ng-model="user.firstName" ng-disabled="!isEditingInfo" class="home__input--position" ng-class="{'transparent':!isEditingInfo, 'bg':isEditingInfo}">
+		    	</div>
 		    </div>
 		    <div class="item row" style="border-color: transparent;">
 		    	<div class="col col-33">Last Name</div>
-		    	<div class="col">{{user.lastName}}</div>
+		    	<div class="col">
+			    	<input type="text" ng-model="user.lastName" ng-disabled="!isEditingInfo" class="home__input--position" ng-class="{'transparent':!isEditingInfo, 'bg':isEditingInfo}">
+		    	</div>
 		    </div>
 		    <div class="item row" style="border-color: transparent;">
 		    	<div class="col col-33">Email</div>
-		    	<div class="col">{{user.email}}</div>
+		    	<div class="col">
+			    	<input type="text" ng-model="user.email" ng-disabled="!isEditingInfo" class="home__input--position" ng-class="{'transparent':!isEditingInfo, 'bg':isEditingInfo}">
+		    	</div>
 		    </div>
 		    <div class="item row" style="border-color: transparent;">
 		    	<div class="col col-33">Phone No.</div>
-		    	<div class="col">{{user.phoneNumber}}</div>
+		    	<div class="col">
+			    	<input type="text" ng-model="user.phoneNumber" ng-disabled="!isEditingInfo" class="home__input--position" ng-class="{'transparent':!isEditingInfo, 'bg':isEditingInfo}">
+		    	</div>
 		    </div>
 		    <div class="item row" style="border-color: transparent;">
 		    	<div class="col col-33">Country</div>
-		    	<div class="col">{{user.location.country}}</div>
+		    	<div class="col">
+			    	<!-- {{user.location.country}} -->
+			    	<input type="text" location-suggestion location="location" ng-model="user.location.country" ng-disabled="!isEditingInfo" class="home__input--position" ng-class="{'transparent':!isEditingInfo, 'bg':isEditingInfo}">
+		    	</div>
 		    </div>
 		   <!--  <div class="item row" style="border-color: transparent;">
 		    	<div class="col col-33">G-place 1</div>

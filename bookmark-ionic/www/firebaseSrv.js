@@ -34,6 +34,7 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 		uploadPicture : uploadPicture,
 		setUserProfileStatus : setUserProfileStatus,
 		saveUser : saveUser,
+		updateUserInfo : updateUserInfo,
 		deleteUser : deleteUser,
 		searchUser : searchUser,
 		searchBookOwners : searchBookOwners,
@@ -238,11 +239,9 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 		$firebaseArray(allUserRef).$loaded()
 		.then(function(allUsers){
 			var returnUsers = [];
-			console.log('allUsers', allUsers)
 			angular.forEach(allUsers, function(allUser, key1){
 				if(allUser.$id != auth.$getAuth().uid)
 				angular.forEach(allUser.booksOwned, function(bookOwned, key2){
-					console.log('bookOwned', bookOwned)
 					if(bookOwned.title && levenshtein(bookOwned.title, book.title)>90){
 						getProfilePicture(allUser.$id)
 						.then(function(url){
@@ -426,6 +425,42 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 			deferred.reject("failed to fetch user data from database")
 		})
 	    return deferred.promise;
+	}
+	function updateUserInfo(userInfo){
+		var deferred = $q.defer();
+		console.log('updating user information ',userInfo)
+		$firebaseObject(userRef).$loaded()
+		.then(function(user){
+			if(user == userInfo){
+				deferred.resolve('nothing changed');
+			}
+			else{
+				if(userInfo.email && userInfo.email!=user.email)
+					user.email = userInfo.email
+				if(userInfo.firstName && userInfo.firstName!=user.firstName)
+					user.firstName = userInfo.firstName
+				if(userInfo.lastName && userInfo.lastName!=user.lastName)
+					user.lastName = userInfo.lastName
+				if(userInfo.phoneNumber && userInfo.phoneNumber!=user.phoneNumber)
+					user.phoneNumber = userInfo.phoneNumber
+				if(userInfo.location && userInfo.location!=user.location)
+					user.location = userInfo.location
+				user.$save()
+				.then(function(ref) {
+				  console.log('user information updated successfully')
+				  deferred.resolve('user information updated successfully')
+				})
+				.catch(function(err) {
+				  console.log("Error updating user info", err);
+				  deferred.reject("Error updating user info")
+				});
+			}
+		})
+		.catch(function(err){
+			console.log('failed to load user ',err);
+			deferred.reject('failed to load user')
+		})
+		return deferred.promise;
 	}
 	function getBookCollection(){
 		var deferred = $q.defer();

@@ -12,6 +12,10 @@ angular.module('bookmark.controllers')
 	vm.didYouMeanKeyword = ""
 	$scope.subheaderHeight = "22px";
 
+	$scope.$watch('online', function(newStatus) { 
+		console.log('connection is ',newStatus?'online':'offline')
+	});
+
 	vm.bookDetail = function(i, j){
 	  	console.log('book clicked i:'+i+' j:'+j)
 	  	console.log('sending '+vm.books[i][j].title)

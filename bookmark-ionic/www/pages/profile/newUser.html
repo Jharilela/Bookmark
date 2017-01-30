@@ -11,8 +11,8 @@
       Finish
     </button>
 	</ion-header-bar>
-
-  <ion-content class="padding">
+  <no-internet-header></no-internet-header>
+  <ion-content class="padding" ng-class="{'has-subheader':!online}">
 
   <div class="list" ng-if="step==1">
 

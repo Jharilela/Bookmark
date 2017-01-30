@@ -13,7 +13,7 @@
   </ion-header-bar>
 
   <ion-content class="padding" ng-class="{'has-header':multipleSelect}">
-  
+    <no-internet-message></no-internet-message>
   	<h2 style="margin: 5px 0px !important;">Books you own</h2>
     <h3 ng-if="ownBooksStatus=='fetching'" style="color:grey">Loading...</h3>
     <h3 ng-if="ownBooksStatus!='fetching' && ownedBooks.length<=0" style="color:grey">empty</h3>
