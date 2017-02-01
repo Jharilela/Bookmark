@@ -10129,6 +10129,12 @@ a.autolinker {
 .home__input--position.bg {
   background-color: #f5f5f5 !important; }
 
+.home__settings-blue {
+  color: blue; }
+
+.home__settings-red {
+  color: red; }
+
 .image-list-thumb {
   padding: 2px 2px 2px 2px;
   height: 100px; }

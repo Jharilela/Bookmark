@@ -24,6 +24,9 @@ function isEmpty(obj){
 	else
 		return false;
 }
+function maxLength(str1, str2){
+	return str1.length>str2.length?str1.length:str2.length;
+}
 
 function dynamicSortMultiple() {
     /*

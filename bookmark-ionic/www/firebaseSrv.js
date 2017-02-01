@@ -23,12 +23,19 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 	    $state.go("register")
 	  }
 	}); 
+
+	var images = {
+		defaultPersonImage : "img/defaultPersonImage.png",
+		inactivePersonImage : "img/inactivePersonImage.png",
+		defaultGroupImage : "img/defaultGroupImage.png"
+	}
 	
 	return{
 		auth : auth,
 		ref : ref,
 		isNewUser : isNewUser,
 		getUser : getUser,
+		userHaveProfilePicture : userHaveProfilePicture,
 		getProfilePicture : getProfilePicture,
 		takePicture : takePicture,
 		uploadPicture : uploadPicture,
@@ -57,8 +64,7 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 		getChat : getChat,
 		doesChatExist : doesChatExist,
 		sendMessage : sendMessage,
-		defaultPersonImage : "../img/defaultPersonImage.png",
-		defaultGroupImage : "../img/defaultGroupImage.png"
+		images : images
 	}
 
 	function isNewUser(uid){
@@ -260,6 +266,24 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 		return deferred.promise;
 	}
 
+	function userHaveProfilePicture(uid){
+		var deferred = $q.defer();
+		storageRef.child("profilePicture").child(uid+".png").getMetadata()
+		.then(function(metadata){
+			deferred.resolve(true);
+		})
+		.catch(function(err){
+			if(err.code == "storage/object-not-found"){
+				deferred.resolve(false);
+			}
+			else{
+				console.error('failed to obtain metadata of profile picture ',err)
+				deferred.reject('failed to obtain metadata of profile picture')
+			}
+		})
+		return deferred.promise;
+	}
+
 	function getProfilePicture(uid){
 		if(!uid)
 			uid = auth.$getAuth().uid
@@ -267,13 +291,7 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 		var deferred = $q.defer();
 
 		function getDefaultPicture(name){
-			storageRef.child("profilePicture").child(name+".png").getDownloadURL()
-			.then(function(url){
-				deferred.resolve(url);
-			})
-			.catch(function(err){
-				deferred.reject('failed to fetch defaultPersonImage.png')
-			})
+			deferred.resolve(images[name]);
 		}
 
 		if(uid == "defaultPersonImage" || uid == "defaultGroupImage" || uid=="inactivePersonImage"){

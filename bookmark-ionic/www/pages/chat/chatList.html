@@ -17,10 +17,9 @@
 	<no-internet-header></no-internet-header>
 	<ion-content class="padding" has-header="true" ng-class="{'has-subheader':!online}">
 		<div class="list">
-			<div ng-show="showSearch">Existing chats</div>
 			<div ng-show="loading" class="chatList__loading--text" style="padding-bottom: 20px;">Loading ... </div>
 			<a ng-repeat="chat in chats" ui-sref="chatRoom({chatId : chat.$id})" class="classList_listItem-text">
-				<div class="item item-avatar" >
+				<div class="item item-avatar" ng-show="chat.visible">
 					<img ng-src="{{chat.icon}}" >
 					<div  ng-repeat="user in chat.users">
 						<div ng-if="user.name!=currentUser.fullName" >
@@ -35,8 +34,8 @@
 					</p>
 				</div>
 			</a>
-			<div ng-show="showSearch"> 
-				All users
+			<div ng-show="showSearch">
+				<hr>
 				<a ng-repeat="bookmarkUser in bookmarkUsers" ng-click="newChat(bookmarkUser); pressSearchButton()">
 					<div class="item item-avatar" >
 						<img ng-src="{{bookmarkUser.profilePictureUrl}}" >

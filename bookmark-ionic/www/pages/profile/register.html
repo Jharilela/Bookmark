@@ -61,7 +61,7 @@
 		    <input type="password" ng-model="register.password">
 		  </label>
 		  <label class="item item-icon-right" ng-click="emailLogin()" style="background-color: #f4f4f4 !important;">
-			  <a>
+			  <a ng-style="{'color':(validateEmail(register.email)==true && register.password)?'#387ef5' : '#dcdcdc'}">
 			  	Sign in
 			  	<i class="icon ion-arrow-right-c"></i>
 			  </a>

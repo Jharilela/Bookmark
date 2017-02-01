@@ -10,7 +10,7 @@ angular.module('bookmark.controllers')
 	$scope.chatUsers = [];
 	$scope.loading = true;
 
-	$scope.$on("$ionicView.beforeEnter", function(event, data){
+	// $scope.$on("$ionicView.beforeEnter", function(event, data){
 	    firebaseSrv.auth.$onAuthStateChanged(function(firebaseUser) 
 	    {
 			if (firebaseUser) 
@@ -51,10 +51,12 @@ angular.module('bookmark.controllers')
 			    console.log("no user")
 			}
 		})
-	});
+	// });
 
 	function assignUsers(){
+		$scope.chatUsers = [];
 		angular.forEach($scope.chats, function(chatObj, key){
+			chatObj.visible = true;
 			var users = chatObj.users;
 			var userArray = [];
 
@@ -98,17 +100,6 @@ angular.module('bookmark.controllers')
 		.catch(function(error){
 			console.log("failed to initiate newChat ", error)
 		})
-		.finally(function(){
-			// firebaseSrv.getChatRooms()
-			// .then(function(userChats){
-			// 	$scope.chats = userChats;
-			// 	assignUsers();
-			// 	$scope.loading = false;
-			// })
-			// .catch(function(err){
-			// 	console.log("error obtaining changed chats")
-			// })
-		})
 	}
 
 	$scope.pressSearchButton = function()
@@ -118,11 +109,18 @@ angular.module('bookmark.controllers')
 			$scope.showSearch = false;
 			$scope.bookmarkUsers = [];
 			$scope.inputText = "";
+			makeChatsVisible();
 		}
 		else
 		{
 			$scope.showSearch = true;
 		}
+	}
+
+	function makeChatsVisible(){
+		angular.forEach($scope.chats, function(chat, key){
+			chat.visible = true;
+		})
 	}
 
 	$scope.searching = function()
@@ -142,29 +140,35 @@ angular.module('bookmark.controllers')
 					if(!found)
 						$scope.bookmarkUsers[$scope.bookmarkUsers.length] = bookmarkUser;
 				})
-				// var same = false;
-				// angular.forEach(localBookmarkUsers, function(bookmarkUser, key1){
-				// 	angular.forEach($scope.bookmarkUsers, function(bookmarkUser, key2){
-
-				// 	})
-				// })
-
 				angular.forEach($scope.bookmarkUsers, function(bookmarkUser, key){
 					firebaseSrv.getProfilePicture(bookmarkUser.$id)
 					.then(function(url){
-						console.log('url received ',url)
 						bookmarkUser.profilePictureUrl = url;
 					})
 					.catch(function(err){
 						console.error("failed to fetch user's profile Picture");
 					})
-				})				
+				})
 				console.log('bookmarkUsers after filtering', $scope.bookmarkUsers)
+			})
+			angular.forEach($scope.chats, function(chat, key1){
+				var found = false;
+				angular.forEach(chat.users, function(user, key2){
+					if(user.name.substring(0,$scope.inputText.length).toLowerCase() == $scope.inputText.toLowerCase() && user.uid != $scope.currentUser.$id)
+						found = true;
+				})
+				if(found){
+					chat.visible = true;
+				}
+				else{
+					chat.visible = false;
+				}
 			})
 		}
 		else
 		{
 			$scope.bookmarkUsers = [];
+			makeChatsVisible();
 		}
 	}
 

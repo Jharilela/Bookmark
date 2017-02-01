@@ -11,6 +11,7 @@ angular.module('bookmark.controllers')
     $scope.location2 = {};
     $scope.distance = "";
     $scope.isEditingInfo = false;
+    $scope.userHaveProfilePicture = true;
 
     vm.width = window.innerWidth;
     vm.height = window.innerHeight;
@@ -46,6 +47,11 @@ angular.module('bookmark.controllers')
       .then(function(userData){
         $scope.user = userData
         console.log('HOME - loading user', $scope.user)
+        firebaseSrv.userHaveProfilePicture($scope.user.$id)
+        .then(function(value){
+          console.log('userHaveProfilePicture : ',value)
+          $scope.userHaveProfilePicture = value;
+        })
       })
     }
 
@@ -120,14 +126,17 @@ angular.module('bookmark.controllers')
     }
 
     $scope.settings = function(){
+      var settingButtons = [
+         { text: ionic.Platform.isAndroid()?'<center class="home__settings-blue">Edit information</center>':'Edit information' },
+         { text: ((ionic.Platform.isAndroid()?'<center class="home__settings-blue">':'') + ($scope.user.hasProfilePicture?'Remove picture':'Restore picture') + (ionic.Platform.isAndroid()?'</center>':''))},
+         { text: ionic.Platform.isAndroid()?'<center class="home__settings-blue">Log out</center>':'Log out'}
+       ];
+      if(!$scope.userHaveProfilePicture)
+       settingButtons.splice(1, 1);
       var hideSheet = $ionicActionSheet.show({
-       titleText: 'Settings',
-       buttons: [
-         { text: 'Edit information' },
-         { text: $scope.user.hasProfilePicture?'Remove picture':'Restore picture'},
-         { text: 'Log out' }
-       ],
-       destructiveText: 'Delete account',
+       titleText: ionic.Platform.isAndroid()?'<center>Settings</center>':'Settings',
+       buttons: settingButtons,
+       destructiveText: ionic.Platform.isAndroid()?'<center class="home__settings-red">Delete account</center>':'Delete account',
        cancelText: 'Cancel',
        cancel: function() {
             // add cancel code..
