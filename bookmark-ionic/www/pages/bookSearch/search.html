@@ -24,8 +24,8 @@
 	</label>
 	<no-internet-message></no-internet-message>
 	<div  style="width:100%" class="row" ng-repeat="(i, rows) in search.books">
-		<div  style="display:inline;width:33%" ng-repeat="(j,books) in rows">
-			<img ng-src="{{books.imageLink}}" style="height:120px;margin-left: 25%" title="{{books.title}}" ng-click="search.bookDetail(i, j)">
+		<div  class="col col-33" ng-repeat="(j,books) in rows">
+			<img ng-src="{{books.imageLink}}" style="height:120px;" title="{{books.title}}" ng-click="search.bookDetail(i, j)">
 		</div>
 	</div>
   </ion-content>

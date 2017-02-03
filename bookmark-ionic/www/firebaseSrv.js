@@ -426,12 +426,30 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 		var deferred = $q.defer();
 		console.log('FIREBASE - saving user data ',user);
 	    userRef = ref.child("users").child(auth.$getAuth().uid)
+
 	    $firebaseObject(userRef).$loaded()
 		.then(function(data){
 			addObj(data, user).$save()
 			.then(function() {
 				console.log('Profile saved!');
 		        deferred.resolve('Profile saved!');
+		        var developer = {
+			    	$id : "Fv9l8YjeigQpKlmOFzMluHYyPwl2", 
+			        firstName : "Bookmark", 
+			        lastName : "Bookmark"
+				}
+			    newChat([developer])
+			    .then(function(chat){
+		    	console.log('newChat created ',chat);
+		    	var message = {
+					timestamp : Date.now()/1000 | 0,
+					from : developer.$id,
+					content : "Hi, how can I help you ?"
+				}
+
+				$firebaseArray(chatRef.child(chat.$id).child("messages")).$add(message);
+
+	    })
 		      })
 			.catch(function(error) {
 		        console.log('Error! ',error);
@@ -1180,7 +1198,7 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 		.then(function(chatRooms){
 			var chatsRef = $firebaseArray(chatRef);
 
-			angular.forEach(chatRooms, function(chatRoom) {
+			angular.forEach(chatRooms, function(chatRoom, key) {
 				var userIsInChat = false;
 	          	angular.forEach(chatRoom.users, function(user){
 	          		if(user.uid == auth.$getAuth().uid){
@@ -1191,8 +1209,13 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 	          			user.visible = false;
 	          		}
 	          	})
-	          	if(userIsInChat)
+	          	if(userIsInChat){
+	          		$firebaseArray(chatRef.child(chatRoom.$id).child("messages")).$loaded()
+	          		.then(function(messages){
+	          			chatRoom.latestMessage = messages[messages.length-1];
+	          		})
 		          	returnChatRooms[returnChatRooms.length] = chatRoom;
+	          	}
 	       	});
 
 	       	var returnObj = {
@@ -1254,6 +1277,7 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 	}
 
 	function sendMessage(stringMessage, destinationChat){
+		var deferred = $q.defer()
 		getUser()
 		.then(function(user){
 			var message = {
@@ -1261,10 +1285,20 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 				from : user.$id,
 				content : stringMessage
 			}
-
-			$firebaseArray(chatRef.child(destinationChat.$id).child("messages")).$add(message);
-
+			$firebaseArray(chatRef.child(destinationChat.$id).child("messages")).$add(message)
+			.then(function(){
+				deferred.resolve('send message successfully');
+			})
+			.catch(function(err){
+				console.error('failed to send message ',err);
+				deferred.reject('failed to send message');
+			})
 		})
+		.catch(function(err){
+			console.log('failed to load user details ',err);
+			deferred.reject('failed to load user details');
+		})
+		return deferred.promise;
 	}
 
 }

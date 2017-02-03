@@ -12,10 +12,10 @@
 		<img ng-src="{{chatIcon}}" class="chatRoom-avatar chatRoom-avatar--main" ng-click="showModal()">
 	</ion-header-bar>
   <no-internet-header></no-internet-header>
-	<ion-content has-bouncing="true" class="has-header has-footer" 
-              delegate-handle="userMessageScroll" 
+	<ion-content has-bouncing="true" class="has-header has-footer" delegate-handle="userMessageScroll" 
               on-swipe-left="goBack()"
-              ng-class="{'has-subheader':!online}">
+              ng-class="{'has-subheader':!online}"
+              ng-style="{'bottom':footerHeight}">
 		<div ng-repeat="message in chat.messages" class="message-wrapper"
                   >
                   <!-- on-hold="onMessageHold($event, $index, message)" -->
@@ -23,8 +23,11 @@
             <div ng-if="message.from !== currentUser.$id">
                       
               	<img class="profile-pic left" 
-                          ng-src="{{getProfilePicture(message.from)}}" onerror="onProfilePicError(this)" />
-      
+                          ng-src="{{getProfilePicture(message.from)}}" onerror="onProfilePicError(this)"/>
+                          <!-- ng-click="showDate(message)" -->
+                <!-- <div ng-if="showDates[message.$id] && message.from !== currentUser.$id">
+                  {{message.timestamp | date:'d MMM'}}
+                </div> -->
                 <div class="chat-bubble left">
       
                     <div class="message" ng-bind-html="message.content | nl2br" autolinker>
@@ -34,8 +37,10 @@
       
             <div ng-if="message.from == currentUser.$id">
                     
-                <img class="profile-pic right" ng-src="{{currentUser.profilePictureUrl}}" onerror="onProfilePicError(this)" />
-                    
+                <img class="profile-pic right" ng-src="{{currentUser.profilePictureUrl}}" onerror="onProfilePicError(this)" ng-click="scrollToBottom()"/>
+                <!-- <div ng-if="showDates[message.$id] && message.from == currentUser.$id">
+                  {{message.timestamp | date:'d MMM'}}
+                </div> -->
                 <div class="chat-bubble right">
       
                     <div class="message" ng-bind-html="message.content | nl2br" autolinker>
@@ -52,9 +57,10 @@
 	</ion-content>
 
 	<form name="sendMessageForm" ng-submit="sendMessage(sendMessageForm)" novalidate>
-        <ion-footer-bar class="bar-stable item-input-inset message-footer" keyboard-attach>
+        <ion-footer-bar class="bar-stable item-input-inset message-footer" keyboard-attach ng-style="{'height':footerHeight}" style="max-height: 105px">
             <label class="item-input-wrapper">
-                <textarea ng-model="inputMessage" value="" placeholder="Send a message..." required minlength="1" maxlength="1500" msd-elastic style="width: 100%"></textarea>
+                <textarea ng-model="inputMessage" value="" placeholder="Send a message..." required minlength="1" maxlength="1500" msd-elastic style="width: 100%;max-height: 100px" ng-click="scrollToBottom()" ng-enter="sendMessage(sendMessageForm)" id="inputTextArea">
+                </textarea>
             </label>
             <div class="footer-btn-wrap">
                 <button class="button button-icon icon ion-android-send footer-btn" type="submit" ng-disabled="!inputMessage || inputMessage === ''">

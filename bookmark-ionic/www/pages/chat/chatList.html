@@ -26,10 +26,13 @@
 							<h2 >{{user.name}}</h2>
 						</div>
 					</div>
+					<p ng-if="chat.latestMessage">
+						<div style="display: inline;" ng-if="chat.latestMessage.from==currentUser.$id">You : </div>{{chat.latestMessage.content}}
+					</p>
 					<p ng-if="!chatList.containsActiveUsers(chat)">
 						User is no longer active
 					</p>
-					<p ng-if="chatList.containsActiveUsers(chat)"> 
+					<p ng-if="chatList.containsActiveUsers(chat) && (!chat.latestMessage || chat.latestMessage == undefined || chat.latestMessage== null)"> 
 						Click to open the message
 					</p>
 				</div>

@@ -36,6 +36,7 @@ angular.module('bookmark.controllers')
 	              
 	$scope.searching = function(){
 		$scope.suggestedKeywords = [];
+		vm.didYouMeanKeyword = "";
 		firebaseSrv.suggestSearch(vm.searchingText)
 		.then(function(keywords){
 			if(keywords.length>0 && keywords[0].similarity<100)
@@ -69,10 +70,7 @@ angular.module('bookmark.controllers')
 	  	else{
 		  	vm.errorMessage = "";
 		  	vm.books = [];
-			for (var i=0; i<bookList.length; i+=3) {
-			    vm.books.push(bookList.slice(i, i+3));
-			}
-		    // vm.books = bookList;
+		    vm.books = bookList.chunk(3);
 		  	console.log('items', vm.books)
 	  	}
 	  	firebaseSrv.logSearch(vm.searchingText.toLowerCase(), (Date.now()/1000 | 0 ))

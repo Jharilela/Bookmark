@@ -33,13 +33,7 @@ angular.module('bookmark.controllers')
     }
 
     $scope.$on("$ionicView.enter", function(event, data){
-       firebaseSrv.auth.$onAuthStateChanged(function(firebaseUser) {
-        if (firebaseUser) {
-          getUser();
-        } else {
-          console.log("Signed out");
-        } 
-      });
+      getUser();
     });
 
     function getUser(){
@@ -150,10 +144,10 @@ angular.module('bookmark.controllers')
          if(index == 0){
           $scope.editInformation();
          }
-         else if(index==1){
+         else if($scope.userHaveProfilePicture && index==1){
           changeProfilePictureStatus();
          }
-         if(index == 2){
+         else if((!$scope.userHaveProfilePicture && index==1) || index == 2){
           logout();
          }
          return true;

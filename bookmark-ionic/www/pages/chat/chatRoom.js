@@ -1,6 +1,6 @@
 angular.module('bookmark.controllers')
 
-.controller('chatRoomCtrl', function($q,$ionicHistory, $scope, $stateParams, $state,$ionicModal, firebaseSrv) { 
+.controller('chatRoomCtrl', function($q,$ionicScrollDelegate, $ionicHistory, $scope, $stateParams, $state,$ionicModal, firebaseSrv) { 
 	console.log('chatRoomCtrl - loaded')
 	var vm = this;
 	$scope.currentUser = $stateParams.currentUser;
@@ -8,6 +8,22 @@ angular.module('bookmark.controllers')
 	$scope.users = [];
 	$scope.chatIcon = "";
 	$scope.hasInactiveUsers = false;
+	$scope.showDates = {};
+	$scope.footerHeight = "44px";
+
+	$scope.scrollToBottom = function() {
+		$ionicScrollDelegate.scrollBottom();
+	};
+
+	$('textarea').each(function(){
+		autosize(this);
+	}).on('autosize:resized', function(e){
+		var taHeight = document.querySelector('#inputTextArea').style.height;
+		$scope.footerHeight = parseInt(taHeight.substring(0,taHeight.indexOf('px')))<=100?(parseInt(taHeight.substring(0,taHeight.indexOf('px')))+5)+'px':'105px';
+		console.log('textarea height updated ',$scope.footerHeight);
+		$scope.scrollToBottom();
+	});
+
 
 	$q.all([firebaseSrv.getChat($stateParams.chatId), firebaseSrv.getUser()])
 	.then(function(data){
@@ -15,8 +31,12 @@ angular.module('bookmark.controllers')
 		chatObj.$bindTo($scope, "chat");
 		$scope.currentUser = data[1];
 
+		chatObj.$watch(function(event) {
+		  $scope.scrollToBottom();
+		});
+
 		var users = chatObj.users;
-		console.log('users ',users)
+		console.log('chat ',chatObj)
 		angular.forEach(users, function(user){
 			if(user.uid != $scope.currentUser.$id){
 				$scope.users[$scope.users.length] = user;
@@ -55,6 +75,7 @@ angular.module('bookmark.controllers')
 				console.err("failed to load chat Icon image from the user's profile photo")
 			})
 		}
+		$scope.scrollToBottom();
 	})
 	.catch(function(err){
 		console.log("failed to load chat");
@@ -81,8 +102,13 @@ angular.module('bookmark.controllers')
 
 	$scope.sendMessage = function(obj){
 		console.log('inputMessage '+ $scope.inputMessage)
-		firebaseSrv.sendMessage($scope.inputMessage, $scope.chat);
-		$scope.inputMessage = "";
+		firebaseSrv.sendMessage($scope.inputMessage, $scope.chat)
+		.then(function(){
+			$scope.scrollToBottom();
+			$scope.footerHeight = "44px";
+			$scope.inputMessage = "";
+			document.querySelector('textarea').style.height = '35px';
+		})
 	}
 
 	$scope.getProfilePicture = function(uid){
@@ -111,6 +137,12 @@ angular.module('bookmark.controllers')
 			$scope.modal.show();
 		});
 	}
+
+	$scope.showDate = function(message)
+	{
+		$scope.showDates[message.$id] = true;
+	}
+
 	// Close the modal
 	$scope.closeModal = function() {
 		$scope.modal.hide();
@@ -125,4 +157,4 @@ angular.module('bookmark.controllers')
       return data.replace(/\n\r?/g, '<br />');
     };
   }
-]);
+])

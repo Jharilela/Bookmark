@@ -446,7 +446,13 @@ function searchSrv ($http, $q, ngProgressFactory, searchAPI){
 	    	//the prefix r stands for reference in searchRefence
 	    	var ref = searchRef[r].obj==undefined?searchRef[r]:searchRef[r].obj
 	    	var rTitle = ref.title;
-	    	var rAuthor = ref.authors!=undefined && typeof searchItem.authors == "object"?ref.authors.join(" , "):"-"
+	    	console.log('ref.authors ', ref.authors);
+	    	try{
+		    	var rAuthor = ref.authors!=undefined && typeof searchItem.authors == "object"?ref.authors.join(" , "):"-"
+		    }
+		    catch(err){
+		    	var rAuthor = ref.authors!=undefined && typeof searchItem.authors == "object"?ref.authors:"-"
+		    }
 	    	var rDay = (ref.publishedDay!=undefined?ref.publishedDay:"-")
 	    	var rMonth = (ref.publishedMonth!=undefined?ref.publishedMonth:"-")
 	    	var rYear = (ref.publishedYear!=undefined?ref.publishedYear:"-")

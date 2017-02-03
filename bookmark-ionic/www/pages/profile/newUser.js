@@ -2,17 +2,22 @@ angular.module('bookmark.controllers')
 .controller('newUserCtrl', function($scope, $state,countryList, firebaseSrv, $firebaseObject, $ionicHistory, $q) {
   	console.log('newUserCtrl - loaded')
   	var vm = this;
-  	vm.user={};
-  	vm.user.location={};
   	$scope.auth = firebaseSrv.auth;
-  	$scope.errorMessage = "";
-  	$scope.step = 1;
-    $scope.profilePicture='';
-    $scope.location = {};
 
     countryList.get().then(function(countryList){
     	$scope.countryList = countryList.data
     })
+
+    $scope.$on("$ionicView.enter", function(event, data){
+	   // handle event
+	   $scope.step = 1;
+	   vm.user={};
+	  	vm.user.location={};
+	  	$scope.errorMessage = "";
+	    $scope.profilePicture='';
+	    $scope.location = {};
+	    console.log('scope.step ', $scope.step)
+	});
 
 	firebaseSrv.auth.$onAuthStateChanged(function(firebaseUser) {
       if (firebaseUser) {
@@ -36,12 +41,6 @@ angular.module('bookmark.controllers')
 		else if($scope.step == 2)
 			$scope.step = 1;
 	};
-
-	$scope.finish = function(){
-		$state.go("tab.profile");
-		$scope.step=1;
-		vm.user={};
-	}
 
 	$scope.display = function(){
 		console.log('ng-option : ', vm.user.location.country)
@@ -110,8 +109,6 @@ angular.module('bookmark.controllers')
 			console.error('cannot update profiile picture')
 		})
 	}
-
-
 
 	$scope.isEmpty = function(value, def){
 		if(value == null || value == '' || value==" "){
@@ -211,30 +208,30 @@ angular.module('bookmark.controllers')
 			if($scope.createNewUser){
 				emailRegister()
 				.then(function(authData){
-					saveUser();
+					vm.user.hasProfilePicture = false;
+					$scope.step = 2;
 				})
 			}
 			else{
-				saveUser();
+				$scope.step = 2;
 			}
 		}
 	}
 
-	function saveUser(){
+	$scope.saveUser = function(){
 		vm.user.provider = $scope.auth.$getAuth().providerData[0].providerId
 		vm.user.type = "individual"
-		vm.user.hasProfilePicture = false;
 		delete vm.user.password;
 		console.log('NEWUSER - saving user data ',vm.user)
 		firebaseSrv.saveUser(vm.user)
 		.then(function(log){
 			console.log('saved user data successfully \n',log)
+			$state.go("tab.profile");
+			$scope.step = 1;
+			vm.user = {};
 		})
 		.catch(function(err){
-			console.log('failed to save user data \n',err)
-		})
-		.finally(function(){
-			$scope.step+=1;
+			console.error('failed to save user data \n',err)
 		})
 	}
 
@@ -249,7 +246,7 @@ angular.module('bookmark.controllers')
 	  			deffered.resolve(authData)
 	  		})
 	  		.catch(function(error){
-	  			console.err("error creating new user")
+	  			console.error("error creating new user")
 	  			deffered.reject(error)
 	  		});
 		}
