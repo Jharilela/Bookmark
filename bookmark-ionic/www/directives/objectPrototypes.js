@@ -10,3 +10,11 @@ if (!Array.prototype.chunk) {
     }
   });
 }
+if (!String.prototype.containsHTML) {
+  Object.defineProperty(String.prototype, 'containsHTML', {
+    value: function() {
+      var str = this;
+      return /<[a-z][\s\S]*>/i.test(str)
+    }
+  });
+}

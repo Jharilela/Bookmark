@@ -27,6 +27,10 @@ function isEmpty(obj){
 function maxLength(str1, str2){
 	return str1.length>str2.length?str1.length:str2.length;
 }
+function htmlToText(str){
+	str = str.replace(/<style([\s\S]*?)<\/style>/gi, '').replace(/<script([\s\S]*?)<\/script>/gi, '').replace(/<\/div>/ig, '\n').replace(/<\/li>/ig, '\n').replace(/<li>/ig, '  *  ').replace(/<\/ul>/ig, '\n').replace(/<\/p>/ig, '\n').replace(/<br\s*[\/]?>/gi, "\n").replace(/<[^>]+>/ig, '');
+	return str;
+}
 
 function dynamicSortMultiple() {
     /*

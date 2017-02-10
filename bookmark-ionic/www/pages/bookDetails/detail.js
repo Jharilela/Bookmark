@@ -9,13 +9,27 @@ angular.module('bookmark.controllers')
 	}
 
 	var windowWidth = $window.innerWidth;
-	$scope.imageWidth = 0.6 * windowWidth;
-	console.log('imageWidth', $scope.imageWidth)
 
 	$scope.source = $stateParams.source;
 	$scope.book = $stateParams.book;
+
+	$scope.expandDescription = true;
+	$scope.showPre = false;
+
+	if($scope.book.description && $scope.book.description.containsHTML()){
+		console.log('$scope.book.description.htmlToText()\n', htmlToText($scope.book.description).trim())
+		$scope.showPre = true;
+		$scope.book.description = htmlToText($scope.book.description).trim();
+	}
 	$scope.bookImage = ($scope.book.largeImageLink == undefined) ? $scope.book.imageLink : $scope.book.largeImageLink;
 	$scope.bookAuthor = $scope.book.authors;
+
+	$scope.pressDescription = function(){
+		if($scope.expandDescription == true)
+			$scope.expandDescription = false;
+		else
+			$scope.expandDescription = true;
+	}
 
 	$q.all([firebaseSrv.getUser(), firebaseSrv.searchBookOwners($scope.book)])
 	.then(function(data){
@@ -43,8 +57,6 @@ angular.module('bookmark.controllers')
 		if($scope.book.title.charAt($scope.book.title.length-1)==":")
 			$scope.book.title = $scope.book.title.substring(0,$scope.book.title.length-1)
 	}
-
-	$scope.$on("$ionicView.enter")
 
 	if($scope.book.authors!=undefined && typeof $scope.book.authors=="object" && $scope.book.authors.length > 0)
 		$scope.book.authors = $scope.book.authors.join(", ");

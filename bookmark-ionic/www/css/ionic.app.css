@@ -9865,6 +9865,9 @@ a.button {
 .detail-noBookOwner {
   color: rgba(0, 0, 0, 0.5); }
 
+.detail-extend--color {
+  color: rgba(0, 0, 0, 0.3); }
+
 .chatRoom-avatar {
   position: absolute;
   top: 16px;

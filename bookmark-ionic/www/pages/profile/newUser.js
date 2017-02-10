@@ -14,7 +14,6 @@ angular.module('bookmark.controllers')
 	   vm.user={};
 	  	vm.user.location={};
 	  	$scope.errorMessage = "";
-	    $scope.profilePicture='';
 	    $scope.location = {};
 	    console.log('scope.step ', $scope.step)
 	});
@@ -27,7 +26,7 @@ angular.module('bookmark.controllers')
 		   	$scope.profilePicture = url
 		   })
 		   .catch(function(error){
-
+		   	$scope.profilePicture='';
 		   })
       } 
       else {

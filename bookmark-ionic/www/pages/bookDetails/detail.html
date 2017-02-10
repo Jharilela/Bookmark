@@ -12,34 +12,38 @@
 			{{bookDetail.message.content}}
 		</div>
 		<div class="row">
-		  <div class="col">
-		  	<img ng-src="{{bookImage}}" width="{{imageWidth}}">
+		  <div class="col col-67">
+		  	<img ng-src="{{bookImage}}" width="100%">
 		  </div>
-		  <div class="col">
-			<button class="button button-block button-energized" ng-click="buy()">
+		  <div class="col" style="height: 0px; display: inline;">
+			<!-- <button class="button button-block button-energized" ng-click="buy()">
 			  Buy now
-			</button><br>
+			</button> -->
 			<button class="button button-block button-balanced" ng-click="borrow()">
 			  Borrow
-			</button><br>
+			</button>
 			<button class="button button-block button-royal" ng-click="wishToRead()">
 			  Wish to read
-			</button><br>
+			</button>
 			<button class="button button-block button-positive" ng-click="ownBook()">
 			  On my shelf
 			</button>
 		  </div>
 		</div>
-		<h3>Title</h3>
+		<h3 style="margin-top: 0px;">
+			Title
+		</h3>
 		{{book.title}}<br>
-		<h3>Source</h3>
-		{{book.type}}<br>
 		<div ng-if="book.subTitle!=undefined">
-			<h3>Subtitle</h3>
+			<h3>
+				Subtitle
+			</h3>
 			{{book.subTitle}}<br>
 		</div>
-		<div ng-if=" book.authors!=undefined">
-			<h3>Authors</h3>
+		<div ng-if=" book.authors!=undefined && book.authors.length>0">
+			<h3>
+				Authors
+			</h3>
 			<div ng-if="angular.isObject(book.authors) == false">
 				{{book.authors}}<br>
 			</div>
@@ -52,10 +56,22 @@
 			</div>
 		</div>
 		<div ng-if="book.description!=undefined">
-			<h3>Description</h3>
-			{{book.description}}<br>
+			<h3 ng-click="pressDescription()">
+				Description
+				<i class="icon ion-arrow-up-b detail-extend--color" ng-show="expandDescription"></i>
+				<i class="icon ion-arrow-down-b detail-extend--color"  ng-hide="expandDescription"></i>
+			</h3>
+			<pre ng-if="showPre" style="font: inherit;" ng-show="expandDescription">
+				{{book.description}}
+			</pre>
+			<div ng-if="!showPre" ng-show="expandDescription">
+				{{book.description}}
+			</div>
+			<br>
 		</div>
-		<h3 id="borrowFrom">Borrow from</h3>
+		<h3 id="borrowFrom" style="margin-top: 0px;">
+			Borrow from
+		</h3>
 		<div ng-if="bookOwners && bookOwners.length>0">
 			<div ng-repeat="owner in bookOwners" class="bookDetails_bookOwner-thumbnail--container">
 				<img ng-src="{{owner.profilePictureUrl}}" class="bookDetails_bookOwner-thumbnail" ui-sref="userProfile({user : owner})">

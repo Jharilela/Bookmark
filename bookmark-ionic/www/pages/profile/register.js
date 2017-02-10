@@ -36,7 +36,14 @@ angular.module('bookmark.controllers')
         	$state.go("tab.bookList")
         })
         .catch(function(error){
-    		$scope.errorMessage = error;
+        	if(error == 'new user'){
+        		console.log('new user')
+        		$state.go("newUser")
+        	}
+        	else {
+        		console.error('error getting user data ',error)
+	    		vm.errorMessage = error;
+        	}
         })
       } 
       else {
