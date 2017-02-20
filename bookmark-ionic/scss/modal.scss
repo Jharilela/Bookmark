@@ -30,6 +30,7 @@
 }
 .fullscreen-image.profile{
     border-radius: 100%;
+    max-width: 300px;
 }
 .fullscreen-image.book{
     padding-bottom: 100%;
@@ -64,4 +65,12 @@
     margin:10px 10px 10px 0px;
     font-size:2em;
     vertical-align:middle;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+}
+.scroll {
+  height: 100%;
 }

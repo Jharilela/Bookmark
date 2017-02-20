@@ -14,17 +14,17 @@ angular.module('bookmark.controllers')
 	    if(refeshable)
 		   getBooks()
 		firebaseSrv.auth.$onAuthStateChanged(function(firebaseUser) {
-		  if (firebaseUser) {
-			getBooks()
-			refeshable = true	
-		  } 
+		 	if (firebaseUser) {
+				getBooks()
+				refeshable = true	
+			} 
 
-		  else {
-		    $scope.ownedBooks = [];
-		    $scope.wishedBooks = [];
-		    $scope.ownBooksStatus = "fetch failed - no user"
-		    $scope.wishedBooksStatus = "fetch failed - no user"
-		  }
+			else {
+			    $scope.ownedBooks = [];
+			    $scope.wishedBooks = [];
+			    $scope.ownBooksStatus = "fetch failed - no user"
+			    $scope.wishedBooksStatus = "fetch failed - no user"
+			}
 		}) 
 	});
 

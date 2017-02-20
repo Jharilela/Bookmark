@@ -30,6 +30,11 @@
     <script src="lib/ngprogress/build/ngprogress.js"></script>
     <link rel="stylesheet" href="lib/ngprogress/ngProgress.css">
 
+    <!-- Maps and Places library -->
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA2LUTJpW7oGxg-hgBijd4zoaS6BqIDzts&libraries=places,geometry&sensor=false">
+    </script>
+    <script src="lib/ngMap/build/scripts/ng-map.min.js"></script>
+
     <!-- cordova script (this will be a 404 during development) -->
     <script src="cordova.js"></script>
     <script src="lib/ngCordova/dist/ng-cordova.min.js"></script>
@@ -90,15 +95,15 @@
     <script src="pages/profile/home.js"></script>
     <script src="pages/profile/register.js"></script>
     <script src="pages/profile/newUser.js"></script>
-    <script src="pages/profile/location.js"></script>
     <script src="pages/profile/userProfile.js"></script>
+
+    <!-- Location Controllers -->
+    <script src="pages/location/location.srv.js"></script>
+    <script src="pages/location/location.js"></script>
+
 
     <!--Temporary Storage-->
     <script src="storage/tempStorage.js"></script>
-
-    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA2LUTJpW7oGxg-hgBijd4zoaS6BqIDzts&libraries=places,geometry&sensor=false">
-    </script>
-
   </head>
   <body ng-app="bookmark">
     <!--

@@ -1,4 +1,4 @@
-<ion-view hide-nav-bar="true">
+<ion-view hide-nav-bar="true" view-title="newUser">
 	<ion-header-bar>
     <button class="button button-clear button-positive " ng-click="goBack()">
       <i class="ion-chevron-left"></i>
@@ -49,7 +49,7 @@
     <!-- Location -->
     <label class="item item-input item-floating-label">
       <span class="input-label" ng-style="newUser.user.location ? {color:'black'} : {color:'red'}">Address</span>
-      <input type="text" placeholder="Address" location-suggestion location="location" ng-model="location.address">
+      <input type="text" placeholder="Address" ng-model="newUser.user.location.address" ui-sref="location">
     </label>
 
     <!-- Country -->
@@ -59,7 +59,7 @@
         <option ng-repeat="country in countryList" value="{{country.name}}">
             {{country.name}}
         </option>
-      </select>    
+      </select>
     </label>
 
     <div class="register-errorMessage" ng-if="errorMessage!=''">{{errorMessage}}</div>

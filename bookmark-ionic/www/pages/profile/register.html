@@ -1,11 +1,12 @@
-<ion-view hide-nav-bar="true">
+<ion-view hide-nav-bar="true" view-title="register">
   <ion-content class="padding">
 	<no-internet-message></no-internet-message>
-  	<div style="width:100%;margin: 40px auto 70px;text-align: center;" ng-hide="emailChosen" ng-click="clickText()">
-  		Sign up or Create an account<br>to enjoy the features of bookmark
+  	<div style="width:100%;margin: 40px auto 50px;text-align: center;" ng-hide="emailChosen" ng-click="clickText()" ng-style="{'margin-bottom' : fbLoggingIn=='finished' || gpLoggingIn=='finished' || emailLoggingIn=='finished' ? '20px' : '50px'}">
+  		Sign up or Create an account<br>to enjoy the features of bookmark<br><br>
+  		<ion-spinner icon="dots" ng-if="fbLoggingIn=='finished' || gpLoggingIn=='finished' || emailLoggingIn=='finished'" class="register-loading--finished"></ion-spinner>
   	</div>
     <button ng-hide="emailChosen" class="button button-block button-positive" ng-click="fbLogin()">
-    	<div class="row" style="padding: 0px">
+    	<div class="row" style="padding: 0px" ng-if="fbLoggingIn!='loading' && fbLoggingIn!='finished'">
     		<div class="col col-33" style="text-align: right">
 			    <i class="icon ion-social-facebook"></i>
 		    </div>
@@ -13,10 +14,12 @@
 	    		Facebook
 		    </div>
     	</div>
+    	<ion-spinner icon="bubbles" class="register__method-loading" ng-if="fbLoggingIn=='loading'"></ion-spinner>
+    	<i class="icon ion-checkmark-round" ng-if="fbLoggingIn=='finished'"></i>
     </button>
 
     <button ng-hide="emailChosen" class="button button-block button-assertive" ng-click="googleLogin()">
-	    <div class="row" style="padding: 0px">
+	    <div class="row" style="padding: 0px" ng-if="gpLoggingIn!='loading'">
     		<div class="col col-33" style="text-align: right">
 			    <i class="icon ion-social-google"></i>
 		    </div>
@@ -24,6 +27,8 @@
 	    		Google
 		    </div>
     	</div>
+    	<ion-spinner icon="bubbles" class="register__method-loading" ng-if="gpLoggingIn=='loading'"></ion-spinner>
+    	<i class="icon ion-checkmark-round" ng-if="gpLoggingIn=='finished' && gpLoggingIn!='finished'"></i>
     </button>
 
     <button class="button button-block button-stable" ng-click="pressEmail()">
@@ -58,13 +63,15 @@
 		  </label>
 		  <label class="item item-input">
 		    <span class="input-label">Password</span>
-		    <input type="password" ng-model="register.password">
+		    <input type="password" ng-model="register.password" ng-enter="emailLogin()">
 		  </label>
-		  <label class="item item-icon-right" ng-click="emailLogin()" style="background-color: #f4f4f4 !important;">
-			  <a ng-style="{'color':(validateEmail(register.email)==true && register.password)?'#387ef5' : '#dcdcdc'}">
+		  <label class="item" ng-class="emailLoggingIn!='loading' && emailLoggingIn!='finished' ? 'item-icon-right':''" ng-click="emailLogin()" style="background-color: #f4f4f4 !important;">
+			  <a ng-style="{'color':(validateEmail(register.email)==true && register.password)?'#387ef5' : '#dcdcdc'}" ng-if="emailLoggingIn!='loading' && emailLoggingIn!='finished'">
 			  	Sign in
 			  	<i class="icon ion-arrow-right-c"></i>
 			  </a>
+			  <ion-spinner icon="bubbles" class="register__method-loading email" ng-if="emailLoggingIn=='loading'"></ion-spinner>
+			  <i class="icon ion-checkmark-round register__method-loading--finished" ng-if="emailLoggingIn=='finished'"></i>
 		  </label>
 		</div>
 		<div ng-if="register.errorMessage!=''" class="register-errorMessage">

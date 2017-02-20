@@ -15,7 +15,8 @@ angular.module('bookmark', [
   'firebase',
   'ngCordova',
   'ngCordovaOauth',
-  'cropme'
+  'cropme',
+  'ngMap'
   ])
 
 .factory("Auth", ["$firebaseAuth",

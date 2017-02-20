@@ -1,0 +1,31 @@
+<ion-view hide-nav-bar="true" view-title="location">
+  <ion-header-bar class="item-input-inset">
+    <button class="button button-positive button-clear icon ion-close-round" style="margin-right:10px;" ng-click="close()"></button>
+    <label class="item-input-wrapper">
+      <i class="icon ion-search placeholder-icon"></i>
+      <input type="search" ng-model="search.query" placeholder="Search">
+    </label>
+    <button class="button button-positive button-clear icon ion-checkmark-round" ng-click="finish();">
+    </button>
+  </ion-header-bar>
+  <ion-header-bar class="bar-subheader" ng-if="search.suggestions.length>0" style="background-color: transparent;">
+    <ion-list style="width: 100%">
+      <ion-item ng-show="search.error">
+        {{search.error}}
+      </ion-item>
+      <ion-item ng-repeat="suggestion in search.suggestions" ng-click="choosePlace(suggestion)">
+        {{suggestion.description}}
+      </ion-item>
+    </ion-list>
+  </ion-header-bar>
+  <ion-content  scroll="false">
+    <!-- <div map-lazy-load="https://maps.google.com/maps/api/js"
+      map-lazy-load-params="{{googleMapsUrl}}"> -->
+      <ng-map id="locationMap" center="{{centerPosition}}" zoom="{{zoom}}" style="width:100%; height: 100%;">
+        <shape name="circle" stroke-color='#0044FF' stroke-weight="1" fill-opacity=" 0.2" ng-repeat="circlePosition in circlePositions" center="{{circlePosition}}" radius="2000" draggable="false">
+        </shape>
+      </ng-map>
+    <!-- </div> -->
+
+  </ion-content>
+</ion-view>

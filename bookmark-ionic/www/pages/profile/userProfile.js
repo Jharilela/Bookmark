@@ -1,8 +1,10 @@
 angular.module('bookmark.controllers')
 
-.controller('userProfileCtrl', function($scope,$state, $stateParams, $ionicHistory, firebaseSrv) {
+.controller('userProfileCtrl', function($scope,$state,$ionicPopover, $stateParams, $ionicHistory, firebaseSrv) {
   	console.log('userprofileCtrl - loaded')
+  	var vm = this;
   	$scope.user =  $stateParams.user
+  	console.log('scope.user ', $scope.user)
   	$scope.editWidth = (window.innerWidth/2)-100;
   	$scope.ownedBooks = [];
 	$scope.wishedBooks = [];
@@ -13,6 +15,14 @@ angular.module('bookmark.controllers')
 	if(!$scope.user.$id){
 		$scope.user.$id = $scope.user.uid;
 	}
+
+	firebaseSrv.getAnotherUser($scope.user.$id)
+	.then(function(user){
+		console.log('another user ', user)
+		vm.mapCenter = [];
+		vm.mapCenter.push(user.location.lat);
+		vm.mapCenter.push(user.location.lng);
+	})
 
 	$scope.$on("$ionicView.beforeEnter", function(event, data){
 	    if(refeshable)
@@ -83,5 +93,26 @@ angular.module('bookmark.controllers')
 		.catch(function(error){
 			console.log('unable to determine if chat exists',error)
 		})
+	}
+
+	$scope.displayLocation = function($event){
+		console.log('displaying location')
+		var e = $event
+		$ionicPopover.fromTemplateUrl('directives/viewMapPop.html', {
+			scope: $scope
+			}).then(function(popover) {
+			$scope.popover = popover;
+			$scope.openPopover($event);
+		});
+
+		$scope.openPopover = function($event) {
+			$scope.popover.show($event);
+		};
+		$scope.closePopover = function() {
+			$scope.popover.hide();
+		};
+		$scope.$on('$destroy', function() {
+			$scope.popover.remove();
+		});
 	}
 })

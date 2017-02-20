@@ -1,8 +1,12 @@
 angular.module('bookmark.controllers')
-.controller('newUserCtrl', function($scope, $state,countryList, firebaseSrv, $firebaseObject, $ionicHistory, $q) {
+.controller('newUserCtrl', function($scope,$rootScope, $state,countryList, firebaseSrv, $firebaseObject, $ionicHistory, $q) {
   	console.log('newUserCtrl - loaded')
   	var vm = this;
   	$scope.auth = firebaseSrv.auth;
+  	vm.user = {};
+  	vm.user.location={};
+  	$scope.errorMessage = "";
+    $scope.location = {};
 
     countryList.get().then(function(countryList){
     	$scope.countryList = countryList.data
@@ -10,12 +14,39 @@ angular.module('bookmark.controllers')
 
     $scope.$on("$ionicView.enter", function(event, data){
 	   // handle event
-	   $scope.step = 1;
-	   vm.user={};
-	  	vm.user.location={};
-	  	$scope.errorMessage = "";
-	    $scope.location = {};
+	    $scope.step = 1;
+	    // vm.user={};
+	    var auth = $scope.auth.$getAuth()
+	    console.log('$scope.auth ',$scope.auth.$getAuth())
 	    console.log('scope.step ', $scope.step)
+
+	    if(auth){
+	    	if(auth.email)
+		    	vm.user.email = auth.email
+		    if(auth.providerData[0].email)
+		    	vm.user.email = auth.providerData[0].email
+		    if(auth.providerData[0].displayName){
+		    	var name = breakName(auth.providerData[0].displayName)
+		    	if(name.firstName)
+			    	vm.user.firstName = name.firstName
+			    if(name.lastName)
+			    	vm.user.lastName = name.lastName
+		    }
+		    if(auth.displayName){
+		    	var name = breakName(auth.displayName)
+		    	if(name.firstName)
+			    	vm.user.firstName = name.firstName
+			    if(name.lastName)
+			    	vm.user.lastName = name.lastName
+		    }
+	    }
+
+        var getLocation = $rootScope.$on('location-changed newUser', function(event, location){
+	        console.log('newUser received change in address ',location)
+	        vm.user.location = location;
+
+	        getLocation();
+	    })
 	});
 
 	firebaseSrv.auth.$onAuthStateChanged(function(firebaseUser) {
@@ -45,59 +76,6 @@ angular.module('bookmark.controllers')
 		console.log('ng-option : ', vm.user.location.country)
 	}
 
-	$scope.$on('location-changed', function(evt, args){
-        $scope.location = args.location
-        console.log('indexOf ', $scope.location.formatted_address.indexOf($scope.location.name))
-        if($scope.location.formatted_address.indexOf($scope.location.name)==-1)
-	        $scope.location.address = $scope.location.name + ($scope.location.formatted_address?", ":"") +$scope.location.formatted_address
-    	else
-    		$scope.location.address = $scope.location.formatted_address
-
-        for(var i = 0; i<$scope.location.address_components.length; i++){
-        	for(var j=0; j<$scope.location.address_components[i].types.length; j++){
-        		if($scope.location.address_components[i].types[j] == "country"){
-        			$scope.location.country = $scope.location.address_components[i].long_name
-        			$scope.location.country_short = $scope.location.address_components[i].short_name
-        		}
-        	}
-        }
-
-        if($scope.isEmpty($scope.location.country,"") && !$scope.isEmpty($scope.location.country_short,"")){
-        	for(var i =0; i< $scope.countryList.length; i++){
-        		if($scope.countryList[i].code == $scope.location.country_short){
-        			$scope.location.country = $scope.countryList[i].name;
-        			break;
-	        	}
-    		}
-        }
-        else if($scope.isEmpty($scope.location.country,"") && $scope.isEmpty($scope.location.country_short,"")){
-        	var possibleCountries = []
-        	for(var i =0; i< $scope.countryList.length; i++){
-        		console.log("comparing 1:"+$scope.location.address+" 2:"+$scope.countryList[i].name+" index: "+$scope.location.address.indexOf($scope.countryList[i].name))
-        		if($scope.location.address.indexOf($scope.countryList[i].name)!=-1){
-        			possibleCountries[possibleCountries.length] = {
-        				index : $scope.location.address.indexOf($scope.countryList[i].name),
-        				name : $scope.countryList[i].name
-        			}
-	        	}
-    		}
-    		possibleCountries.sort(dynamicSortMultiple("-index"))
-    		console.log('possibleCountries', possibleCountries)
-    		if(possibleCountries.length>0){
-    			$scope.location.country = possibleCountries[0].name;
-    		}
-    	}
-
-        console.log('location ',$scope.location);
-        var address = {
-        	lat : $scope.location.geometry.location.lat(),
-        	lng : $scope.location.geometry.location.lng(),
-        	address : $scope.location.address,
-        	country : $scope.location.country
-        }
-        vm.user.location = address;
-        console.log('vm.user', vm.user)
-    })
 
 	$scope.takePicture = function(source){
 		firebaseSrv.takePicture(source)

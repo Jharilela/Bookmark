@@ -21,7 +21,8 @@
     "cordova-plugin-statusbar",
     "ionic-plugin-keyboard",
     "cordova-plugin-network-information",
-    "cordova-plugin-console@~1.0.3"
+    "cordova-plugin-console@~1.0.3",
+    "cordova-plugin-googlemaps"
   ],
   "cordovaPlatforms": [
     "ios",

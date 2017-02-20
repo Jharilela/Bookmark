@@ -31,6 +31,17 @@ function htmlToText(str){
 	str = str.replace(/<style([\s\S]*?)<\/style>/gi, '').replace(/<script([\s\S]*?)<\/script>/gi, '').replace(/<\/div>/ig, '\n').replace(/<\/li>/ig, '\n').replace(/<li>/ig, '  *  ').replace(/<\/ul>/ig, '\n').replace(/<\/p>/ig, '\n').replace(/<br\s*[\/]?>/gi, "\n").replace(/<[^>]+>/ig, '');
 	return str;
 }
+function breakName(str){
+	var returnObj= {}
+	if(str.indexOf(" ")==-1){
+		returnObj.firstName = str;
+	}
+	else{
+		returnObj.firstName = str.substring(0, str.indexOf(" "))
+		returnObj.lastName = str.substring(str.indexOf(" ")+1, str.length)
+	}
+	return returnObj
+}
 
 function dynamicSortMultiple() {
     /*

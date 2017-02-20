@@ -1,4 +1,4 @@
-<ion-view hide-nav-bar="true">
+<ion-view hide-nav-bar="true" view-title="userProfile">
   <ion-header-bar ng-hide="showCrop">
 	<button class="button button-clear button-positive " ng-click="goBack()">
 		<i class="ion-chevron-left"></i>
@@ -10,10 +10,17 @@
   	<a class="button button-positive home__photo-icon edit" ng-style="{'margin-right':'{{editWidth}}px'}" ng-click="message()">
 	  	<i class="icon ion-chatboxes "></i>
   	</a>
+    <!-- <a class="button button-positive home__photo-icon location" ng-style="{'margin-left':'{{editWidth}}px'}" ng-click="displayLocation($event)">
+      <i class="icon ion-ios-location "></i>
+    </a> -->
 
   	<center ng-if="user.firstName"><h2>{{user.firstName}} {{user.lastName}}</h2></center>
     <center ng-if="user.name"><h2>{{user.name}}</h2></center>
   	<br>
+    <ng-map center="{{userProfile.mapCenter}}" zoom="13" >
+      <shape name="circle" stroke-color='#0044FF' stroke-weight="1" fill-opacity=" 0.2" center="{{userProfile.mapCenter}}" radius="2000" draggable="false">
+      </shape>
+    </ng-map>
 
   	<h3>Books owned</h3>
   	<h4 ng-if="ownBooksStatus=='fetching'" style="color:grey">Loading...</h4>
@@ -26,8 +33,8 @@
     </div>
 
   	<h3>Wishes to read</h3>
-  	<h4 ng-if="ownBooksStatus=='fetching'" style="color:grey">Loading...</h4>
-    <h4 ng-if="ownBooksStatus!='fetching' && ownedBooks.length<=0" style="color:grey">empty</h4>
+  	<h4 ng-if="wishedBooksStatus=='fetching'" style="color:grey">Loading...</h4>
+    <h4 ng-if="wishedBooksStatus!='fetching' && wishedBooks.length<=0" style="color:grey">empty</h4>
   	<!-- <div ng-repeat="bookOwned in user.booksOwned" ng-if="booksOwned!=undefined && booksOwned.length>0">
 	  	{{bookOwned.title}}
   	</div> -->

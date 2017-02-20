@@ -62,7 +62,7 @@ angular.module('bookmark.router', [])
     url:'/chatRoom',
     templateUrl : 'pages/chat/chatRoom.html',
     controller : 'chatRoomCtrl as chatRoom',
-    cache : false,
+    cache : true,
     params : { chatId : null},
     resolve: {
       "currentAuth": ["Auth", function(Auth) {
@@ -140,6 +140,13 @@ angular.module('bookmark.router', [])
           return Auth.$requireSignIn();
         }]
       }
+    })
+  .state('location', {
+      url: '/location',
+      templateUrl: 'pages/location/location.html',
+      controller: 'locationCtrl as location',
+      params:{ location:null},
+      cache: false,
     })
 
   .state('register',{

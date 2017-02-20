@@ -10050,6 +10050,10 @@ a.autolinker {
 .loader .ion-loading-c {
   font-size: 64px; }
 
+.chatRoom__cancel-location::before {
+  font-size: 20px !important;
+  line-height: 20px !important; }
+
 .profile-picture {
   border-radius: 100%; }
 
@@ -10118,12 +10122,17 @@ a.autolinker {
   right: 0px;
   margin-top: 170px; }
 
+.home__photo-icon.location {
+  left: 0px;
+  margin-top: 170px; }
+
 .newUser-container {
   position: relative; }
 
 .home__input--position {
   width: 100%;
   height: 100% !important;
+  color: black;
   font-size: 15px !important; }
 
 .home__input--position.transparent {
@@ -10137,6 +10146,30 @@ a.autolinker {
 
 .home__settings-red {
   color: red; }
+
+.register__method-loading {
+  fill: white;
+  stroke: white;
+  vertical-align: text-top; }
+
+.register__method-loading.email {
+  fill: #387ef5;
+  margin: auto;
+  display: table; }
+
+.item-icon-right.register__method-loading {
+  padding-right: 0px; }
+
+.register__method-loading--finished {
+  color: #387ef5;
+  margin: auto;
+  font-size: medium;
+  display: table;
+  position: relative !important; }
+
+.register-loading--finished svg {
+  height: 60px;
+  width: 60px; }
 
 .image-list-thumb {
   padding: 2px 2px 2px 2px;
@@ -10166,7 +10199,8 @@ a.autolinker {
   top: 0; }
 
 .fullscreen-image.profile {
-  border-radius: 100%; }
+  border-radius: 100%;
+  max-width: 300px; }
 
 .fullscreen-image.book {
   padding-bottom: 100%; }
@@ -10199,6 +10233,13 @@ a.autolinker {
   margin: 10px 10px 10px 0px;
   font-size: 2em;
   vertical-align: middle; }
+
+#map {
+  width: 100%;
+  height: 100%; }
+
+.scroll {
+  height: 100%; }
 
 .bookList__book-image {
   height: 120px;

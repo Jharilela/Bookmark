@@ -11,6 +11,7 @@ angular.module('bookmark.controllers')
 	vm.suggestedKeywords = [];
 	vm.didYouMeanKeyword = ""
 	$scope.subheaderHeight = "22px";
+	$scope.booksNearby = [];
 
 	$scope.$watch('online', function(newStatus) { 
 		console.log('connection is ',newStatus?'online':'offline')
@@ -21,6 +22,23 @@ angular.module('bookmark.controllers')
 	  	console.log('sending '+vm.books[i][j].title)
 	  	$state.go('bookDetail', {source:"search", book: vm.books[i][j]});
 	}
+
+	vm.nearbyBookDetail = function(i, j){
+		$state.go('bookDetail', {source:"search", book: $scope.booksNearby[i][j]});
+	}
+
+	firebaseSrv.auth.$onAuthStateChanged(function(firebaseUser) {
+		if (firebaseUser) {
+			firebaseSrv.getBooksNearby("5km",21)
+			.then(function(booksNearby){
+				$scope.booksNearby = booksNearby.chunk(3);
+				console.log("booksNearby ",$scope.booksNearby)
+			})
+		} 
+		else {
+			$scope.booksNearby = [];
+		}
+	}) 
 
 	// $scope.typing = function(){
 	// 	firebaseSrv.suggestSearch(vm.searchingText)
@@ -36,6 +54,7 @@ angular.module('bookmark.controllers')
 	              
 	$scope.searching = function(){
 		$scope.suggestedKeywords = [];
+		cordova.plugins.Keyboard.close();
 		vm.didYouMeanKeyword = "";
 		firebaseSrv.suggestSearch(vm.searchingText)
 		.then(function(keywords){
@@ -50,13 +69,17 @@ angular.module('bookmark.controllers')
 		
 	  	console.log('searching '+vm.searchingText)
 	  	vm.suggestedKeywords = [];
-	  	searchSrv.progressbar.start();
-	  	searchSrv.progressbar.set(2);
 	  	if(vm.searchingText!="" && vm.searchingText!=" ")
 		{
+		  	searchSrv.progressbar.start();
+		  	searchSrv.progressbar.set(2);
+
 		  	searchSrv.searchBookList(vm.searchingText, vm.selectedService)
 		  	.then(printBooks)
 		  	.catch(printBooksError)
+		}
+		else{
+			vm.books =[];
 		}
 
 	}

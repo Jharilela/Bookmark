@@ -15,7 +15,10 @@ angular.module('bookmark.controllers')
 
 	$scope.$on("$ionicView.beforeEnter", function(event, data){
 	   // handle event
-	   vm.errorMessage='';
+		vm.errorMessage='';
+		$scope.fbLoggingIn = "no";
+		$scope.gpLoggingIn = "no";
+		$scope.emailLoggingIn = "no";
 	});
 
 	$scope.pressEmail =function(){
@@ -69,40 +72,58 @@ angular.module('bookmark.controllers')
 
   	$scope.fbLogin = function(){
 	  	// login with Facebook
+	  	$scope.fbLoggingIn = "loading";
 	  	if(ionic.Platform.isIOS() || ionic.Platform.isAndroid()){
 	  		console.log('loging in with Facebook Oauth')
-	  		$cordovaOauth.facebook(constants.facebookAppId, ["email"])
+	  		$cordovaOauth.facebook(constants.facebookAppId, ["public_profile","email"])
 	  		.then(function(result) {
 	           console.log("Result "+JSON.stringify(result))
 	           console.log('access token '+result.access_token)
 	           var credential = firebase.auth.FacebookAuthProvider.credential(result.access_token);
-	           $scope.auth.$signInWithCredential(credential).then(authSuccess).catch(authFail);
+	           $scope.auth.$signInWithCredential(credential).then(authSuccess).catch(authFail)
+	           .finally(function(){
+	           	$scope.fbLoggingIn = "finished";
+	           })
 			})
 	  		.catch(function(error){
 	  			console.log("Error -> " + error);
+	  			$scope.fbLoggingIn = "error";
 	  		})
 	  	}
 	  	else{
-	  		$scope.auth.$signInWithPopup("facebook").then(authSuccess).catch(authFail);
+	  		$scope.fbLoggingIn = "loading";
+	  		$scope.auth.$signInWithPopup("facebook").then(authSuccess).catch(authFail)
+	  		.finally(function(){
+	           	$scope.fbLoggingIn = "finished";
+	        })
 	  	}
   	}
 
   	$scope.googleLogin = function(){
+  		$scope.gpLoggingIn = "loading";
   		if(ionic.Platform.isIOS() || ionic.Platform.isAndroid()){
   			console.log('loging in with Google Oauth')
-	  		$cordovaOauth.google(constants.googleClientId, ["email"])
+	  		$cordovaOauth.google(constants.googleClientId, ["profile","email"])
 	  		.then(function(result) {
 	           console.log("Result "+JSON.stringify(result))
 	            console.log('access token '+result.access_token)
 	            var credential = firebase.auth.GoogleAuthProvider.credential(result.id_token);
-	        	$scope.auth.$signInWithCredential(credential).then(authSuccess).catch(authFail);
+	        	$scope.auth.$signInWithCredential(credential).then(authSuccess).catch(authFail)
+	        	.finally(function(){
+					$scope.gpLoggingIn = "finished";
+				})
 			})
 			.catch(function(error) {
 			    console.log("Error -> " + error);
+			    $scope.gpLoggingIn = "error";
 			});
   		}
   		else{
-  			$scope.auth.$signInWithPopup("google").then(authSuccess).catch(authFail);
+  			$scope.gpLoggingIn = "loading";
+  			$scope.auth.$signInWithPopup("google").then(authSuccess).catch(authFail)
+  			.finally(function(){
+	           	$scope.gpLoggingIn = "finished";
+	        })
   		}
   	}
 
@@ -112,18 +133,24 @@ angular.module('bookmark.controllers')
 
   	$scope.emailLogin = function()
   	{
+  		$scope.emailLoggingIn = "loading";
 	  	console.log('email login '+ vm.email + " " + typeof vm.email)
 		if(firebaseSrv.validateEmail(vm.email) && vm.password.length>=6)
 		{
-		  	$scope.auth.$signInWithEmailAndPassword(vm.email, vm.password).then(authSuccess).catch(authFail);
+		  	$scope.auth.$signInWithEmailAndPassword(vm.email, vm.password).then(authSuccess).catch(authFail)
+		  	.finally(function(){
+		  		$scope.emailLoggingIn = "finished";
+		  	})
 		}
 		else if(firebaseSrv.validateEmail(vm.email)==false)
 		{
 			vm.errorMessage = 'Invalid email'
+			$scope.emailLoggingIn = "error";
 		}
 		else if(vm.password.length<6)
 		{
 			vm.errorMessage = "password must contain atleast 6 characters"
+			$scope.emailLoggingIn = "error";
 		}
 	}
 

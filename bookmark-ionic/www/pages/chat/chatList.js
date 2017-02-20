@@ -55,6 +55,7 @@ angular.module('bookmark.controllers')
 
 	function assignUsers(){
 		$scope.chatUsers = [];
+		$scope.chats.sort(dynamicSortMultiple("-latestMessageTimestamp"));
 		angular.forEach($scope.chats, function(chatObj, key){
 			chatObj.visible = true;
 			var users = chatObj.users;

@@ -1,29 +1,58 @@
 angular.module('bookmark.controllers')
 
-.controller('chatRoomCtrl', function($q,$ionicScrollDelegate, $ionicHistory, $scope, $stateParams, $state,$ionicModal, firebaseSrv) { 
+.controller('chatRoomCtrl', function($rootScope, $timeout, $q,$ionicScrollDelegate, $ionicHistory, $scope, $stateParams, $state,$ionicModal, firebaseSrv) { 
 	console.log('chatRoomCtrl - loaded')
 	var vm = this;
 	$scope.currentUser = $stateParams.currentUser;
-	$scope.inputMessage = "";
+	vm.inputMessage = {};
+	vm.inputMessage.text = "";
 	$scope.users = [];
 	$scope.chatIcon = "";
 	$scope.hasInactiveUsers = false;
 	$scope.showDates = {};
 	$scope.footerHeight = "44px";
+	$scope.inputFooterHeight = "44px";
 
 	$scope.scrollToBottom = function() {
-		$ionicScrollDelegate.scrollBottom();
+		$timeout(function(){
+			$ionicScrollDelegate.$getByHandle('chatRoomScroll').scrollBottom();
+		}, 1);
 	};
+
+	function resizeFooter(){
+		var taHeight = document.querySelector('#inputTextArea').style.height;
+		var currentHeight = parseInt(taHeight.substring(0,taHeight.indexOf('px')))
+		$scope.inputFooterHeight = (currentHeight<=100?(currentHeight+5):105);
+		$scope.footerHeight = $scope.inputFooterHeight +(vm.inputMessage.location?100:0)+'px';
+		$scope.inputFooterHeight += 'px';
+		console.log('textarea height updated ',$scope.footerHeight);
+		$scope.scrollToBottom();
+	}
 
 	$('textarea').each(function(){
 		autosize(this);
 	}).on('autosize:resized', function(e){
-		var taHeight = document.querySelector('#inputTextArea').style.height;
-		$scope.footerHeight = parseInt(taHeight.substring(0,taHeight.indexOf('px')))<=100?(parseInt(taHeight.substring(0,taHeight.indexOf('px')))+5)+'px':'105px';
-		console.log('textarea height updated ',$scope.footerHeight);
-		$scope.scrollToBottom();
+		if(document.querySelector('#inputTextArea')){
+			resizeFooter();
+		}
+		else{
+			$scope.scrollToBottom();
+		}
 	});
 
+	$scope.$on("$ionicView.enter", function(event, data){
+		var getLocation = $rootScope.$on('location-changed chatRoom', function(event, location){
+			console.log('chatRoom received change in address ',location)
+			var arr = []
+			arr.push(location.lat);
+			arr.push(location.lng);
+			location.center = arr
+			vm.inputMessage.location = location;
+			resizeFooter();
+
+			getLocation();
+		})
+	});
 
 	$q.all([firebaseSrv.getChat($stateParams.chatId), firebaseSrv.getUser()])
 	.then(function(data){
@@ -100,14 +129,23 @@ angular.module('bookmark.controllers')
 	    $state.go('tab.chatList');
 	};
 
+	$scope.goToProfile = function(user){
+		console.log('user', user)
+		if(!user.profilePictureUrl){
+			user.profilePictureUrl = $scope.getProfilePicture(user.uid)
+		}
+		$state.go('userProfile', {user : user})
+	}
+
 	$scope.sendMessage = function(obj){
-		console.log('inputMessage '+ $scope.inputMessage)
-		firebaseSrv.sendMessage($scope.inputMessage, $scope.chat)
+		console.log('sending message ', vm.inputMessage)
+		firebaseSrv.sendMessage(vm.inputMessage, $scope.chat)
 		.then(function(){
-			$scope.scrollToBottom();
-			$scope.footerHeight = "44px";
-			$scope.inputMessage = "";
+			delete vm.inputMessage;
+			vm.inputMessage = {};
+			vm.inputMessage.text = "";
 			document.querySelector('textarea').style.height = '35px';
+			resizeFooter();
 		})
 	}
 
@@ -119,6 +157,11 @@ angular.module('bookmark.controllers')
 		}
 	} 
 
+	$scope.removeLocation = function(){
+		delete vm.inputMessage.location;
+		resizeFooter();
+	}
+
 	$scope.viewUser = function(){
 		$state.go("userProfile",{user : user})
 	}
@@ -127,7 +170,17 @@ angular.module('bookmark.controllers')
 	  this.ele.src = firebaseSrv.defaultImage; // set a fallback
 	}
 
-	$scope.showModal = function() {
+	$scope.showModal = function(userId) {
+		console.log('viewing picture of ',userId)
+		if(userId == $scope.chatIcon){
+			$scope.viewPicture = $scope.chatIcon
+		}
+		else{
+			angular.forEach($scope.users, function(user){
+				if(user.uid == userId)
+					$scope.viewPicture = user.profilePictureUrl;
+			})
+		}
 		var templateUrl = 'directives/viewProfilePicture.html'
 		$ionicModal.fromTemplateUrl(templateUrl, {
 			scope: $scope,
@@ -141,6 +194,19 @@ angular.module('bookmark.controllers')
 	$scope.showDate = function(message)
 	{
 		$scope.showDates[message.$id] = true;
+	}
+
+	$scope.pressLocation = function(){
+		console.log('location is pressed')
+		var locations = [];
+		locations.push($scope.currentUser.location)
+		angular.forEach($scope.users, function(user){
+			firebaseSrv.getAnotherUser(user.uid)
+			.then(function(userData){
+				locations.push(userData.location)
+			})
+		})
+		$state.go('location', {location : locations})
 	}
 
 	// Close the modal

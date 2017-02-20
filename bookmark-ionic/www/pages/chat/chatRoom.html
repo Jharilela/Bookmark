@@ -1,71 +1,88 @@
-<ion-view hide-nav-bar="true">
+<ion-view hide-nav-bar="true" view-title="chatRoom">
 	<ion-header-bar>
 
 		<button class="button icon ion-chevron-left button-clear button-positive " ng-click="goBack()"></button>
 		<h1 class="title" >
-			<div ng-repeat="user in chat.users">
-				<div ng-if="user.name!=currentUser.fullName" ui-sref="userProfile({user : user})">
+			<div ng-repeat="user in chat.users" style="display: inline;">
+				<div ng-if="user.uid!=currentUser.$id" ng-click="goToProfile(user)">
 					{{user.name}}
 				</div>
 			</div>
 		</h1>
-		<img ng-src="{{chatIcon}}" class="chatRoom-avatar chatRoom-avatar--main" ng-click="showModal()">
+    <img ng-src="{{chatIcon}}" class="chatRoom-avatar chatRoom-avatar--main" ng-click="showModal(chatIcon)">
 	</ion-header-bar>
   <no-internet-header></no-internet-header>
-	<ion-content has-bouncing="true" class="has-header has-footer" delegate-handle="userMessageScroll" 
-              on-swipe-left="goBack()"
-              ng-class="{'has-subheader':!online}"
-              ng-style="{'bottom':footerHeight}">
-		<div ng-repeat="message in chat.messages" class="message-wrapper"
-                  >
-                  <!-- on-hold="onMessageHold($event, $index, message)" -->
-      
-            <div ng-if="message.from !== currentUser.$id">
-                      
-              	<img class="profile-pic left" 
-                          ng-src="{{getProfilePicture(message.from)}}" onerror="onProfilePicError(this)"/>
-                          <!-- ng-click="showDate(message)" -->
-                <!-- <div ng-if="showDates[message.$id] && message.from !== currentUser.$id">
-                  {{message.timestamp | date:'d MMM'}}
-                </div> -->
-                <div class="chat-bubble left">
-      
-                    <div class="message" ng-bind-html="message.content | nl2br" autolinker>
-                    </div>
+	<ion-content has-bouncing="true" class="has-header has-footer" delegate-handle="chatRoomScroll" on-swipe-left="goBack()" ng-class="{'has-subheader':!online}" ng-style="{'bottom':footerHeight}">
+		<div ng-repeat="message in chat.messages" class="message-wrapper">
+      <!-- on-hold="onMessageHold($event, $index, message)" -->
+        <div ng-if="message.from !== currentUser.$id">
+                  
+          	<img class="profile-pic left" ng-src="{{getProfilePicture(message.from)}}" ng-click="showModal(message.from)" onerror="onProfilePicError(this)"/>
+                      <!-- ng-click="showDate(message)" -->
+            <!-- <div ng-if="showDates[message.$id] && message.from !== currentUser.$id">
+              {{message.timestamp | date:'d MMM'}}
+            </div> -->
+            <div class="chat-bubble left" ng-if="message.location" style="padding: 5px;" ng-style="{'margin-bottom' : message.content?'-17px':'10px'}">
+                <ng-map center="{{message.location.center}}" zoom="14" draggable="false" zoom-control="false" scrollwheel="false" disable-double-click-zoom="true" street-view-control="false" map-type-control="false" style="height: 150px;width: 150px;">
+                    <marker position="{{message.location.center}}"></marker>
+                </ng-map>
+            </div>
+            <div class="chat-bubble left" ng-style="{'min-width' : message.location?'160px':'0px'}" ng-if="message.content">
+                <div class="message" ng-bind-html="message.content | nl2br" autolinker>
                 </div>
             </div>
-      
-            <div ng-if="message.from == currentUser.$id">
-                    
-                <img class="profile-pic right" ng-src="{{currentUser.profilePictureUrl}}" onerror="onProfilePicError(this)" ng-click="scrollToBottom()"/>
-                <!-- <div ng-if="showDates[message.$id] && message.from == currentUser.$id">
-                  {{message.timestamp | date:'d MMM'}}
-                </div> -->
-                <div class="chat-bubble right">
-      
-                    <div class="message" ng-bind-html="message.content | nl2br" autolinker>
-                    </div>
-                </div>
-            </div>
-      
-            <div class="cf"></div>
-            
-            <center ng-if="hasInactiveUsers">
-              User has deleted their account
-            </center>
         </div>
+  
+        <div ng-if="message.from == currentUser.$id">
+                
+            <img class="profile-pic right" ng-src="{{currentUser.profilePictureUrl}}" onerror="onProfilePicError(this)" ng-click="scrollToBottom()"/>
+            <!-- <div ng-if="showDates[message.$id] && message.from == currentUser.$id">
+              {{message.timestamp | date:'d MMM'}}
+            </div> -->
+            <div class="chat-bubble right" ng-if="message.location" style="padding: 5px;" ng-style="{'margin-bottom' : message.content?'-17px':'10px'}">
+                <ng-map center="{{message.location.center}}" zoom="14" draggable="false" zoom-control="false" scrollwheel="false" disable-double-click-zoom="true" street-view-control="false" map-type-control="false" style="height: 150px;width: 150px;">
+                    <marker position="{{message.location.center}}"></marker>
+                </ng-map>
+            </div>
+            <div class="chat-bubble right" ng-style="{'min-width' : message.location?'160px':'0px'}" ng-if="message.content">
+                <div class="message" ng-bind-html="message.content | nl2br" autolinker>
+                </div>
+            </div>
+        </div>
+  
+        <div class="cf"></div>
+    </div>
+    <center ng-if="hasInactiveUsers">
+        User has deleted their account
+    </center>
 	</ion-content>
 
+  <ion-footer-bar class="bar-stable item-input-inset message-footer" ng-style="{'bottom' : inputFooterHeight}" style="padding: 0px;height: 100px;" ng-if="chatRoom.inputMessage.location">
+    <!-- {{chatRoom.inputMessage.location}} -->
+    <ng-map center="{{chatRoom.inputMessage.location.center}}" zoom="13" draggable="false" zoom-control="false" scrollwheel="false" disable-double-click-zoom="true" street-view-control="false" map-type-control="false" style="height: 100px;width: 50%;min-width: 50%;display: -webkit-inline-box;">
+      <marker position="{{chatRoom.inputMessage.location.center}}"></marker>
+    </ng-map>
+    <div style="display: inline-block;padding: 7px;margin: auto;">
+      {{chatRoom.inputMessage.location.address}}
+    </div>
+    <button class="button button-clear button-stable " style="position: absolute;top: 0px;right: 0px;" ng-click="removeLocation()">
+      <i class="icon ion-close-circled chatRoom__cancel-location"></i>
+    </button>
+  </ion-footer-bar>
 	<form name="sendMessageForm" ng-submit="sendMessage(sendMessageForm)" novalidate>
-        <ion-footer-bar class="bar-stable item-input-inset message-footer" keyboard-attach ng-style="{'height':footerHeight}" style="max-height: 105px">
-            <label class="item-input-wrapper">
-                <textarea ng-model="inputMessage" value="" placeholder="Send a message..." required minlength="1" maxlength="1500" msd-elastic style="width: 100%;max-height: 100px" ng-click="scrollToBottom()" ng-enter="sendMessage(sendMessageForm)" id="inputTextArea">
-                </textarea>
-            </label>
-            <div class="footer-btn-wrap">
-                <button class="button button-icon icon ion-android-send footer-btn" type="submit" ng-disabled="!inputMessage || inputMessage === ''">
-                </button>
-             </div>
-        </ion-footer-bar>
-    </form>
+    <ion-footer-bar class="bar-stable item-input-inset message-footer" keyboard-attach ng-style="{'height':inputFooterHeight}" style="max-height: 105px">
+        <label class="item-input-wrapper">
+            <textarea ng-model="chatRoom.inputMessage.text" value="" placeholder="Send a message..." required minlength="1" maxlength="1500" msd-elastic style="width: 100%;max-height: 100px" ng-click="scrollToBottom()" ng-enter="sendMessage(sendMessageForm)" id="inputTextArea">
+            </textarea>
+        </label>
+        <div class="footer-btn-wrap">
+            <!-- Location button  -->
+            <div class="button button-positive button-clear icon ion-ios-location footer-btn" style="right: 0px;" ng-click="pressLocation()" ng-if="(!chatRoom.inputMessage.text || chatRoom.inputMessage.text === '') && !chatRoom.inputMessage.location">
+            </div>
+            <!-- Send button  -->
+            <button class="button button-icon button-clear button-positive icon ion-android-send footer-btn" type="submit" ng-if="(chatRoom.inputMessage.text && chatRoom.inputMessage.text != '') || chatRoom.inputMessage.location" style="    right: 0px;">
+            </button>
+        </div>
+    </ion-footer-bar>
+  </form>
 </ion-view>

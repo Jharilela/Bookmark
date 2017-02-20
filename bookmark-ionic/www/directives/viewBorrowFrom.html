@@ -1,0 +1,13 @@
+ <ion-popover-view style="margin-left: 0px; left: 50%">
+    <ion-header-bar class="bar-positive">
+      <h1 class="title">Borrow from</h1>
+    </ion-header-bar>
+    <ion-content style="margin: 10px 5px;">
+		<div ng-repeat="owner in bookOwners" class="bookDetails_bookOwner-thumbnail--container">
+			<img ng-src="{{owner.profilePictureUrl}}" class="bookDetails_bookOwner-thumbnail" ui-sref="userProfile({user : owner})" ng-click="closePopover()">
+			<div style="margin-bottom: 10px;">
+				{{owner.distance}}km
+			</div>
+		</div>
+    </ion-content>
+</ion-popover-view>

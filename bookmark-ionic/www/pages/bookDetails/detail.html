@@ -1,4 +1,4 @@
-<ion-view hide-nav-bar="true">
+<ion-view hide-nav-bar="true" view-title="bookDetail">
 	<ion-header-bar>
 	<button class="button button-clear button-positive " ng-click="goBack()">
 		<i class="ion-chevron-left"></i>
@@ -19,7 +19,7 @@
 			<!-- <button class="button button-block button-energized" ng-click="buy()">
 			  Buy now
 			</button> -->
-			<button class="button button-block button-balanced" ng-click="borrow()">
+			<button class="button button-block button-balanced" ng-click="borrow($event)">
 			  Borrow
 			</button>
 			<button class="button button-block button-royal" ng-click="wishToRead()">

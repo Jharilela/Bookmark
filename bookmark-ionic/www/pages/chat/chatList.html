@@ -1,6 +1,6 @@
-<ion-view hide-nav-bar="true">
+<ion-view hide-nav-bar="true" view-title="chatList">
 	<ion-header-bar class="bar-has-input item-input-inset">
-		<div ng-hide="showSearch">
+		<div ng-hide="showSearch" style="position: absolute;right: 0px;margin-right: 10px;">
 			<button class="button icon ion-ios-search-strong button-clear button-positive " ng-click="pressSearchButton()"> 
 			</button>
 		</div>
@@ -22,14 +22,16 @@
 				<div class="item item-avatar" ng-show="chat.visible">
 					<img ng-src="{{chat.icon}}" >
 					<div  ng-repeat="user in chat.users">
-						<div ng-if="user.name!=currentUser.fullName" >
+						<div ng-if="user.uid!=currentUser.$id" >
 							<h2 >{{user.name}}</h2>
 						</div>
 					</div>
-					<p ng-if="chat.latestMessage">
-						<div style="display: inline;" ng-if="chat.latestMessage.from==currentUser.$id">You : </div>{{chat.latestMessage.content}}
+					<p ng-if="chat.latestMessage && chatList.containsActiveUsers(chat)">
+						<div style="display: inline;" ng-if="chat.latestMessage.from==currentUser.$id">You : </div>
+						<div ng-if="chat.latestMessage.content" style="display: inline;">{{chat.latestMessage.content}}</div>
+						<div ng-if="chat.latestMessage.location" style="display: inline;">{{chat.latestMessage.location.address}}</div>
 					</p>
-					<p ng-if="!chatList.containsActiveUsers(chat)">
+					<p ng-if="!chatList.containsActiveUsers(chat)" style="display: inline;">
 						User is no longer active
 					</p>
 					<p ng-if="chatList.containsActiveUsers(chat) && (!chat.latestMessage || chat.latestMessage == undefined || chat.latestMessage== null)"> 

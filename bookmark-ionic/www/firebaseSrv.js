@@ -2,7 +2,7 @@
 angular.module('bookmark.services')
 .factory('firebaseSrv', firebaseSrv)
 
-function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray, $q, Auth, $state, $cordovaCamera){
+function firebaseSrv (searchSrv,LocationService, $firebaseAuth, $firebaseObject, $firebaseArray, $q, Auth, $state, $cordovaCamera){
 	console.log('firebaseSrv - loaded')
 	var vm = this;
 	var auth = $firebaseAuth();
@@ -35,6 +35,7 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 		ref : ref,
 		isNewUser : isNewUser,
 		getUser : getUser,
+		getAnotherUser : getAnotherUser,
 		userHaveProfilePicture : userHaveProfilePicture,
 		getProfilePicture : getProfilePicture,
 		takePicture : takePicture,
@@ -45,6 +46,7 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 		deleteUser : deleteUser,
 		searchUser : searchUser,
 		searchBookOwners : searchBookOwners,
+		getBooksNearby : getBooksNearby,
 		validateName : validateName,
 		validatePhoneNumber : validatePhoneNumber,
 		validateEmail : validateEmail,
@@ -110,6 +112,19 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 					deferred.resolve(user)
 				})
 			}
+		})
+		.catch(function(error){
+			console.log("user's data cannot be loaded")
+			deferred.reject("user's data cannot be loaded.\n Please try again")
+		})
+
+		return deferred.promise
+	}
+	function getAnotherUser(id){
+		var deferred = $q.defer();
+		$firebaseArray(allUserRef).$loaded()
+		.then(function(allUsers){
+			deferred.resolve(allUsers.$getRecord(id));
 		})
 		.catch(function(error){
 			console.log("user's data cannot be loaded")
@@ -261,6 +276,55 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 		})
 		.catch(function(error){
 			console.log("bookmark users data cannot be loaded")
+			deferred.reject("user's data cannot be loaded.\n Please try again")
+		})
+		return deferred.promise;
+	}
+	function getBooksNearby(radius, numberOfResults){
+		radius = LocationService.stringToDistance(radius);
+		console.log('radius ',radius)
+		console.log('getting #'+numberOfResults+' books nearby');
+		var deferred = $q.defer();
+		$q.all([getUser(), getBookCollection(), $firebaseArray(allUserRef).$loaded()])
+		.then(function(data){
+			var currentUser = data[0];
+			var bookCollections = data[1];
+			var allUsers = data[2];
+			var returnBooks = [];
+
+			for(var i= allUsers.length-1; i>=0; i--){
+				var allUser = allUsers[i];
+				var distance = LocationService.inProximity(currentUser, allUser, radius)
+				if(distance){
+					allUser.distance = distance;
+				}
+				else{
+		        	allUsers.splice(i,1);
+		        }
+			}
+			allUsers.sort(dynamicSortMultiple("distance"))
+
+			angular.forEach(allUsers, function(allUser){
+				if(allUser.booksOwned != undefined){
+					angular.forEach(allUser.booksOwned, function(book){
+						if(returnBooks.length < numberOfResults){
+        					var bookExists = false;
+	        				angular.forEach(returnBooks, function(returnBook){
+	        					if(returnBook.$id == book.key)
+	        						bookExists = true;
+	        				})
+	        				if(!bookExists){
+        						returnBooks.push(bookCollections.$getRecord(book.key));
+							}
+        				}
+        			})
+				}
+			})
+
+			deferred.resolve(returnBooks)
+		})
+		.catch(function(error){
+			console.error("bookmark users data cannot be loaded")
 			deferred.reject("user's data cannot be loaded.\n Please try again")
 		})
 		return deferred.promise;
@@ -1213,6 +1277,8 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 	          		$firebaseArray(chatRef.child(chatRoom.$id).child("messages")).$loaded()
 	          		.then(function(messages){
 	          			chatRoom.latestMessage = messages[messages.length-1];
+	          			if(chatRoom.latestMessage)
+		          			chatRoom.latestMessageTimestamp = chatRoom.latestMessage.timestamp
 	          		})
 		          	returnChatRooms[returnChatRooms.length] = chatRoom;
 	          	}
@@ -1276,27 +1342,25 @@ function firebaseSrv (searchSrv, $firebaseAuth, $firebaseObject, $firebaseArray,
 		return deferred.promise;
 	}
 
-	function sendMessage(stringMessage, destinationChat){
+	function sendMessage(obj, destinationChat){
 		var deferred = $q.defer()
-		getUser()
-		.then(function(user){
-			var message = {
-				timestamp : Date.now()/1000 | 0,
-				from : user.$id,
-				content : stringMessage
-			}
-			$firebaseArray(chatRef.child(destinationChat.$id).child("messages")).$add(message)
-			.then(function(){
-				deferred.resolve('send message successfully');
-			})
-			.catch(function(err){
-				console.error('failed to send message ',err);
-				deferred.reject('failed to send message');
-			})
+		var message = {
+			timestamp : Date.now()/1000 | 0,
+			from : auth.$getAuth().uid,
+		}
+		if(obj.text){
+			message.content = obj.text;
+		}
+		if(obj.location){
+			message.location = obj.location;
+		}
+		$firebaseArray(chatRef.child(destinationChat.$id).child("messages")).$add(message)
+		.then(function(){
+			deferred.resolve('send message successfully');
 		})
 		.catch(function(err){
-			console.log('failed to load user details ',err);
-			deferred.reject('failed to load user details');
+			console.error('failed to send message ',err);
+			deferred.reject('failed to send message');
 		})
 		return deferred.promise;
 	}

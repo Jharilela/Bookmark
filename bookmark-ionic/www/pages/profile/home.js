@@ -1,6 +1,6 @@
 angular.module('bookmark.controllers')
 
-.controller('profileCtrl', function($scope,$ionicActionSheet, $timeout,$ionicPopup,firebaseSrv, LocationService, tempStorageSrv, $firebaseObject, $firebaseAuth, $firebaseArray, $ionicLoading,$cordovaCamera) {
+.controller('profileCtrl', function( $scope,$rootScope,$compile,$ionicActionSheet, $timeout,$ionicPopup,firebaseSrv, LocationService, tempStorageSrv, $firebaseObject, $firebaseAuth, $firebaseArray, $ionicLoading,$cordovaCamera,NgMap) {
   	console.log('profileCtrl - loaded')
     var vm = this;
   	$scope.auth = firebaseSrv.auth;
@@ -34,12 +34,28 @@ angular.module('bookmark.controllers')
 
     $scope.$on("$ionicView.enter", function(event, data){
       getUser();
+
+      var getLocation = $rootScope.$on('location-changed profileHome', function(event, location){
+        console.log('profileHome received change in address ',location)
+        vm.mapCenter = [];
+        vm.mapCenter.push(location.lat)
+        vm.mapCenter.push(location.lng)
+        $scope.user.location = location;
+        $scope.saveUserInfo()
+
+        getLocation();
+
+      })
     });
 
     function getUser(){
       firebaseSrv.getUser()
       .then(function(userData){
         $scope.user = userData
+        vm.mapCenter = [];
+        vm.mapCenter.push(userData.location.lat)
+        vm.mapCenter.push(userData.location.lng)
+
         console.log('HOME - loading user', $scope.user)
         firebaseSrv.userHaveProfilePicture($scope.user.$id)
         .then(function(value){
@@ -160,56 +176,12 @@ angular.module('bookmark.controllers')
      }, 10000);
     }
 
-    $scope.$on('location-changed', function(evt, args){
-        $scope.location = args.location
-        console.log('indexOf ', $scope.location.formatted_address.indexOf($scope.location.name))
-        if($scope.location.formatted_address.indexOf($scope.location.name)==-1)
-          $scope.location.address = $scope.location.name + ($scope.location.formatted_address?", ":"") +$scope.location.formatted_address
-        else
-          $scope.location.address = $scope.location.formatted_address
+   
 
-        for(var i = 0; i<$scope.location.address_components.length; i++){
-          for(var j=0; j<$scope.location.address_components[i].types.length; j++){
-            if($scope.location.address_components[i].types[j] == "country"){
-              $scope.location.country = $scope.location.address_components[i].long_name
-              $scope.location.country_short = $scope.location.address_components[i].short_name
-            }
-          }
-        }
-
-        if(isEmpty($scope.location.country,"") && !isEmpty($scope.location.country_short,"")){
-          for(var i =0; i< $scope.countryList.length; i++){
-            if($scope.countryList[i].code == $scope.location.country_short){
-              $scope.location.country = $scope.countryList[i].name;
-              break;
-            }
-        }
-        }
-        else if(isEmpty($scope.location.country,"") && isEmpty($scope.location.country_short,"")){
-          var possibleCountries = []
-          for(var i =0; i< $scope.countryList.length; i++){
-            // console.log("comparing 1:"+$scope.location.address+" 2:"+$scope.countryList[i].name+" index: "+$scope.location.address.indexOf($scope.countryList[i].name))
-            if($scope.location.address.indexOf($scope.countryList[i].name)!=-1){
-              possibleCountries[possibleCountries.length] = {
-                index : $scope.location.address.indexOf($scope.countryList[i].name),
-                name : $scope.countryList[i].name
-              }
-            }
-        }
-        possibleCountries.sort(dynamicSortMultiple("-index"))
-        console.log('possibleCountries', possibleCountries)
-        if(possibleCountries.length>0){
-          $scope.location.country = possibleCountries[0].name;
-        }
-      }
-
-        console.log('location ',$scope.location);
-        var address = {
-          lat : $scope.location.geometry.location.lat(),
-          lng : $scope.location.geometry.location.lng(),
-          address : $scope.location.address,
-          country : $scope.location.country
-        }
-        $scope.user.location = address;
-    })
+    NgMap.getMap().then(function(map) {
+        console.log('map ',map)
+        console.log(map.getCenter());
+        console.log('markers', map.markers);
+        console.log('shapes', map.shapes);
+      });
 })

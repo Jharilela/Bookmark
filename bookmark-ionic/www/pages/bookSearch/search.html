@@ -1,9 +1,9 @@
-<ion-view hide-nav-bar="true">
+<ion-view hide-nav-bar="true" view-title="bookSearch">
 
 	<ion-header-bar class="bar-has-input item-input-inset" id="search-container">
 	    <label class="item-input-wrapper no-bg">
 	      <i class="icon ion-search placeholder-icon"></i>
-		  <input type="text" placeholder="Search" ng-model="search.searchingText" ng-keyup="$event.keyCode == 13 && searching()" ng-change="typing()">
+		  <input type="text" placeholder="Search for books" ng-model="search.searchingText" ng-keyup="$event.keyCode == 13 && searching()" ng-change="typing()">
 	    </label>
 	    <div class="buttons">
 			<button class="button button-positive button-clear" ng-click="searching()" style="margin-left:10px" >OK</button>
@@ -18,15 +18,27 @@
 	    <!--<button class="button icon ion-close-circled button-assertive button-clear"></button>-->
     </ion-header-bar>
 
-  <ion-content class="padding" >
-	<label ng-if="search.didYouMeanKeyword" class="search_suggestions" ng-click="resetBookSearch();searching()">
-			Did you mean : {{search.didYouMeanKeyword}} ?
-	</label>
-	<no-internet-message></no-internet-message>
-	<div  style="width:100%" class="row" ng-repeat="(i, rows) in search.books">
-		<div  class="col col-33" ng-repeat="(j,books) in rows">
-			<img ng-src="{{books.imageLink}}" style="height:120px;" title="{{books.title}}" ng-click="search.bookDetail(i, j)">
+	<ion-content class="padding" >
+		<label ng-if="search.didYouMeanKeyword" class="search_suggestions" ng-click="resetBookSearch();searching()">
+				Did you mean : {{search.didYouMeanKeyword}} ?
+		</label>
+		<no-internet-message></no-internet-message>
+		<div  style="width:100%" class="row" ng-repeat="(i, rows) in search.books">
+			<div  class="col col-33" ng-repeat="(j,books) in rows">
+				<img ng-src="{{books.imageLink}}" style="height:120px;" title="{{books.title}}" ng-click="search.bookDetail(i, j)">
+			</div>
 		</div>
-	</div>
-  </ion-content>
+		<div ng-if="search.books.length==0">
+			<center>Books near you</center>
+			<div ng-repeat="(i,bookRow) in booksNearby" style="padding: 0px;" class="row" >
+		      <div class="row" style="padding: 0px;">
+		        <div ng-repeat="(j,book) in bookRow" class="col col-33" style="padding: 0px;">
+		          <div class="col col-33">
+		          	<img ng-src="{{book.imageLink}}" class="bookList__book-image" title="{{book.title}}" ng-click="search.nearbyBookDetail(i,j)">
+		          </div>  
+		        </div>
+		      </div>
+		    </div>
+	    </div>
+	</ion-content>
 </ion-view>
