@@ -1,6 +1,6 @@
 angular.module('bookmark.controllers')
 
-.controller('userProfileCtrl', function($scope,$state,$ionicPopover, $stateParams, $ionicHistory, firebaseSrv) {
+.controller('userProfileCtrl', function($scope,$timeout,$state,$ionicPopover, $stateParams, $ionicHistory, firebaseSrv, NgMap) {
   	console.log('userprofileCtrl - loaded')
   	var vm = this;
   	$scope.user =  $stateParams.user
@@ -19,9 +19,15 @@ angular.module('bookmark.controllers')
 	firebaseSrv.getAnotherUser($scope.user.$id)
 	.then(function(user){
 		console.log('another user ', user)
-		vm.mapCenter = [];
-		vm.mapCenter.push(user.location.lat);
-		vm.mapCenter.push(user.location.lng);
+		arr = [];
+		arr.push(user.location.lat);
+		arr.push(user.location.lng);
+		vm.mapCenter = arr;
+		// $timeout(function() {
+			// vm.mapCenter = arr;
+			// map.setCenter({lat: user.location.lat, lng: user.location.lng});
+			// google.maps.event.trigger(map, "center_changed");
+	    // }, 200);
 	})
 
 	$scope.$on("$ionicView.beforeEnter", function(event, data){
@@ -114,5 +120,21 @@ angular.module('bookmark.controllers')
 		$scope.$on('$destroy', function() {
 			$scope.popover.remove();
 		});
+
+		vm.map = NgMap.initMap("userMap");
 	}
+})
+.directive('mappop', function() {
+    return { 
+      link: function(scope, element, attributes){
+        element.css({'display' : 'initial'})
+      }
+    }
+})
+.directive('viewpop', function() {
+    return { 
+      link: function(scope, element, attributes){
+        element.css({'left' : '10px', 'width' : '95%'})
+      }
+    }
 })

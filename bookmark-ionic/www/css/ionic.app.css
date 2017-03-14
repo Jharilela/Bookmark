@@ -10171,6 +10171,9 @@ a.autolinker {
   height: 60px;
   width: 60px; }
 
+ng-map#pop {
+  display: contents !important; }
+
 .image-list-thumb {
   padding: 2px 2px 2px 2px;
   height: 100px; }

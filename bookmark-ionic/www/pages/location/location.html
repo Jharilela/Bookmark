@@ -1,11 +1,11 @@
 <ion-view hide-nav-bar="true" view-title="location">
   <ion-header-bar class="item-input-inset">
-    <button class="button button-positive button-clear icon ion-close-round" style="margin-right:10px;" ng-click="close()"></button>
+    <button class="button button-positive button-clear icon ion-chevron-left" style="margin-right:10px;" ng-click="close()"></button>
     <label class="item-input-wrapper">
       <i class="icon ion-search placeholder-icon"></i>
       <input type="search" ng-model="search.query" placeholder="Search">
     </label>
-    <button class="button button-positive button-clear icon ion-checkmark-round" ng-click="finish();">
+    <button class="button button-positive button-clear icon ion-checkmark-round" ng-click="finish();" ng-if="editable">
     </button>
   </ion-header-bar>
   <ion-header-bar class="bar-subheader" ng-if="search.suggestions.length>0" style="background-color: transparent;">

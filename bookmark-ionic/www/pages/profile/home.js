@@ -1,6 +1,6 @@
 angular.module('bookmark.controllers')
 
-.controller('profileCtrl', function( $scope,$rootScope,$compile,$ionicActionSheet, $timeout,$ionicPopup,firebaseSrv, LocationService, tempStorageSrv, $firebaseObject, $firebaseAuth, $firebaseArray, $ionicLoading,$cordovaCamera,NgMap) {
+.controller('profileCtrl', function($q, $scope,$rootScope,$compile,$ionicActionSheet, $timeout,$ionicPopup,firebaseSrv, LocationService, tempStorageSrv, $firebaseObject, $firebaseAuth, $firebaseArray, $ionicLoading,$cordovaCamera,NgMap) {
   	console.log('profileCtrl - loaded')
     var vm = this;
   	$scope.auth = firebaseSrv.auth;
@@ -32,9 +32,9 @@ angular.module('bookmark.controllers')
       })
     }
 
+
     $scope.$on("$ionicView.enter", function(event, data){
       getUser();
-
       var getLocation = $rootScope.$on('location-changed profileHome', function(event, location){
         console.log('profileHome received change in address ',location)
         vm.mapCenter = [];
@@ -42,9 +42,7 @@ angular.module('bookmark.controllers')
         vm.mapCenter.push(location.lng)
         $scope.user.location = location;
         $scope.saveUserInfo()
-
         getLocation();
-
       })
     });
 

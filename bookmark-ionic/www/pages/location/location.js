@@ -11,6 +11,12 @@ angular.module('bookmark.controllers')
   $scope.search.query = "";
   var first = 0;
   var choose = 0;
+  $scope.editable = $stateParams.editable;
+
+  $scope.$on("$ionicView.enter", function(event, data){
+     // handle event
+     console.log("State Params: ", data.stateParams);
+  });
 
   function init(refresh){
     if($stateParams.location){
@@ -70,10 +76,12 @@ angular.module('bookmark.controllers')
 
   $scope.close = function() {
     resetMarkers();
+    delete vm.markers;
     $ionicHistory.goBack();
   };
   $scope.finish = function(){
     if(vm.address){
+      console.log('sending location to '+$ionicHistory.backTitle())
       if($ionicHistory.backTitle() == "chatRoom"){
         $rootScope.$broadcast('location-changed chatRoom', vm.address)
       }

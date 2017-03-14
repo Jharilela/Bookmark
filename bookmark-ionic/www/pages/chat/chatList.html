@@ -34,7 +34,7 @@
 					<p ng-if="!chatList.containsActiveUsers(chat)" style="display: inline;">
 						User is no longer active
 					</p>
-					<p ng-if="chatList.containsActiveUsers(chat) && (!chat.latestMessage || chat.latestMessage == undefined || chat.latestMessage== null)"> 
+					<p ng-if="chatList.containsActiveUsers(chat) && (!chat.latestMessage || chat.latestMessage == undefined || chat.latestMessage== null || !(chat.latestMessage.content || chat.latestMessage.location))"> 
 						Click to open the message
 					</p>
 				</div>

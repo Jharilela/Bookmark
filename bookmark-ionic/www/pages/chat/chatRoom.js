@@ -196,17 +196,22 @@ angular.module('bookmark.controllers')
 		$scope.showDates[message.$id] = true;
 	}
 
-	$scope.pressLocation = function(){
-		console.log('location is pressed')
-		var locations = [];
-		locations.push($scope.currentUser.location)
-		angular.forEach($scope.users, function(user){
-			firebaseSrv.getAnotherUser(user.uid)
-			.then(function(userData){
-				locations.push(userData.location)
+	$scope.pressLocation = function(location){
+		if(location){
+			$state.go('location', {location : [location], editable : false})
+		}
+		else{
+			console.log('location is pressed')
+			var locations = [];
+			locations.push($scope.currentUser.location)
+			angular.forEach($scope.users, function(user){
+				firebaseSrv.getAnotherUser(user.uid)
+				.then(function(userData){
+					locations.push(userData.location)
+				})
 			})
-		})
-		$state.go('location', {location : locations})
+			$state.go('location', {location : locations})
+		}
 	}
 
 	// Close the modal

@@ -145,7 +145,8 @@ angular.module('bookmark.router', [])
       url: '/location',
       templateUrl: 'pages/location/location.html',
       controller: 'locationCtrl as location',
-      params:{ location:null},
+      params:{ location:null,
+                editable : true},
       cache: false,
     })
 

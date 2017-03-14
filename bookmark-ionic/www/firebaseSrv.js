@@ -1277,8 +1277,13 @@ function firebaseSrv (searchSrv,LocationService, $firebaseAuth, $firebaseObject,
 	          		$firebaseArray(chatRef.child(chatRoom.$id).child("messages")).$loaded()
 	          		.then(function(messages){
 	          			chatRoom.latestMessage = messages[messages.length-1];
-	          			if(chatRoom.latestMessage)
+	          			if(chatRoom.latestMessage){
 		          			chatRoom.latestMessageTimestamp = chatRoom.latestMessage.timestamp
+	          			}
+	          			else{
+	          				chatRoom.latestMessage = {}
+	          				chatRoom.latestMessage.timestamp = Math.floor(Date.now() / 1000);
+	          			}
 	          		})
 		          	returnChatRooms[returnChatRooms.length] = chatRoom;
 	          	}

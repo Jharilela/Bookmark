@@ -1,6 +1,5 @@
 <ion-view hide-nav-bar="true" view-title="chatRoom">
 	<ion-header-bar>
-
 		<button class="button icon ion-chevron-left button-clear button-positive " ng-click="goBack()"></button>
 		<h1 class="title" >
 			<div ng-repeat="user in chat.users" style="display: inline;">
@@ -23,7 +22,7 @@
               {{message.timestamp | date:'d MMM'}}
             </div> -->
             <div class="chat-bubble left" ng-if="message.location" style="padding: 5px;" ng-style="{'margin-bottom' : message.content?'-17px':'10px'}">
-                <ng-map center="{{message.location.center}}" zoom="14" draggable="false" zoom-control="false" scrollwheel="false" disable-double-click-zoom="true" street-view-control="false" map-type-control="false" style="height: 150px;width: 150px;">
+                <ng-map center="{{message.location.center}}" zoom="14" draggable="false" zoom-control="false" scrollwheel="false" disable-double-click-zoom="true" street-view-control="false" map-type-control="false" disable-default-u-i="true" style="height: 150px;width: 150px;"  ng-click="pressLocation(message.location)">
                     <marker position="{{message.location.center}}"></marker>
                 </ng-map>
             </div>
@@ -40,7 +39,7 @@
               {{message.timestamp | date:'d MMM'}}
             </div> -->
             <div class="chat-bubble right" ng-if="message.location" style="padding: 5px;" ng-style="{'margin-bottom' : message.content?'-17px':'10px'}">
-                <ng-map center="{{message.location.center}}" zoom="14" draggable="false" zoom-control="false" scrollwheel="false" disable-double-click-zoom="true" street-view-control="false" map-type-control="false" style="height: 150px;width: 150px;">
+                <ng-map center="{{message.location.center}}" zoom="14" draggable="false" zoom-control="false" scrollwheel="false" disable-double-click-zoom="true" disable-default-u-i="true" street-view-control="false" map-type-control="false" style="height: 150px;width: 150px;" ng-click="pressLocation(message.location)">
                     <marker position="{{message.location.center}}"></marker>
                 </ng-map>
             </div>
@@ -59,7 +58,7 @@
 
   <ion-footer-bar class="bar-stable item-input-inset message-footer" ng-style="{'bottom' : inputFooterHeight}" style="padding: 0px;height: 100px;" ng-if="chatRoom.inputMessage.location">
     <!-- {{chatRoom.inputMessage.location}} -->
-    <ng-map center="{{chatRoom.inputMessage.location.center}}" zoom="13" draggable="false" zoom-control="false" scrollwheel="false" disable-double-click-zoom="true" street-view-control="false" map-type-control="false" style="height: 100px;width: 50%;min-width: 50%;display: -webkit-inline-box;">
+    <ng-map center="{{chatRoom.inputMessage.location.center}}" zoom="13" draggable="false" zoom-control="false" scrollwheel="false" disable-double-click-zoom="true" street-view-control="false" map-type-control="false" style="height: 100px;width: 50%;min-width: 50%;display: -webkit-inline-box;" >
       <marker position="{{chatRoom.inputMessage.location.center}}"></marker>
     </ng-map>
     <div style="display: inline-block;padding: 7px;margin: auto;">
