@@ -3,9 +3,9 @@ Bookmark is a a hybrid mobile application that allows bookReaders to share, trad
 
 The bookmark-ionic folder contains the mobile app under developement 
 
-To build an ios release
+## To build an ios release
 
-Step 1 : ionic build ios --release
+Step 1 : `ionic build ios --release`
 
 Step 2 : open the xcode file /Users/J/Documents/Bookmark/bookmark-ionic/platforms/ios/bookmark.xcodeproj
 
@@ -15,22 +15,23 @@ Step 4 : press product -> archive and then upload to itunes store
 
 
 
-To build an android release
+## To build an android release
 
-Step 1 : cordova build --release android
+Step 1 : `cordova build --release android`
 
-Step 2 : jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore path/to/bookmark-ionic/release-key.keystore /path/to/bookmark-ionic/platforms/android/build/outputs/apk/android-release-unsigned.apk bookmark
+Step 2 : `jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore path/to/bookmark-ionic/release-key.keystore /path/to/bookmark-ionic/platforms/android/build/outputs/apk/android-release-unsigned.apk bookmark`
 
 *password : B..............
 
-Step 3 : zipalign -v 4 /path/to/bookmark-ionic/platforms/android/build/outputs/apk/android-release-unsigned.apk /path/to/bookmark-ionic/platforms/android/build/outputs/apk/bookmark@version.apk
+Step 3 : 
+`zipalign -v 4 /path/to/bookmark-ionic/platforms/android/build/outputs/apk/android-release-unsigned.apk /path/to/bookmark-ionic/platforms/android/build/outputs/apk/bookmark@version.apk`
 
 if(zipalign is not found)
 
-	alias zipalign=~/Library/Android/sdk/build-tools/23.0.3/zipalign
+`alias zipalign=~/Library/Android/sdk/build-tools/23.0.3/zipalign`
 	
-else if (permision denied to set files in bookmark-ionic)
+else if Error: spawn EACCES (permision denied to set files in bookmark-ionic)
 
-	sudo chown -R $USER:$GROUP  ~/documents/Bookmark/bookmark-ionic
+`sudo chown -R $USER:$GROUP  ~/documents/Bookmark/bookmark-ionic`
 	
 Step 4 : Find the bookmark.apk and upload it to the android play store https://play.google.com/apps/publish
