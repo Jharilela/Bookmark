@@ -6,6 +6,7 @@ The bookmark-ionic folder contains the mobile app under developement
 ## To build an ios release
 
 Step 1 : `ionic build ios --release`
+To debug on device `ionic run ios -l -c -s`
 
 Step 2 : open the xcode file /Users/J/Documents/Bookmark/bookmark-ionic/platforms/ios/bookmark.xcodeproj
 
