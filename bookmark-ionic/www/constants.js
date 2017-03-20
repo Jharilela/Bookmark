@@ -4,7 +4,8 @@ angular.module('bookmark.constants')
 	return {
 		environment : "development",
 		googleClientId : "316498021139-1c6f3u1h7vglk21lo9pjn3v8hbmc6n50.apps.googleusercontent.com",
-		facebookAppId : "858145674316344"
+		facebookAppId : "858145674316344",
+    FCMServerKey : "AAAASbDAixM:APA91bG0_R-1ryjJvA4L6Nr8Hu17WuXy006sIkfeKdnxokZPPOZSnVjO-RmB839dJJ_fSCznCyVOxY1IUtb36f9KAbzGxw6yBB9eH7viB_XZGR4dnyX7HXwFVMNc1RZO_A7OmpnyYQbu"
 	}
 
 })

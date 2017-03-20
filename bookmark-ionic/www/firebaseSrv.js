@@ -2,7 +2,20 @@
 angular.module('bookmark.services')
 .factory('firebaseSrv', firebaseSrv)
 
-function firebaseSrv (searchSrv,LocationService, $firebaseAuth, $firebaseObject, $firebaseArray, $q, Auth, $state, $cordovaCamera){
+function firebaseSrv (
+	searchSrv,
+	constants,
+	$http,
+	$cordovaLocalNotification,
+	$ionicPlatform,
+	LocationService, 
+	$firebaseAuth, 
+	$firebaseObject, 
+	$firebaseArray, 
+	$q, 
+	Auth, 
+	$state, 
+	$cordovaCamera){
 	console.log('firebaseSrv - loaded')
 	var vm = this;
 	var auth = $firebaseAuth();
@@ -17,7 +30,8 @@ function firebaseSrv (searchSrv,LocationService, $firebaseAuth, $firebaseObject,
 	    bookRef = ref.child("books")
 	    searchRef = ref.child("search")
 	    chatRef = ref.child("chat")
-	    storageRef = storage.ref()
+	    storageRef = storage.ref();
+	    getMessagingToken();
 	  } else {
 	    console.log("profileSrv - Signed out");
 	    $state.go("register")
@@ -42,6 +56,8 @@ function firebaseSrv (searchSrv,LocationService, $firebaseAuth, $firebaseObject,
 		uploadPicture : uploadPicture,
 		setUserProfileStatus : setUserProfileStatus,
 		saveUser : saveUser,
+		saveMessagingToken : saveMessagingToken,
+		sendNotification : sendNotification,
 		updateUserInfo : updateUserInfo,
 		deleteUser : deleteUser,
 		searchUser : searchUser,
@@ -504,27 +520,154 @@ function firebaseSrv (searchSrv,LocationService, $firebaseAuth, $firebaseObject,
 				}
 			    newChat([developer])
 			    .then(function(chat){
-		    	console.log('newChat created ',chat);
-		    	var message = {
-					timestamp : Date.now()/1000 | 0,
-					from : developer.$id,
-					content : "Hi, how can I help you ?"
-				}
+			    	console.log('newChat created ',chat);
+			    	var message = {
+						timestamp : Date.now()/1000 | 0,
+						from : developer.$id,
+						content : "Hi, how can I help you ?"
+					}
 
-				$firebaseArray(chatRef.child(chat.$id).child("messages")).$add(message);
-
-	    })
-		      })
+					$firebaseArray(chatRef.child(chat.$id).child("messages")).$add(message);
+			    })
+		    })
 			.catch(function(error) {
 		        console.log('Error! ',error);
 		        deferred.reject("error saving ")
-		      });
+		    });
 		})
 		.catch(function(error){
 			console.log('Error! ', error)
 			deferred.reject("failed to fetch user data from database")
 		})
 	    return deferred.promise;
+	}
+
+	function getMessagingToken(){
+		console.log('getting messagingToken')
+		$ionicPlatform.ready(function() {
+			console.log('platform is ready for FCM');
+			try{
+				$cordovaLocalNotification.clearAll(function() {
+		            console.log("cleared all local notifications");
+		        }, this);
+			}
+			catch(err){
+				console.warn("unable to clear all local notifications ",err);
+			}
+
+			try{
+				FCMPlugin.getToken(function(token){
+			      console.log('FCMPlugin token : ',token);
+			      //save token to firebase user data
+			      if(token){
+			      	saveMessagingToken(token);
+			      }
+			    });
+			    FCMPlugin.onTokenRefresh(function(token){
+			    	if(token){
+			    		saveMessagingToken(token);
+			    	}
+				});
+			    FCMPlugin.onNotification(function(data){
+			    	console.log('received notification ',data);
+
+				    // method 1
+					if(data.wasTapped){
+					    //Notification was received on device tray and tapped by the user.
+					    alert( "1. "+JSON.stringify(data) );
+					    
+					}else{
+					    //Notification was received in foreground. Maybe the user needs to be notified.
+					    // alert popup when message is obtained
+					    // alert( "2. "+JSON.stringify(data) );
+					    
+					    // display notification when message is received
+				    	// $cordovaLocalNotification.schedule({
+				     //       id: "1234",
+				     //       title: data.title,
+				     //       text: data.text,
+				     //       icon : "ic_nothing",
+				     //       smallIcon : "ic_stat_bookmark_icon",
+				     //       sound: null
+					    // }).then(function () {
+					    //        console.log("The notification has been displayed");
+					    // }).catch(function(err){
+					    //    	console.warn("unable to display notification : "+err);
+					    // })
+				}
+			    });
+			}
+			catch(err){
+				console.warn('unable to obtain FCM messagingToken ',err)
+			}
+		})
+	}
+
+	function saveMessagingToken(token){
+		console.log('saving token')
+		userRef = ref.child("users").child(auth.$getAuth().uid)
+
+	    $firebaseObject(userRef).$loaded()
+		.then(function(data){
+			data.messagingToken = token;
+			data.$save()
+			.then(function(){
+				console.log('saved messaging token successfully')
+			})
+			.catch(function(err){
+				console.error('failed to save messaging token ',err);
+			})
+		})
+		.catch(function(error){
+			console.error('failed to save messaging token ',error)
+		})
+	}
+	function sendNotification(title, text, uid, messagingToken){
+		var deferred = $q.defer();
+		var obj = {
+			"notification": {
+				"title": title,
+				"body": text,
+				"icon" : "ic_stat_bookmark_icon"
+			},
+			"data" : {
+				"title" : title,
+				"text" : text
+			}
+		}
+		getAnotherUser(uid)
+		.then(function(user){
+			if(user.messagingToken){
+				obj["to"] = user.messagingToken;
+				console.log('sending Notification ',obj)
+				$http({
+				    method: 'POST',
+				    url: 'https://fcm.googleapis.com/fcm/send',
+				    data: obj,
+				    headers: {
+				    	'Content-Type': 'application/json',
+				    	'Authorization' : 'key='+constants.FCMServerKey
+				    }
+				})
+				.then(function(){
+					console.log("sent notification successfully");
+					deferred.resolve("sent notification successfully");
+				})
+				.catch(function(err){
+					console.error("Unable to send notification ",err);
+					deferred.reject("Unable to send notification")
+				})
+			}
+			else{
+				console.log("anotherUser does not have messagingToken, unable to send notification")
+				deferred.reject("unable to send notification");
+			}	
+		})
+		.catch(function(err){
+			console.error('unable to fetch anotherUser data');
+			deferred.reject("unable to send notification");
+		})
+		return deferred.promise;
 	}
 	function updateUserInfo(userInfo){
 		var deferred = $q.defer();

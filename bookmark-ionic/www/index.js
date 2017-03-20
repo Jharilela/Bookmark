@@ -25,20 +25,39 @@ angular.module('bookmark', [
   }
 ])
 
-.run(function($ionicPlatform) {
+.run(function($ionicPlatform,$cordovaLocalNotification) {
+  console.log('first run of ionicPlatform')
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)
-
-    if (window.cordova && window.cordova.plugins && window.cordova.plugins.Keyboard) {
-      cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
-      cordova.plugins.Keyboard.disableScroll(true);
-
+    console.log('first run of ionicPlatform.ready has been fired');
+    try{
+      if (window.cordova && window.cordova.plugins && window.cordova.plugins.Keyboard) {
+        cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
+        cordova.plugins.Keyboard.disableScroll(true);
+      }
+    }catch(err){
+      console.log("error running keyboard plugin ",err)
     }
-    if (window.StatusBar) {
-      // org.apache.cordova.statusbar required
-      StatusBar.styleDefault();
+
+    try{
+      if (window.StatusBar) {
+        // org.apache.cordova.statusbar required
+        StatusBar.styleDefault();
+      }
+    }catch(err){
+      console.log('error running StatusBar plugin', err);
     }
+    
+
+
+    $ionicPlatform.on('resume', function(){
+        // Do sweet stuff!
+        $cordovaLocalNotification.clearAll(function() {
+            console.log("cleared all local notifications")
+        }, this);
+    });
+
   });
 })
 

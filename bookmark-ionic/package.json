@@ -19,10 +19,12 @@
     "cordova-plugin-whitelist",
     "cordova-plugin-splashscreen",
     "cordova-plugin-statusbar",
-    "ionic-plugin-keyboard",
     "cordova-plugin-network-information",
     "cordova-plugin-console@~1.0.3",
-    "cordova-plugin-googlemaps"
+    "cordova-plugin-googlemaps",
+    "cordova-plugin-fcm",
+    "de.appplant.cordova.plugin.local-notification",
+    "ionic-plugin-keyboard"
   ],
   "cordovaPlatforms": [
     "ios",

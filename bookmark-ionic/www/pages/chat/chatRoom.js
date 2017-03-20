@@ -141,6 +141,7 @@ angular.module('bookmark.controllers')
 		console.log('sending message ', vm.inputMessage)
 		firebaseSrv.sendMessage(vm.inputMessage, $scope.chat)
 		.then(function(){
+			firebaseSrv.sendNotification($scope.currentUser.firstName+" "+$scope.currentUser.lastName, vm.inputMessage.text, $scope.users[0].uid)
 			delete vm.inputMessage;
 			vm.inputMessage = {};
 			vm.inputMessage.text = "";

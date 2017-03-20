@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<widget id="com.ionicframework.bookmark542273" version="0.3.2" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.ionicframework.bookmark542273" version="0.4.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
   <name>bookmark</name>
   <description>
     An Ionic Framework and Cordova project.
   </description>
   <author email="Jharilela@gmail.com" href="http://jaboski.com/bookmark">
       Jayant Harilela
-    </author>
+  </author>
   <content src="index.html"/>
   <access origin="*"/>
   <allow-navigation href="*"/>
+  <allow-navigation href="http://192.168.0.156:8100"/>
   <preference name="webviewbounce" value="false"/>
   <preference name="UIWebViewBounce" value="false"/>
   <preference name="DisallowOverscroll" value="true"/>
@@ -34,6 +35,7 @@
     <variable name="APP_NAME" value="bookmark"/>
   </plugin>
   <platform name="ios">
+    <hook type="before_compile" src="hooks/xcode8.js"/>
     <icon src="resources/ios/icon/icon.png" width="57" height="57"/>
     <icon src="resources/ios/icon/icon@2x.png" width="114" height="114"/>
     <icon src="resources/ios/icon/icon-40.png" width="40" height="40"/>

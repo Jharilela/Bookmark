@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+    <meta http-equiv="Content-Security-Policy">
     <title></title>
 
 
@@ -44,8 +45,10 @@
     <script src="lib/firebase/firebase-app.js"></script>
     <script src="lib/firebase/firebase-auth.js"></script>
     <script src="lib/firebase/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/3.4.0/firebase-storage.js"></script>
+    <script src="lib/firebase/firebase-messaging.js"></script>
+    <script src="lib/firebase/firebase-storage.js"></script>
     <script src="lib/angularfire/dist/angularfire.min.js"></script>
+
     <script>
         var firebaseConfig = 
         {
@@ -56,9 +59,9 @@
             messagingSenderId: "316498021139"
         };
 
-        firebase.initializeApp(firebaseConfig)
-        var ref = firebase.database().ref()
-        var storage = firebase.storage()
+        firebase.initializeApp(firebaseConfig);
+        var ref = firebase.database().ref();
+        var storage = firebase.storage();
     </script>
 
     <!-- your app's js -->
@@ -101,9 +104,9 @@
     <script src="pages/location/location.srv.js"></script>
     <script src="pages/location/location.js"></script>
 
-
     <!--Temporary Storage-->
     <script src="storage/tempStorage.js"></script>
+    
   </head>
   <body ng-app="bookmark">
     <!--
