@@ -54,7 +54,17 @@ angular.module('bookmark.controllers')
 	              
 	$scope.searching = function(){
 		$scope.suggestedKeywords = [];
-		cordova.plugins.Keyboard.close();
+		try{
+			cordova.plugins.Keyboard.close();
+		}
+		catch(err){
+			if(err == "ReferenceError: cordova is not defined"){
+				console.warn("cordova not defined : not available on browser");
+			}
+			else{
+				console.error(err);
+			}
+		}
 		vm.didYouMeanKeyword = "";
 		firebaseSrv.suggestSearch(vm.searchingText)
 		.then(function(keywords){

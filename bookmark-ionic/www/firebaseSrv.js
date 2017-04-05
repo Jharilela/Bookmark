@@ -12,6 +12,7 @@ function firebaseSrv (
 	$firebaseAuth, 
 	$firebaseObject, 
 	$firebaseArray, 
+	countryList,
 	$q, 
 	Auth, 
 	$state, 
@@ -115,7 +116,13 @@ function firebaseSrv (
 				deferred.reject("new user")
 			}
 			else{
-				console.log('user exists')
+				console.log('user exists');
+				if(user.location){
+					countryList.getCurrency(user.location.country)
+					.then(function(currency){
+						user.location.currency = currency;
+					})
+				}
 
 				getProfilePicture(user.$id)
 				.then(function(url){
@@ -124,9 +131,8 @@ function firebaseSrv (
 				.catch(function(err){
 					console.error("failed to fetch user's profile Picture");
 				})
-				.finally(function(){
-					deferred.resolve(user)
-				})
+
+				deferred.resolve(user)
 			}
 		})
 		.catch(function(error){
@@ -552,7 +558,12 @@ function firebaseSrv (
 		        }, this);
 			}
 			catch(err){
-				console.warn("unable to clear all local notifications ",err);
+				if(err == "TypeError: Cannot read property 'plugins' of undefined"){
+					console.warn("cordova local notifications unavailable on browser")
+				}
+				else{
+					console.warn("unable to clear all local notifications ",err);
+				}
 			}
 
 			try{
@@ -571,34 +582,41 @@ function firebaseSrv (
 			    FCMPlugin.onNotification(function(data){
 			    	console.log('received notification ',data);
 
-				    // method 1
-					if(data.wasTapped){
-					    //Notification was received on device tray and tapped by the user.
-					    alert( "1. "+JSON.stringify(data) );
-					    
-					}else{
-					    //Notification was received in foreground. Maybe the user needs to be notified.
-					    // alert popup when message is obtained
-					    // alert( "2. "+JSON.stringify(data) );
-					    
-					    // display notification when message is received
-				    	// $cordovaLocalNotification.schedule({
-				     //       id: "1234",
-				     //       title: data.title,
-				     //       text: data.text,
-				     //       icon : "ic_nothing",
-				     //       smallIcon : "ic_stat_bookmark_icon",
-				     //       sound: null
-					    // }).then(function () {
-					    //        console.log("The notification has been displayed");
-					    // }).catch(function(err){
-					    //    	console.warn("unable to display notification : "+err);
-					    // })
-				}
+			    	if(ionic.Platform.isAndroid()){
+				    	// method 1
+						if(data.wasTapped){
+						    //Notification was received on device tray and tapped by the user.
+						    alert( "1. "+JSON.stringify(data) );
+						}else{
+						    //Notification was received in foreground. Maybe the user needs to be notified.
+						    // alert popup when message is obtained
+						    // alert( "2. "+JSON.stringify(data) );
+						    
+						    // display notification when message is received
+					    	// $cordovaLocalNotification.schedule({
+					     //       id: "1234",
+					     //       title: data.title,
+					     //       text: data.text,
+					     //       icon : "ic_nothing",
+					     //       smallIcon : "ic_stat_bookmark_icon",
+					     //       sound: null
+						    // }).then(function () {
+						    //        console.log("The notification has been displayed");
+						    // }).catch(function(err){
+						    //    	console.warn("unable to display notification : "+err);
+						    // })
+						}
+			    	}
+			    	else if(ionic.platform.isIOS()){
+			    		//display notification when message is received
+			    		alert("message received");
+			    	}
 			    });
 			}
 			catch(err){
-				console.warn('unable to obtain FCM messagingToken ',err)
+				if(err != "ReferenceError: FCMPlugin is not defined"){
+					console.warn('unable to obtain FCM messagingToken ',err);
+				}
 			}
 		})
 	}
@@ -633,7 +651,8 @@ function firebaseSrv (
 			"data" : {
 				"title" : title,
 				"text" : text
-			}
+			},
+			"priority":"high"
 		}
 		getAnotherUser(uid)
 		.then(function(user){
@@ -865,7 +884,7 @@ function firebaseSrv (
 		})
 		return deferred.promise;
 	}
-	function ownBook(book){
+	function ownBook(book, wantTo){
 		book = cleanObj(book)
 		console.log('adding book to ownedBooks library')
 		var deferred = $q.defer();
@@ -898,11 +917,12 @@ function firebaseSrv (
 		        	}
 		        });
 		        if(!userHasBook && !userWishesBook){
-		        	console.log('adding book to user\'s library')
+		        	console.log('adding book to user\'s library');
 			        ownedBookKeys.$add({
 						key : refKey,
 						title : book.title,
-						status : "available"
+						status : "available",
+						wantTo : wantTo
 					})
 					//if another person is borrowing the book, their details is stored in secondParty
 					deferred.resolve("books added successfully")

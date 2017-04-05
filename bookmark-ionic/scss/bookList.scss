@@ -17,3 +17,13 @@ $book_image-height : 120px;
     padding-top: ($book_image-height - $select_icon-size) / 2;
 }
 
+.bookList__money{
+    color : rgb(38,127,66);
+    display: inline;
+    margin-left: -20px;
+    background-color: white;
+    border: black;
+    padding: 1px 5px;
+    border-radius: 100%;
+}
+

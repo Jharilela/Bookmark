@@ -20,10 +20,11 @@
     <div ng-repeat="(i,bookRow) in ownedBooks track by i" class="row" >
       <div class="row" style="padding: 0px;">
         <div ng-repeat="(j,book) in bookRow track by j" class="col col-33" style="padding: 0px;">
-          <div class="col col-33" style="padding: 0px;">
+          <div class="col col-33" style="padding: 0px;display: inline;">
             <i class="icon ion-checkmark-round bookList__book-image--overlay" ng-if="multipleSelect && book.showOverlay" ng-click="changeVisibility('ownedBooks', i, j)" ng-style="{'width' : book.imageWidth}"></i>
             <img ng-src="{{book.book.imageLink}}" class="bookList__book-image" title="{{book.title}}" ng-click="multipleSelect==false ? gotoBookDetail(book.book) : changeVisibility('ownedBooks', i, j)" on-hold="selectMultiple('ownedBooks',{row : i, col: j})" ng-style="{'opacity' : ((book.secondParty && book.secondParty.name)?0.5:1)}" booklist-image>
             </img>
+            <i ng-if="book.wantTo && (book.wantTo.rent || book.wantTo.sell)" class="ion-social-usd bookList__money"></i>
           </div>
         </div>
       </div>

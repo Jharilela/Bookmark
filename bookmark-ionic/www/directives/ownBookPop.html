@@ -1,0 +1,12 @@
+<div style="display: flex;">
+	<button class='button' ng-class="{'button-stable' : !ownBookandRent, 'button-dark' : ownBookandRent}" style="width: 50%" ng-click="pressownBookandRent()">	
+		Rent
+	</button>
+	<button class='button' ng-class="{'button-stable' : !ownBookandSell, 'button-dark' : ownBookandSell}" style="width: 50%" ng-click="pressownBookandSell()">
+		Sell
+	</button>
+</div>
+<div style="display: flex;">
+	<input type='number' placeholder='{{currency}}' ng-if="ownBookandRent" style="width: 50%;" ng-model="bookDetail.rentPrice">
+	<input type='number' placeholder='{{currency}}' ng-if="ownBookandSell" style="width: 50%;" ng-style="{'margin-left' : (!ownBookandRent && ownBookandSell)?'50%':'0px'}" ng-model="bookDetail.sellPrice">
+</div>

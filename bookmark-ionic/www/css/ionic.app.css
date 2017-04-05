@@ -10174,6 +10174,20 @@ a.autolinker {
 ng-map#pop {
   display: contents !important; }
 
+.viewMapPop.frame {
+  left: 10px;
+  width: 95%; }
+
+.viewMapPop > .header {
+  margin-top: -20px;
+  background-color: #387ef5;
+  text-align: center;
+  color: white;
+  height: 30px; }
+
+.userProfile i[class=ion-chevron-left]::before {
+  font-size: 22px; }
+
 .image-list-thumb {
   padding: 2px 2px 2px 2px;
   height: 100px; }
@@ -10209,7 +10223,7 @@ ng-map#pop {
   padding-bottom: 100%; }
 
 .fullscreen-image.book-title {
-  padding-top: 60%;
+  padding-top: 70%;
   max-width: 60%;
   color: white; }
 
@@ -10257,6 +10271,15 @@ ng-map#pop {
   height: 120px;
   text-align: center;
   padding-top: 35px; }
+
+.bookList__money {
+  color: #267f42;
+  display: inline;
+  margin-left: -20px;
+  background-color: white;
+  border: black;
+  padding: 1px 5px;
+  border-radius: 100%; }
 
 .no-padding {
   padding: 0px; }

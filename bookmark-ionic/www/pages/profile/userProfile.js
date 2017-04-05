@@ -2,7 +2,7 @@ angular.module('bookmark.controllers')
 
 .controller('userProfileCtrl', function($scope,$timeout,$state,$ionicPopover, $stateParams, $ionicHistory, firebaseSrv, NgMap) {
   	console.log('userprofileCtrl - loaded')
-  	var vm = this;
+  	var vm = this; 
   	$scope.user =  $stateParams.user
   	console.log('scope.user ', $scope.user)
   	$scope.editWidth = (window.innerWidth/2)-100;
@@ -103,12 +103,14 @@ angular.module('bookmark.controllers')
 
 	$scope.displayLocation = function($event){
 		console.log('displaying location')
-		var e = $event
+		var e = $event;
+
 		$ionicPopover.fromTemplateUrl('directives/viewMapPop.html', {
 			scope: $scope
 			}).then(function(popover) {
 			$scope.popover = popover;
 			$scope.openPopover($event);
+			vm.popoverMap = NgMap.initMap("popoverMap");
 		});
 
 		$scope.openPopover = function($event) {
@@ -120,21 +122,19 @@ angular.module('bookmark.controllers')
 		$scope.$on('$destroy', function() {
 			$scope.popover.remove();
 		});
-
-		vm.map = NgMap.initMap("userMap");
 	}
 })
-.directive('mappop', function() {
-    return { 
-      link: function(scope, element, attributes){
-        element.css({'display' : 'initial'})
-      }
-    }
-})
-.directive('viewpop', function() {
-    return { 
-      link: function(scope, element, attributes){
-        element.css({'left' : '10px', 'width' : '95%'})
-      }
-    }
-})
+// .directive('mappop', function() {
+//     return { 
+//       link: function(scope, element, attributes){
+//         element.css({'display' : 'block', 'width : 100%'})
+//       }
+//     }
+// })
+// .directive('viewpop', function() {
+//     return { 
+//       link: function(scope, element, attributes){
+//         element.css({'left' : '10px', 'width' : '95%'})
+//       }
+//     }
+// })

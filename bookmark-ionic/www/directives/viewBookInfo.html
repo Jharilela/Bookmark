@@ -6,6 +6,11 @@
 	        	<div style="text-align: center;">
 	        		{{book.title}}
 	        	</div><br>
+	        	<div ng-if="!book.secondParty">
+	        		Want to lend book ?
+	        		<br>
+	        		Want to sell book ?
+	        	</div>
 	        	<div ng-if="book.secondParty && book.secondParty.name && book.secondParty.type=='rent'" >
 		        	<div class="row">
 		        		<div class="col">

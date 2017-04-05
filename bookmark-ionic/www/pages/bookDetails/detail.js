@@ -34,6 +34,7 @@ angular.module('bookmark.controllers')
 	$q.all([firebaseSrv.getUser(), firebaseSrv.searchBookOwners($scope.book)])
 	.then(function(data){
 		var currentUser = data[0];
+		$scope.user = currentUser;
 		console.log("currentUser ",currentUser)
 		$scope.bookOwners = data[1];
 		console.log("bookOwners ",$scope.bookOwners)
@@ -63,49 +64,104 @@ angular.module('bookmark.controllers')
 	  };
 
 	$scope.ownBook = function(){
-		firebaseSrv.ownBook($scope.book)
-		.then(function(log){
-			console.log('success : ', log)
-			vm.message = {
-				type : 'success',
-				content: log
-			}
-		})
-		.catch(function(error){
-			console.log('error owning book : ',error)
-			if(error == "book already in wishList"){
-				var confirmPopup = $ionicPopup.confirm({
-			     title: 'Book is in your wish list',
-			     template: '<center>Remove book from wish list<br> and add it to your book collection ?</center>'
-			    });
+		$scope.ownBookandRent = false;
+		$scope.ownBookandSell = false;
+		vm.rentPrice = null;
+		vm.sellPrice = null;
 
-			    confirmPopup.then(function(res) {
-			     if(res) {
-			       firebaseSrv.removeUserBook($scope.book)
-			       .then(function(){
-			       		$scope.ownBook();
-			       })
-			       .catch(function(error){
-			       		vm.message = {
+		$scope.currency = $scope.user.location.currency;
+
+		$scope.pressownBookandRent = function(){
+			if($scope.ownBookandRent){
+				$scope.ownBookandRent = false ;
+			}
+			else{
+				$scope.ownBookandRent = true;
+			}
+		}
+
+		$scope.pressownBookandSell = function(){
+			if($scope.ownBookandSell){
+				$scope.ownBookandSell = false ;
+			}
+			else{
+				$scope.ownBookandSell = true;
+			}
+		}
+
+		$ionicPopup.show({
+			templateUrl : "directives/ownBookPop.html",
+			title : "Add book to your libray",
+			subTitle : "would you like to spread the knowledge?",
+			scope : $scope,
+			buttons: [
+			{ 	text: 'Cancel',
+				onTap: function(e){
+					return false;
+				}
+			},
+			{
+				text: '<b>Confirm</b>',
+				type: 'button-positive',
+				onTap: function(e) {
+					var obj = {};
+					if($scope.ownBookandRent && vm.rentPrice)
+					obj.rentPrice = vm.rentPrice;
+					if($scope.ownBookandSell && vm.sellPrice)
+					obj.sellPrice = vm.sellPrice;
+					return obj;
+				}
+			}]
+		})
+		.then(function(wantTo){
+			if(wantTo != false){
+				wantTo.rent = $scope.ownBookandRent;
+				wantTo.sell = $scope.ownBookandSell;
+				firebaseSrv.ownBook($scope.book, wantTo)
+				.then(function(log){
+					console.log('success : ', log)
+					vm.message = {
+						type : 'success',
+						content: log
+					}
+				})
+				.catch(function(error){
+					console.log('error owning book : ',error)
+					if(error == "book already in wishList"){
+						var confirmPopup = $ionicPopup.confirm({
+					     title: 'Book is in your wish list',
+					     template: '<center>Remove book from wish list<br> and add it to your book collection ?</center>'
+					    });
+
+					    confirmPopup.then(function(res) {
+					     if(res) {
+					       firebaseSrv.removeUserBook($scope.book)
+					       .then(function(){
+					       		$scope.ownBook();
+					       })
+					       .catch(function(error){
+					       		vm.message = {
+									type : 'error',
+									content : error
+								}
+					       })
+					     } else {
+					       console.log('User is not sure to add book to wish list');
+					     }
+					    });
+					}
+					else{
+						vm.message = {
 							type : 'error',
 							content : error
 						}
-			       })
-			     } else {
-			       console.log('User is not sure to add book to wish list');
-			     }
-			    });
+					}
+				})
+				.finally(function(){
+					console.log('vm.message', vm.message)
+					$timeout(removeMessage, 3000);
+				})
 			}
-			else{
-				vm.message = {
-					type : 'error',
-					content : error
-				}
-			}
-		})
-		.finally(function(){
-			console.log('vm.message', vm.message)
-			$timeout(removeMessage, 3000);
 		})
 	}
 	$scope.wishToRead = function(){

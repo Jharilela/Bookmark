@@ -129,3 +129,17 @@ $photo-margin : 30px;
 ng-map#pop{
 	display: contents !important;
 }
+.viewMapPop.frame{
+	left : 10px; 
+	width :95%;
+}
+.viewMapPop > .header{
+	margin-top: -20px;
+    background-color: $positive;
+    text-align: center;
+    color: white;
+    height: 30px;
+}
+.userProfile i[class=ion-chevron-left]::before{
+	font-size: 22px;
+}
