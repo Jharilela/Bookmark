@@ -11,7 +11,7 @@ To debug on device `ionic run ios -l -c -s`
 
 Step 2 : open the xcode file /Users/J/Documents/Bookmark/bookmark-ionic/platforms/ios/bookmark.xcodeproj
 
-Step 3 : on xcode, go to the info section of bookmark, under Custom ios target properties, add string values ot all the provacy keys
+Step 3 : on xcode, go to the info section of bookmark, under Custom ios target properties, add string values ot all the privacy keys
 
 Step 4 : press product -> archive and then upload to itunes store
 
