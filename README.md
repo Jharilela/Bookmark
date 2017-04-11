@@ -15,6 +15,7 @@ Step 3 : on xcode, go to the info section of bookmark, under Custom ios target p
 
 Step 4 : press product -> archive and then upload to itunes store
 
+Step 5 : To publish it to the apple store, visit https://itunesconnect.apple.com/ To view all certicificates and provisioning profiles, visit https://developer.apple.com/
 
 
 ## To build an android release
