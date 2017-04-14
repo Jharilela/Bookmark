@@ -1,12 +1,12 @@
  <ion-popover-view style="margin-left: 0px; left: 50%">
     <ion-header-bar class="bar-positive">
-      <h1 class="title">Borrow from</h1>
+      <h1 class="title">Buy from</h1>
     </ion-header-bar>
     <ion-content style="margin: 10px 5px;">
 		<div ng-repeat="owner in bookOwners" class="bookDetails_bookOwner-thumbnail--container">
 			<img ng-src="{{owner.profilePictureUrl}}" class="bookDetails_bookOwner-thumbnail" ui-sref="userProfile({user : owner})" ng-click="closePopover()">
-			<div style="margin-bottom: 10px;" ng-if="owner.wantTo && owner.wantTo.rentPrice">
-				{{owner.wantTo.rentPrice}} {{owner.wantTo.currency}}
+			<div style="margin-bottom: 10px;" ng-if="owner.wantTo && owner.wantTo.sellPrice">
+				{{owner.wantTo.sellPrice}} {{owner.wantTo.currency}}
 			</div>
 		</div>
 		<center ng-if="!bookOwners || bookOwners.length == 0">Be the first to own the book</center>

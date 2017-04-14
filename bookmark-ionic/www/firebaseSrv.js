@@ -73,6 +73,7 @@ function firebaseSrv (
 		logSearch : logSearch,
 		suggestSearch : suggestSearch,
 		ownBook : ownBook,
+		changeBookStatus : changeBookStatus,
 		removeUserBook : removeUserBook,
 		lendBook : lendBook,
 		receiveOwnedBook : receiveOwnedBook,
@@ -83,7 +84,8 @@ function firebaseSrv (
 		getChat : getChat,
 		doesChatExist : doesChatExist,
 		sendMessage : sendMessage,
-		images : images
+		images : images,
+		getCurrency : getCurrency
 	}
 
 	function isNewUser(uid){
@@ -286,6 +288,7 @@ function firebaseSrv (
 				if(allUser.$id != auth.$getAuth().uid)
 				angular.forEach(allUser.booksOwned, function(bookOwned, key2){
 					if(bookOwned.title && levenshtein(bookOwned.title, book.title)>90){
+						allUser.wantTo = bookOwned.wantTo;
 						getProfilePicture(allUser.$id)
 						.then(function(url){
 							allUser.profilePictureUrl = url
@@ -586,7 +589,8 @@ function firebaseSrv (
 				    	// method 1
 						if(data.wasTapped){
 						    //Notification was received on device tray and tapped by the user.
-						    alert( "1. "+JSON.stringify(data) );
+						    //alert("new message");
+						    //alert( "1. "+JSON.stringify(data) );
 						}else{
 						    //Notification was received in foreground. Maybe the user needs to be notified.
 						    // alert popup when message is obtained
@@ -608,8 +612,9 @@ function firebaseSrv (
 						}
 			    	}
 			    	else if(ionic.platform.isIOS()){
+			    		//alert("new message");
 			    		//display notification when message is received
-			    		alert("message received");
+			    		//alert("message received");
 			    	}
 			    });
 			}
@@ -646,7 +651,9 @@ function firebaseSrv (
 			"notification": {
 				"title": title,
 				"body": text,
-				"icon" : "ic_stat_bookmark_icon"
+				"icon" : "ic_stat_bookmark_icon",
+				"sound":"default",
+				'content_available' : true
 			},
 			"data" : {
 				"title" : title,
@@ -814,7 +821,6 @@ function firebaseSrv (
 
 	    $firebaseArray(user.child("booksOwned")).$loaded()
 	    .then(function(bookKeys){
-	    	console.log('booksOwned loaded successfully', bookKeys)
 	    	if(type == "keys"){
 		    	deferred.resolve(bookKeys)
 		    }
@@ -836,6 +842,7 @@ function firebaseSrv (
 		    	})
 		    }
 		    else if(type == "full+keys"){
+		    	console.log('booksOwned loaded successfully', bookKeys)
 		    	getBookCollection()
 		    	.then(function(bookCollections){
 		    		angular.forEach(bookCollections, function(bookCollection) {
@@ -961,6 +968,20 @@ function firebaseSrv (
 			deferred.reject("cannot load books on server")
 		})
 		return deferred.promise;
+	}
+	function changeBookStatus(book){
+		getBooksOwned("currentUser", "keys")
+		.then(function(booksOwned){
+			angular.forEach(booksOwned, function(bookOwned, index){
+				if(book.$id == bookOwned.$id){
+					bookOwned.wantTo = book.wantTo;
+					booksOwned.$save(index);
+				}
+			})
+		})
+		.catch(function(err){
+
+		})
 	}
 	function removeUserBook(book){
 		var deferred = $q.defer();
@@ -1529,6 +1550,42 @@ function firebaseSrv (
 		.catch(function(err){
 			console.error('failed to send message ',err);
 			deferred.reject('failed to send message');
+		})
+		return deferred.promise;
+	}
+
+	function getCurrency(){
+		var deferred = $q.defer();
+		getUser()
+		.then(function(user){
+			if(user){
+				if(user.location){
+					if(user.location.currency){
+						deferred.resolve(user.location.currency);
+					}
+					else{
+						if(user.location.country){
+							countryList.getCurrency(user.location.country)
+							.then(function(currency){
+								deferred.resolve(user.location.currency);
+							})
+						}
+						else{
+							deferred.reject('user has no country and currency')
+						}
+					}
+				}
+				else{
+					deferred.reject("user has no location")
+				}
+			}
+			else{
+				deferred.reject("user does not exist ")
+			}
+		})
+		.catch(function(err){
+			console.error('unable to get user data ',err);
+			deferred.reject("unable to get user data ")
 		})
 		return deferred.promise;
 	}

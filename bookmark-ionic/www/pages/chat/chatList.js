@@ -10,39 +10,6 @@ angular.module('bookmark.controllers')
 	$scope.chatUsers = [];
 	$scope.loading = true;
 
-	$scope.display = function(){
-		$cordovaLocalNotification.schedule({
-           id: "1234",
-           title: "data.title",
-           text: "data.text",
-           icon : "ic_nothing",
-           smallIcon : "ic_stat_bookmark_icon",
-           sound: null
-	    }).then(function () {
-	           console.log("The notification has been displayed");
-	    }).catch(function(err){
-	       	console.warn("unable to display notification : "+err);
-	    })
-	}
-	$scope.delay = function(){
-		$cordovaLocalNotification.schedule({
-	       id: "1234",
-	       title: "data.title",
-	       text: "data.text",
-	       at : new Date() + (1000 * 5),
-	       icon : "ic_nothing",
-	       smallIcon : "ic_stat_bookmark_icon",
-	       sound: null
-	    }).then(function () {
-	        console.log("The notification has been displayed");
-	    }).catch(function(err){
-	       	console.warn("unable to display notification : "+err);
-	    })
-	}
-	$scope.alert = function(){
-		alert("hi");
-	}
-
 	// $scope.$on("$ionicView.beforeEnter", function(event, data){
 	    firebaseSrv.auth.$onAuthStateChanged(function(firebaseUser) 
 	    {

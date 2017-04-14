@@ -1,6 +1,6 @@
 angular.module('bookmark.controllers')
 
-.controller('userProfileCtrl', function($scope,$timeout,$state,$ionicPopover, $stateParams, $ionicHistory, firebaseSrv, NgMap) {
+.controller('userProfileCtrl', function($scope,$timeout,$state,$ionicPopover,LocationService, $stateParams, $ionicHistory, firebaseSrv, NgMap) {
   	console.log('userprofileCtrl - loaded')
   	var vm = this; 
   	$scope.user =  $stateParams.user
@@ -23,6 +23,22 @@ angular.module('bookmark.controllers')
 		arr.push(user.location.lat);
 		arr.push(user.location.lng);
 		vm.mapCenter = arr;
+
+		firebaseSrv.getUser()
+		.then(function(currentUser){
+			if(currentUser.location && user.location){
+				var distance = LocationService.calculateDistance({lat:currentUser.location.lat, lng:currentUser.location.lng},{lat : user.location.lat, lng:user.location.lng})
+				if(distance>1000){
+					$scope.distance = (distance/1000).toFixed(0);
+				}
+				else{
+					$scope.distance = (distance/1000).toFixed(2);
+				}
+			}
+		})
+		.catch(function(err){
+			console.error("failed to fetch currentUser data for calculating distance");
+		})
 		// $timeout(function() {
 			// vm.mapCenter = arr;
 			// map.setCenter({lat: user.location.lat, lng: user.location.lng});

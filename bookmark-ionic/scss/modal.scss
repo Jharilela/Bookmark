@@ -27,6 +27,7 @@
     position: fixed;
     right: 0;
     top: 0;
+    overflow-x: hidden;
 }
 .fullscreen-image.profile{
     border-radius: 100%;
@@ -73,4 +74,26 @@
 }
 .scroll {
   height: 100%;
+}
+.viewBookInfo i[class*="ion-close-round"]{
+    position: absolute;
+    right: 0px;
+    color:white;
+    margin-right: 5px;
+    margin-top: 5px;
+    z-index : 9;
+}
+.viewBookInfo i[class*="ion-close-round"]::before{
+    font-size: 30px
+}
+.viewBookInfo .transparent{
+    background-color: transparent;
+    border: none;
+    color: white;
+}
+.viewBookInfo__input--currency{
+    background-color: transparent !important;
+    border-bottom: white 1px solid !important;
+    color: white !important;
+    width: 48%;
 }

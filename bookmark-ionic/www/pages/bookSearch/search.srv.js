@@ -596,7 +596,7 @@ function searchSrv ($http, $q, ngProgressFactory, searchAPI){
 				    	}
 				    	if(key="imageLink"){
 				    		console.log('imageLink', bookList[bookExists.index].obj.imageLink)
-				    		if(bookList[bookExists.index].obj.imageLink.indexOf('nophoto')!=-1){
+				    		if(!bookList[bookExists.index].obj.imageLink || bookList[bookExists.index].obj.imageLink.indexOf('nophoto')!=-1){
 				    			console.log('empty picture', bookList[bookExists.index])
 				    			bookList[bookExists.index].noOfOccurrence = 0;
 				    		}

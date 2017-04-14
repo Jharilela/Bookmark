@@ -4,6 +4,7 @@ angular.module('bookmark.services')
   var detailsService = new google.maps.places.PlacesService(document.createElement("input"));
   // var distanceService = new google.maps.geometry.spherical;
   function calculateDistance(position1, position2){
+    //position1 and 2 are objects containing the parameters 'lat' and 'lng' just like the below inProximity funciton
     var marker1 = new google.maps.Marker({
       position: position1
     });

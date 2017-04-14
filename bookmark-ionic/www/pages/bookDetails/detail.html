@@ -1,12 +1,12 @@
 <ion-view hide-nav-bar="true" view-title="bookDetail">
 	<ion-header-bar>
-	<button class="button button-clear button-positive " ng-click="goBack()">
+	<button class="button button-clear button-positive " ng-click="goBack()" style="width: 40px;text-align: left;">
 		<i class="ion-chevron-left"></i>
 	</button>
 	 
 	</ion-header-bar>
 
-	<ion-content class="padding" delegate-handle="mainScroll">
+	<ion-content class="padding">
 		<div ng-if="bookDetail.message.content!=''" ng-class="{' detail-successMessage' : bookDetail.message.type=='success', 'detail-errorMessage' : bookDetail.message.type=='error'}">
 			<i ng-class="{'icon ion-checkmark-circled' : bookDetail.message.type=='success', 'ion-android-cancel' : bookDetail.message.type=='error'}"></i>
 			{{bookDetail.message.content}}
@@ -16,9 +16,9 @@
 		  	<img ng-src="{{bookImage}}" width="100%">
 		  </div>
 		  <div class="col" style="height: 0px; display: inline;">
-			<!-- <button class="button button-block button-energized" ng-click="buy()">
-			  Buy now
-			</button> -->
+			<button class="button button-block button-energized" ng-click="buy($event)">
+			  Buy
+			</button>
 			<button class="button button-block button-balanced" ng-click="borrow($event)">
 			  Borrow
 			</button>

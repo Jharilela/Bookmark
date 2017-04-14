@@ -21,7 +21,6 @@
     "cordova-plugin-statusbar",
     "cordova-plugin-network-information",
     "cordova-plugin-console@~1.0.3",
-    "cordova-plugin-googlemaps",
     "cordova-plugin-fcm",
     "de.appplant.cordova.plugin.local-notification",
     "ionic-plugin-keyboard"

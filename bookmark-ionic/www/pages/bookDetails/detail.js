@@ -1,5 +1,5 @@
 angular.module('bookmark.controllers')
-.controller('bookDetailCtrl', function($scope,$q,$ionicPopover, $ionicPopup, $ionicScrollDelegate, $location, LocationService ,$rootScope, $state, $stateParams, $window,  $timeout, $ionicHistory, detailSrv, firebaseSrv){
+.controller('bookDetailCtrl', function($scope,$q,$ionicPopover, $ionicPopup, $location, LocationService ,$rootScope, $state, $stateParams, $window,  $timeout, $ionicHistory, detailSrv, firebaseSrv){
 	console.log('bookDetailCtrl loaded ', $stateParams);
 	var vm = this;
 	$rootScope.angular = angular;
@@ -40,7 +40,7 @@ angular.module('bookmark.controllers')
 		console.log("bookOwners ",$scope.bookOwners)
 		angular.forEach($scope.bookOwners, function(bookOwner, key){
 	        distance = LocationService.inProximity(currentUser, bookOwner, LocationService.stringToDistance("5km"))
-	        bookOwner.distance = (distance/1000).toFixed(2);+"km"
+	        bookOwner.distance = (distance/1000).toFixed(2)+"km";
 	        console.log('distance : '+distance)
 		})
 		$scope.bookOwners.sort(dynamicSortMultiple("distance"));
@@ -211,38 +211,43 @@ angular.module('bookmark.controllers')
 			$timeout(removeMessage, 3000);
 		})
 	}
+	$scope.buy = function($event){
+		var e = $event;
+		$ionicPopover.fromTemplateUrl('directives/viewBuyFrom.html', {
+			scope: $scope
+		}).then(function(popover) {
+			$scope.popover = popover;
+			$scope.openPopover($event);
+		});
 
+		$scope.openPopover = function($event) {
+			$scope.popover.show($event);
+		};
+		$scope.closePopover = function() {
+			$scope.popover.hide();
+		};
+		$scope.$on('$destroy', function() {
+			$scope.popover.remove();
+		});
+	}
 	$scope.borrow = function($event){
 		var e = $event
-		if($scope.bookOwners.length == 0 ){
-			$ionicPopup.alert({
-		     title: 'No book owners',
-		     template: '<center>No one has the book on their collection. Be the first to own the book</center>'
-		   });
-		}
-		else{
-			  $ionicPopover.fromTemplateUrl('directives/viewBorrowFrom.html', {
-			    scope: $scope
-			  }).then(function(popover) {
-			    $scope.popover = popover;
-			    $scope.openPopover($event);
-			  });
+		$ionicPopover.fromTemplateUrl('directives/viewBorrowFrom.html', {
+			scope: $scope
+		}).then(function(popover) {
+			$scope.popover = popover;
+			$scope.openPopover($event);
+		});
 
-			  $scope.openPopover = function($event) {
-			    $scope.popover.show($event);
-			  };
-			  $scope.closePopover = function() {
-			    $scope.popover.hide();
-			  };
-		      $scope.$on('$destroy', function() {
-			    $scope.popover.remove();
-			  });
-
-			// var id = "borrowFrom"
-			// $location.hash(id);
-			// $ionicScrollDelegate.$getByHandle('mainScroll').anchorScroll(id);
-		}
-
+		$scope.openPopover = function($event) {
+			$scope.popover.show($event);
+		};
+		$scope.closePopover = function() {
+			$scope.popover.hide();
+		};
+		$scope.$on('$destroy', function() {
+			$scope.popover.remove();
+		});
 	}
 
 	function removeMessage(){

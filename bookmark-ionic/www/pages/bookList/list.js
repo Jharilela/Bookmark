@@ -15,8 +15,9 @@ angular.module('bookmark.controllers')
 		   getBooks()
 		firebaseSrv.auth.$onAuthStateChanged(function(firebaseUser) {
 		 	if (firebaseUser) {
-				getBooks()
-				refeshable = true	
+				getBooks();
+				refeshable = true;
+				getCurrency();
 			} 
 
 			else {
@@ -27,6 +28,17 @@ angular.module('bookmark.controllers')
 			}
 		}) 
 	});
+
+	function getCurrency(){
+		firebaseSrv.getCurrency()
+		.then(function(currency){
+			$scope.currency = currency;
+		})	
+		.catch(function(err){
+			console.error('unable to obtain currency : ', err);
+			$scope.currency = " ";
+		})
+	}
 
 	function getBooks(){
 		firebaseSrv.getBooksOwned("currentUser", "full+keys")
@@ -117,6 +129,7 @@ angular.module('bookmark.controllers')
 	$scope.closeModal = function() {
 		$scope.modal.hide();
 		$scope.modal.remove();
+		getBooks();
 		$scope.form = {};
 	}
 	$scope.submitModal = function(){
@@ -127,6 +140,20 @@ angular.module('bookmark.controllers')
 			})
 		})
 		$scope.closeModal();
+	}
+
+	$scope.changeBookStatus = function(book, param){
+		console.log('changing book '+book.title+' param : '+param+" value : "+book.wantTo[param]);
+		if(book.wantTo.sell == false && book.wantTo.sellPrice){
+			delete book.wantTo.sellPrice;
+		}
+		if(book.wantTo.rent == false && book.wantTo.rentPrice){
+			delete book.wantTo.rentPrice;
+		}
+		if($scope.currency){
+			book.wantTo.currency = $scope.currency;
+		}
+		firebaseSrv.changeBookStatus(book);
 	}
 
 	$scope.lendBook = function(){
