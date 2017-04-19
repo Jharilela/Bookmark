@@ -8,5 +8,9 @@
     "angularfire": "^2.0.2",
     "ng-cordova-oauth": "^0.2.10",
     "jr-crop": "^1.1.2"
+  },
+  "resolutions": {
+    "angular": "^1.5.8",
+    "angular-sanitize": "^1.5.8"
   }
 }
