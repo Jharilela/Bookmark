@@ -12,6 +12,7 @@ angular.module('bookmark.controllers')
 	vm.didYouMeanKeyword = ""
 	$scope.subheaderHeight = "22px";
 	$scope.booksNearby = [];
+	$scope.booksNearbyFetched = false;
 
 	$scope.$watch('online', function(newStatus) { 
 		console.log('connection is ',newStatus?'online':'offline')
@@ -33,6 +34,7 @@ angular.module('bookmark.controllers')
 			.then(function(booksNearby){
 				$scope.booksNearby = booksNearby.chunk(3);
 				console.log("booksNearby ",$scope.booksNearby)
+				$scope.booksNearbyFetched = true;
 			})
 		} 
 		else {

@@ -29,7 +29,9 @@
 			</div>
 		</div>
 		<div ng-if="search.books.length==0">
-			<center>Books near you</center>
+			<center ng-if="!booksNearbyFetched">Getting books near you</center>
+			<center ng-if="booksNearbyFetched && booksNearby.length > 0">Books near you</center>
+			<center ng-if="booksNearbyFetched && booksNearby.length == 0">Sorry... No books nearby</center>
 			<div ng-repeat="(i,bookRow) in booksNearby" style="padding: 0px;" class="row" >
 		      <div class="row" style="padding: 0px;">
 		        <div ng-repeat="(j,book) in bookRow" class="col col-33" style="padding: 0px;">

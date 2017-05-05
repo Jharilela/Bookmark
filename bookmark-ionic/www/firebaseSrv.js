@@ -319,13 +319,20 @@ function firebaseSrv (
 
 			for(var i= allUsers.length-1; i>=0; i--){
 				var allUser = allUsers[i];
-				var distance = LocationService.inProximity(currentUser, allUser, radius)
-				if(distance){
-					allUser.distance = distance;
+				if(currentUser.location && allUser.location)
+				{
+					var distance = LocationService.inProximity(currentUser, allUser, radius)
+					if(distance){
+						allUser.distance = distance;
+					}
+					else{
+			        	allUsers.splice(i,1);
+			        }
 				}
-				else{
-		        	allUsers.splice(i,1);
-		        }
+				else
+				{
+					allUser.distance = 10000;
+				}
 			}
 			allUsers.sort(dynamicSortMultiple("distance"))
 
