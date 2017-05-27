@@ -1,0 +1,903 @@
+Data regarding the books, users, chats, search histories are all stored in a real time database - Google Firebase, which is a free to use database for hobbyists with limited quota. Firebase seemed a noteworthy database option because it saves time, effort and money as it does not require back end code and separate server hosting. The firebase service can be adapted to various platforms : android, ios, web, C++ and unity. Bookmark implements the web version of Firebase while integrating ios and android certificates to ensure access to the database after deployment.
+
+Quick access to 
+1. [Firebase Console](https://console.firebase.google.com/project/bookmark-140216/overview)
+2. [Data Structure](#data-structure)
+3. [Configuration](#configuration)
+4. [Functions](#functions)
+
+***
+
+# Data Structure
+
+Firebase stores data in a unique way. In traditional SQL format, data is stored in rows and columns where each column represented a variable/property. Firebase stores data in the form of JSON objects with key value pairs. Each data object or array is identified with a unique `$id` parameter that is determined by the firebase service (it is recommended not to alter the $id values).
+
+    bookmark-140216  (Firebase)
+    |
+    |- books
+       |-bookId
+         |- amazonId
+         |- authors
+         |- description
+         |- googleId
+         |- goodReadsId
+         |- imageLink
+         |- ISBN
+         |- publisher
+         |- title
+         |- other details ....
+    |- chat
+       |- chatId
+         |- messages
+            |- messageId
+               |- content
+               |- from
+               |- timestamp
+            |- messageId
+               |- location
+               |- from
+               |- timestamp
+         |- timestamp
+         |- users
+            |- 0
+               |- name
+               |- uid
+            |- 1
+               |- name
+               |- uid
+    |- search
+       |- searchId
+         |- count
+         |- keyword
+         |- similarKeywords
+            |- similarKeywordId
+               |- count
+               |- keyword
+               |- timestamp
+         |- timestamp
+         |- verified
+    |- users
+       |- userId
+         |- booksOwned
+         |- email
+         |- firstName
+         |- hasProfilePicture
+         |- lastname
+         |- location
+         |- phoneNumber
+         |- provider
+         |- wishList
+
+# Configuration
+To add firebase onto a web project, we must declare global variable of the services we are using. In the case of bookmark, we will be using firebase database to store the data's described in the [data structure header](#data-structure) and firebase storage to store users' profile pictures in jpg and png format.
+
+Before we can use the services, we must import the scripts onto the main HTML file. The files are located externally on the google server. However, this approach causes the app to crash when no connection is detected. hence, the files are downloaded onto the lib folder and imported from the HTML file. The angular version of firebase from the [official github repository](https://github.com/firebase/angularfire) is downloaded and used. Since ionic 1 is being used for the application, version 1 angularfire is used.
+
+    <!-- Firebase -->
+    <script src="lib/firebase/firebase-app.js"></script>
+    <script src="lib/firebase/firebase-auth.js"></script>
+    <script src="lib/firebase/firebase-database.js"></script>
+    <script src="lib/firebase/firebase-messaging.js"></script>
+    <script src="lib/firebase/firebase-storage.js"></script>
+    <script src="lib/angularfire/dist/angularfire.min.js"></script>
+
+In the HTML file, we include a script tag containing the global firebase variables
+
+    var firebaseConfig = 
+    {
+        apiKey: "AIzaSyA2LUTJpW7oGxg-hgBijd4zoaS6BqIDzts",
+        authDomain: "bookmark-140216.firebaseapp.com",
+        databaseURL: "https://bookmark-140216.firebaseio.com",
+        storageBucket: "bookmark-140216.appspot.com",
+        messagingSenderId: "316498021139"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    var ref = firebase.database().ref();
+    var storage = firebase.storage();
+
+Now, the `firebase` and `storage` can be accessed from anywhere in the application.
+
+The access to the database and storage services are centralized to a factory for easy debugging and prevention of redundant functions. Hence, we create an angular factory called `firebaseSrv` that returns functions which can read and write from the firebase database. 
+
+    'use strict'
+    angular.module('bookmark.services')
+    .factory('firebaseSrv', firebaseSrv)
+
+    function firebaseSrv (services){
+        var auth = $firebaseAuth();
+	var ref = firebase.database().ref();
+	var userRef, allUserRef,bookRef,searchRef, chatRef, storageRef;
+
+	auth.$onAuthStateChanged(function(firebaseUser) {
+            if (firebaseUser) {
+                console.log("FIREBASE onAuthStateChanged \n Signed in as:", firebaseUser.uid);
+                userRef = ref.child("users").child(auth.$getAuth().uid);
+                allUserRef = ref.child("users");
+                bookRef = ref.child("books");
+                searchRef = ref.child("search");
+                chatRef = ref.child("chat");
+                storageRef = storage.ref();
+            } else {
+                console.log("profileSrv - Signed out");
+                $state.go("register");
+            }
+	}); 
+
+	return{
+            function_name : function(){
+                return something
+            }
+        }
+    }
+
+The `auth` variable receives an firebase authentication object. The state of the variable changes when the user logs in or logs out. Whenever a user logs in, the `$onAuthStateChange` method returns a firebase authentication objects; if this object is null, this means the user has logged out and we return to the register page where the user can log in before accessing the firebase rw services. 
+
+As the user logs in, the firebaseUser object contains the unique id `uid` of the user which identifies users' personal details in the firebase database. Reference variables are then created to store the address of various databases that are accessed frequently. All the database reference are created locally with respect to the `firebaseSrv` factory and are not returned to any controller; this ensures that firebase can only be accessed from the factory and not from any other controller calling the firebaseSrv service.
+
+# Functions
+The firebaseSrv factory has alot of functions that can be used to read from and write to firebase database. To access these services, we must first import the javascript file called `firebaseSrv.js`
+
+    <script src="firebaseSrv.js"></script>
+
+Then we must import the service onto the controller, factory or service
+
+    angular.module('bookmark.controllers')
+    .controller('chatRoomCtrl', function(firebaseSrv) {})
+
+To use any of the functions below, we must call upon the firebaseSrv class followed by the function name in capCase
+
+    firebaseSrv.functionName
+
+Since the database is stored in a firebase serveer and may cause delay when retreiving the item, many of the functions return data asynchronously using the `$q.defer()` method. In order to obtain data properly, the syntax goes as follows 
+
+    firebaseSrv.functionName(parameters)
+    .then(function(data){
+        // do something
+    })
+    .catch(function(err){
+        // display error
+    })
+
+list of functions:
+1. [getUser](#getuser)
+2. [getAnotherUser](#getanotheruser)  
+3. [userHaveProfilePicture](#userhaveprofilepicture)
+4. [getProfilePicture](#getprofilepicture)
+5. [takePicture](#takepicture)
+6. [uploadPicture](#uploadpicture)
+7. [setUserProfileStatus](#setuserprofilestatus)
+8. [saveUser](#saveuser)  
+9. [saveMessagingToken](#savemessagingtoken)
+10. [sendNotification](#sendnotification)
+11. [updateUserInfo](#updateuserinfo)  
+12. [deleteUser](#deleteuser)
+13. [searchUser](#searchuser)
+14. [searchBookOwners](#searchbookowners)
+15. [getBooksNearby](#getbooksnearby)
+16. [validateName](#validatename)
+17. [validatePhoneNumber](#validatephonenumber)
+18. [validateEmail](#validateemail)  
+19. [getSearchCollection](#getsearchcollection) 
+20. [getBooksOwned](#getbooksowned)
+21. [getWishList](#getwishlist)
+22. [logSearch](#logsearch)  
+23. [suggestSearch](#suggestsearch)
+24. [ownBook](#ownbook)
+25. [changeBookStatus](#changebookstatus)
+26. [removeUserBook](#removeuserbook)
+27. [lendBook](#lendbook)  
+28. [receiveOwnedBook](#receiveownedbook)  
+29. [addToWishList](#addtowishlist)
+30. [newChat](#newchat)
+31. [getChatRooms](#getchatrooms)
+32. [getChat](#getchat)
+33. [doesChatExist](#doeschatexist)
+34. [sendMessage](#sendmessage)
+35. [images](#images)  
+36. [getCurrency](#getcurrency)
+
+## getUser
+Asynchronous function that returns user data stored in firebase when user creates the account for the first time. It also loads the user profile picture from firebase storage. Each user's profile picture is named after their user id. The function loads the user data in therms of firebase object and then loads the profile picture and location. This function can only be used to obtain the details of the person using the app and not of any other user, to do so you must access the [getAnotherUser function](#getAnotherUser)
+
+After the user data has been loaded, the currency and profile picture is asynchronously loaded and returned after with some delay. The currency is loaded from the countryList service and the profilePicture is loaded from the `getProfilePicture` function within firebaseSrv.
+
+To use the function, we must abide by the syntax 
+`firebaseSrv.getUser()` and it does not require any parameters. The caller function will receive the user data if it exists and an error if the data was unable to be loaded or the user is a new user who have not registered their personal details in the app.
+
+	firebaseSrv.getUser()
+	.then(function(currentUser){
+		// do something with user details
+	})
+	.catch(function(err){
+		// display error
+	})
+
+## getAnotherUser
+This function accepts a user id as parameter and returns the user data. All the user details is loaded and the function searches for the record containing the user id and returns the user object. If the user id is not found , the function returns an error
+
+	firebaseSrv.getAnotherUser(user_id)
+	.then(function(anotherUser){
+		// do something with another user's details
+	})
+	.catch(function(error){
+		//  display the error
+	})
+
+This function does not return the user's profile picture or currency like the [getUser function](#getUser)
+
+## userHaveProfilePicture
+This asynchronous function returns a Boolean value if the user has stored a profile picture in the firebase storage service. If the file exists, it returns `true`. If the file does not exist, it returns `false`. If there was a problem checking the database or the metadata of the profile picture, it returns an error.
+
+	firebaseSrv.userHaveProfilePicture(user_id)
+	.then(function(result){
+		if(result == true)
+			// retreive picture
+		else if(result == false)
+			// dont retreive picture
+	})
+	.catch(function(err){
+		// display error
+	})
+
+This function is usually called before retrieving a profile picture. In the profile page, the user has an option to remove their profile picture; all this does is add a variable to their user details preventing the app to retrieve the profile picture. In reality this picture is not removed from the firebase storage and can be retrieved when the user decides to reinstate the profile picture
+
+## getProfilePicture
+This asynchronous function retrieves a user_id parameter and returns the url of the user's profile picture. If the user_id parameter is null, the function returns the current user's profile picture.
+
+	firebaseSrv.getProfilePicture()
+	.then(function(url){
+		// $scope.profilePictureUrl = url
+	})
+	.catch(function(err){
+		// display error
+	})
+
+The user_id can also be a combination of 3 different strings namely : defaultPersonImage, defaultGroupImage, inactivePersonImage. Under these conditions, the function return's a url of these commonly used images stored within the app resources in the mobile phone. If the user does not have a profile picture, it returns the defaultPersonImage picture. If the group has no icon or image, it returns the defaultGroupImage. If the person has deleted their account, it returns the inactivePersonImage. If the user has chosen to remove their picture, the function will return the defaultPersonImage. When there is an error loading the users database or retreiving the images, the function return an error
+
+## takePicture
+This function invokes the Camera library native to the platform. The function receives a  parameter that can have a string value of either "camera" or "photoLibrary".
+
+If the parameter passed contains a string value of "camera", the function launches the camera enabling the user to take a picture instantaneously. If the parameter passed contains a string value of "photoLibrary", the function launches the photoLibrary and enables the user to select a picture from their gallery. Once a picture has been taken using the camera or chosen from the gallery, the function uploads the profile picture to firebase Storage and then returns the url to the function caller. 
+
+	firebaseSrv.takePicture("photoLibrary")
+	.then(function(url){
+		// do something with profile picture url
+	})
+	.catch(function(err){
+		// display error
+	})
+
+If there is an error retreiving the image from the device, uploading the image to firebase storage or retreiving the profile picture url, the function returns an error
+
+## uploadPicture
+A function that is only used by the [takePicture](#takePicture) function to upload a profilePicture to the firebase storage. The function receives the imageData and loads the file in the firebase storage with the name of `user_id.png` in base64 format. 
+
+The asynchronous function returns the snapshot of the image file if it is uploaded successfully. If there was an error in converting the image file to base64 format or uploading it to the firebase storage server, the function returns an error
+
+## setUserProfilePicture
+The function changes the 'hasProfilePicture' parameter of the user's data. Although a user may upload a profile picture, they may chose to remove their profilePicture but that does not remove the file from firebase storage. Instead, it makes the picture not visible to the user. 
+
+If the 'hasProfilePicture' parameter is true, the profilePicture becomes visible to the user. If the 'hasProfilePicture' is false, the profilePicture does not become visible to the user or to public.
+
+    firebaseSrv.setUserProfilePictureStatus(false)
+    .then(function(string){
+        // change visibility of profile picture
+    })
+    .catch(function(err){
+        // display error
+    })
+
+The asynchronous function returns a string value if the profile picture status is changed successfully or an error if the profile picture status has not been changed.
+
+## saveUser
+This asynchronous function saves the user data when they create an account in bookmark for the first time. The function creates a JSON object in the user branch of the firebase database. After this action is completed, the function establishes a new chat with the bookmark developer account having the user id "Fv9l8YjeigQpKlmOFzMluHYyPwl2". After the chat has been created, a message is generated from bookmark developer with a text saying "Hi, how can I help you ?".
+
+    firebaseSrv.saveUser({
+        firstName : "Jayant",
+        lastName : "Harilela",
+        email : "Jharilela@gmail.com"
+    })
+    .then(function(){
+        // display that user data has been saved successfully
+    })
+    .catch(function(err){
+        // display error or try again
+    })
+
+If the user data has been saved successfully, the function returns a string and then establishes a chat with bookmark developer and create a new chat message. Straight after the user data has been saved, the function returns the string directly without considering if the chat has been established or message has been sent. If there was an error saving the user data, the function returns an error.
+
+## saveMessagingToken
+This asynchronous function loads user data and saves the messaging token. The messaging token is a token used for sending push notifications when a message has been sent in the chat. An error is returned when the user data cannot be loaded or when the messaging token cannot be saved. The function receives a messaging token from the FCMPlugin when the token is loaded
+
+When the user logs in or creates an account, a messaging token is created and then saved onto the user database. Since notifications are managed by the FCM (Firebase Cloud Messaging) plugin. When a new token is loaded, it is directly saved using the saveMessagingToken function
+
+    FCMPlugin.getToken(function(token){
+        if(token){
+            saveMessagingToken(token);
+        }
+    });
+    FCMPlugin.onTokenRefresh(function(token){
+        if(token){
+            saveMessagingToken(token);
+        }
+    });
+
+The token is registered for each device and is called upon when the notification is received.
+
+    FCMPlugin.onNotification(function(data){
+        // display notification
+    });
+
+## sendNotification
+The sendNotification function sends notifications to devices registered with a specific `messagingToken`. The function receives 3 parameters namely: title, text, uid.
+
+`title` - notification title
+`text` - notification body
+'uid' - the targeted user id
+
+When the currentUser sends a message in the chatRoom, the function sends a notification to the targetted user using this funciton. The function loads the data of the targetted user and obtains the messagingToken. The notification is then sent using `$http.post` method through the FCM server `https://fcm.googleapis.com/fcm/send` with the following data structure
+
+    data : {
+        "to" : "Fv9l8YjeigQpKlmOFzMluHYyPwl2"
+        "notification": {
+            "title": "hello",
+            "body": "welcom to bookmark",
+            "icon" : "ic_stat_bookmark_icon",
+            "sound":"default",
+            'content_available' : true
+        },
+        "data" : {
+            "title" : "hello",
+            "text" : "welcome to bookmark"
+        },
+        "priority":"high"
+    }
+
+This asynchronous function returns a string if the notifications are sent successfully and it returns an error if there was an error retreiving the user data, if the user has no messaging token and if there was an error posting the notification.
+
+    firebaseSrv.sendNotification("hello", "welcome to bookmark", "Fv9l8YjeigQpKlmOFzMluHYyPwl2")
+    .then(function(){
+        // display sent message successfully
+    })
+    .catch(function(err){
+        // try sending notification again
+    })
+
+## updateUserInfo
+This asynchronous function updates the user information such as email, firstName, lastName, phoneNumber, location. It receives a JSON object containing the user's new data. The user is able to change their details from the profile page and when they do, the data is direcly saved to the user database. 
+
+    firebaseSrv.updateUserInfo({
+        firstName : "Jay",
+        lastName : "Harilela"
+    })
+    .then(function(){
+        // display the new updated information
+    })
+    .catch(function(err){
+        // display error and try again
+    })
+
+If the user data has not been changed, a string is directly returned. Else, if the user data has been changed and saved, the function returns a string on successfully changing the information in the database. If there is an error loading the user information or saving the new information, an error is returned
+
+## deleteUser
+This asynchronous function deletes the user information in a few simultaneous steps: delete profile picture, make all chats inactive, delete the user data. Once all these steps have been completed, the firebase authentication account is removed and this action is irreversible. If there was an error deleting the profile picture, making the chats inactive or if the firebase authentication is removed unsucessfully, an error is returned.
+
+    firebaseSrv.deleteUser()
+    .then(function(){
+        // return to login page
+    })
+    .catch(function(err){
+        // display error and try again
+    })
+
+Once all the data is removed, the user is sent back to the log in page. Since this action is final and irrivokable, the user must be prompted again and must confirm the action before executing the function
+
+## searchUser
+This function receives a search keyword and the function searches for other users' name which starts with the search keyword. it loads all the user's data and loops through each of their details, if the firstName or lastName starts with the search keyword, it is added to an array and returned to the caller. The search method is case insensitive
+
+    firebaseSrv.searchUser("john")
+    .then(function(users){
+        // display the filtered users in the chatList
+    })
+    .catch(function(err){
+        // display the error while searching for the user
+    })
+
+If there was an error loading all the user information, an error is returned and no array or obejct is returned. This function is called when the currentUser searches for a name in the chatList and the function will search other users having a bookmark account. When the user clicks on any new user, a chat will be initiated
+
+## searchBookOwners
+This function receives a book object containing the book title and searches for all users who have a s imilar book in their booksOwned collection. Once the user data has been loaded, their profile picture is fetched and returned along with the user's data
+
+    firebaseSrv.searchBookOwners("harry po")
+    .then(function(bookOwners){
+        // display the bookOnwers
+    })
+    .catch(function(err){
+        // display that no user owns the book in their library
+    })
+
+If there was an error retreiving all the user's data, an error is returned to the calling function. This function is called upon when a user is viewing the details of the book and wants to rent or buy the book from someone who has the book.
+
+## getBooksNearby
+This asynchronous function returns bookmark users that have a book closest to the currentUser. The function accepts 2 parameter being radius and numberOfResults
+
+`radius` - the proximity from the currentUser to other bookmark users
+`numberOfResults` - limit to the number of results that can be returned
+
+The function loads the current user, all the books in the collection and all the users in the bookmark database. Once all the user data is loaded, the distance between the currentUser and another user is calculated using the `Location service`. Once the distance is calculated, it is sorted based on the shortest distance using the `dynamicSortMultiple` method in the basic directive. If a user owns 1 or more book, each book is loaded onto an array that is to be returned. The amount of books returned is limited by the numberOfResults parameter. If more books are loaded and they exceed the numberOfResults parameter, the excess is negated.
+
+An error is returned if the currentUser, bookCollection, allUsers.
+
+## validateName
+This function does a regex validation to check if the a name parameter contains alphabets. The function returns `true` if the name parameter contains only alphabets and `false` if the name parameter contains any other characters like numbers
+
+    firebaseSrv.validateName("Jayant Harilela")
+
+    true
+
+    firebaseSrv.validateName("Jayant 33")
+
+    false
+
+The regex validation is below
+
+    name.test(/^[a-zA-Z]+$/);
+
+## validatePhoneNumber  
+The function does a regex validation to check if the phoneNumber is valid and has a valid syntax. The function returns true if the syntax contains numbers, `+` or space. The function returns true if the syntax is `+ ext phoneNo` or directly `phoneNo`.
+
+    firebaseSrv.validatePhoneNumber("+852 5634 9007")
+
+    true
+
+    firebaseSrv.validatePhoneNumber(" 56349007")
+
+    true
+
+    firebaseSrv.validatePhoneNumber("563A9007")
+
+    false
+
+The regex expression is below
+
+     phoneNumber.test(/^\+?\d+$/);
+
+## validateEmail  
+This function does a regex validation to check if the email parameter is valid and has a valid syntax. The function returns true if the syntax is `email_address@your_domain.com`. If the syntax does not contain `@` and `.`, then the function returns false
+
+    firebaseSrv.validateEmail("Jharilela@gmail.com")
+
+    true
+
+    firebaseSrv.validateEmail("J harilela@gmail.com")
+
+    false
+
+The regex validation is below
+
+    email.test(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
+
+## getSearchCollection
+This function returns an firebaseArray containing all lthe searches people have made in the past. Everytime a user searches for a book, the book title is saved onto the search database in the firebase database. If the user mispelled a book, the bookmark app uses levenshtein's theorem to decide how siilar the book title being search is to a book title that already exists in the database; all this is explained in the [logSearch function](#logsearch).
+
+    firebaseSrv.getSearchCollection()
+    .then(function(searcheQuerries){
+        // do something with search queries
+    })
+    .catch(function(err){
+        // display error
+    })
+
+This asynchronous function returns the `$firebaseArray` of all the books searched for. If there was an error retreiving the database, an error is returned
+
+## getBooksOwned 
+This function returns an array of all the books owned by a user (books they have added to their library). The function accepts 2 parameters being the uid and type
+
+`uid` - id of the targetted user
+The value can contain a string attribute of "currentUser" to obtain the books owned by the current user of the app or the value can be the the user id of another user to obtain the books owned by another user.
+
+`type` - defines the structure of the array to be returned
+Since the booksOwned is stored in a `$firebaseArray` format, there can be multiple types of array structures to be returned. Type can have either 3 values "keys", "full", "full+keys". 
+
+
+if type == "keys", the funciton returns only the book ids without any data of the book like the book title, the author, etc. The book ids refer to a record in the book collection that contains all the information regarding a book.
+If type == "full", the function returns all the parameters that defines the book including the book title, author, picture, etc. The return array does not contain the book ids in the book collection.
+If type == "full+keys", the function returns all the parameters that defines the book along with their book ids directly from book collection 
+
+    firebaseArray.getBooksOwned("currentUser", "keys")
+    .then(function(booksOwned){
+        // display books owned
+    })
+    .catch(function(err){
+        // display error in fetching books owned
+    })
+
+The function returns an error if the books owned cannot be loaded successfully
+
+## getWishList  
+This function works similar to that of the getBooksOwned but obtains the wishList of the user instead. It also receives 2 parameters being the uid and type
+
+`uid` - id of the targetted user
+The value can contain a string attribute of "currentUser" to obtain the books owned by the current user of the app or the value can be the the user id of another user to obtain the wish list by another user.
+
+`type` - defines the structure of the array to be returned
+Since the wishLish is stored in a `$firebaseArray` format, there can be multiple types of array structures to be returned. Type can have either 3 values "keys", "full", "full+keys". 
+
+
+if type == "keys", the funciton returns only the book ids without any data of the book like the book title, the author, etc. The book ids refer to a record in the book collection that contains all the information regarding a book.
+If type == "full", the function returns all the parameters that defines the book including the book title, author, picture, etc. The return array does not contain the book ids in the book collection.
+If type == "full+keys", the function returns all the parameters that defines the book along with their book ids directly from book collection 
+
+    firebaseArray.getWishList("currentUser", "keys")
+    .then(function(wishList){
+        // display wish list
+    })
+    .catch(function(err){
+        // display error in fetching wish list
+    })
+
+The function returns an error if the wish list cannot be loaded successfully
+
+## logSearch 
+Everytime a person searches for the book, the keyword is logged onto the search database in firebase. Every past search is stored onto the search collection database. When a search is made, the keyword is compared to those that is already saved using the levenshtein algorithm and if they are similar over 80 levenshtein points but they are not the same, the keyword is saved under the similar branch.
+
+    firebaseSrv.logSearch(text, timestamp)
+    .then()
+    .catch(function(){
+        // try again 
+    })
+
+There are 3 conditions that may occur after calculating the similarity level. Look at the example below
+
+    |- searchCollection
+       |- searchId
+         |- count : 2
+         |- keyword : "harry porter"
+         |- similarKeywords
+            |- similarKeywordId
+               |- count : 5
+               |- keyword : "harry potter"
+         |- verified : false
+
+If similarity == 0%, A new record in the search collection is added. Example if someone searches for the man who knew infinity
+
+    |- searchCollection
+        |- searchId
+            |- count : 2
+            |- keyword : "harry porter"
+            |- similarKeywords
+                |- similarKeywordId
+                    |- count : 5
+                    |- keyword : "harry potter"
+            |- verified : false
+        |- searchId
+            |- count : 1
+            |- keyword : "the man who knew infinity"
+            |- verified : false
+
+If similarity == 100%, the count parameter of the search keyword is increamented by 1. Example if someone searched for harry porter
+
+    |- searchCollection
+        |- searchId
+            |- count : 3
+            |- keyword : "harry porter"
+            |- similarKeywords
+                |- similarKeywordId
+                    |- count : 5
+                    |- keyword : "harry potter"
+            |- verified : false
+
+If 80<similarity<100, the platform checks if the search keyword is similar to any other book keyword in the similarKeyword child branch of the search. If the search keyword is 100% similar to a book keyword in the similarKeywords, the count of the similar keyword increases. 
+
+If the search keyword does not match any similarKeyword, a new record is created and added. Example, if someone searches for "harry putter", a new record is created
+
+    |- searchCollection
+        |- searchId
+            |- count : 2
+            |- keyword : "harry porter"
+            |- similarKeywords
+                |- similarKeywordId
+                    |- count : 5
+                    |- keyword : "harry potter"
+                |- similarKeywordId
+                    |- count : 1
+                    |- keyword : "harry putter"
+            |- verified : false
+
+If the search keyword matches the similarKeyword, the count of the similar keyword increases. Example, if someone searches for "harry potter"
+
+    |- searchCollection
+        |- searchId
+            |- count : 2
+            |- keyword : "harry porter"
+            |- similarKeywords
+                |- similarKeywordId
+                    |- count : 6
+                    |- keyword : "harry potter"
+            |- verified : false
+
+If someone searches for a similarKeyword more than 5 times of the keyword under the searchCollection branch, the main word gets replaced. Example, if someone searches for harry potter 2 more times, 
+
+    |- searchCollection
+        |- searchId
+            |- count : 2
+            |- keyword : "harry porter"
+            |- similarKeywords
+                |- similarKeywordId
+                    |- count : 7
+                    |- keyword : "harry potter"
+            |- verified : false
+
+
+                    |
+                    v
+
+
+    |- searchCollection
+        |- searchId
+            |- count : 7
+            |- keyword : "harry potter"
+            |- similarKeywords
+                |- similarKeywordId
+                    |- count : 2
+                    |- keyword : "harry porter"
+            |- verified : false
+
+The search keywords aid in autocorrect for users. When the user is searching for a book, and the search keyword matches a similarKeyword, then the main keyword is suggested to the user. The method of displaying the suggested keyword is explained breifly in the [suggestSearch function](#suggestsearch) below.
+
+## suggestSearch  
+This function provides the user with some kwyword suggestion if they misspelled words. The function receives a text parameter of the search keyword. If the search keyword matches any similarKeyword child, the main keyword will be added to an array and suggested to the user. 
+
+    firebaseSrv.suggestSearch("harry porter")
+    .then(function(suggestions){
+        // display suggestions ["harry potter"]
+    })
+    .catch(function(err){
+        // do not show suggestions and try again
+    })
+
+The method of finding a suggestion is similar to that of finding similarKeywords in [logSearch function](#logsearch). The search keyword is compared to similarKeywords using the levenshtein's algorithm and if the similarity level is over 80%, the main keyword is added to an array and sorted based on the similarity rating
+
+## ownBook
+This function adds a book to the user's ownedBook collection. It accepts 2 parameters: book and wantTo
+
+`book` - contains all the book data including the title, author, published date, etc. Since it has not been added to the book collection yet, the book has no book id assigned to it.
+`wantTo` contains the user's desired actions, whether they want to rent it or sell it to another user.
+
+    firebaseSrv.ownBook({
+        title : "harry potter",
+        author : "JK rowlin"
+    }, {
+        currency : "HKD"
+        rent : false,
+        sell : true,
+        sellPrice : 300
+    })
+    .then()
+    .catch(function(err){
+        // display error if book already exists in the user's colleciton. If there was a connection error, try again
+    })
+
+The function first loads all the books in the book collection and determines if the book exists in the collection. If the book exists, we obtain the key and then add the record to the user's data under the booksOwned branch. If the book does not exist yet, the book is first added to the book collections and then the key is obtained and added to the user's data under the booksOwned branch. All the details of the book is not stored. Only the book title, book key in the book collection, the user's wantTo action set and the status if the book is available for rent/sell or not. The function also checks if the user already has the book in their booksOwned or wishList library and if it does, the function returns an error and prevents duplicate entry of a book in the user's collection
+
+## changeBookStatus  
+This function changes the user's action of a book they owned in the booksOwned branch of the user's data. When the user decides to change wheteher they want to rent/sell the book. The function receives only the book parameter containing the book id and the want to object
+
+    firebaseSrv.changeBookStatus({
+        $id : "-K_sX7wjFIZFfGrM5u4x"
+        wantTo : {
+            rent : false,
+            sell : false
+        }
+    })
+
+The function loads the book collection and finds the matching book id and then changes the wantTo parameter. Since the funciton does not return any promise or any object, there is no need of then and catch functions
+
+## removeUserBook  
+This function removes a book from the user's booksOwned or wishList branch. The function simultaneously loads the wishList and booksOwned to find the matching id with the book they want to remove. Once found, they are directly removed from the booksOwned or wishList but their record in the book collection is retained and not modified.
+
+    firebaseSrv.removeUserBook({
+        title : "Artificial Intelligence",
+        $id : "-K_sX7wjFIZFfGrM5u4x"
+    })
+    .then(function(){
+        // display to the user that the book has been removed
+    })
+    .catch(function(err){
+        // display error in removing the book and try again
+    })
+
+Error is returned if the book cannot be removed from either the wishList or booksOwned
+
+## lendBook  
+This function rents a book that a user has in their booksOwned collection. In order to rent a book, the user must press a book they want to lend in the bookList page for some time and then press the lend book button. The function receives 2 parameters: form and ownedBook.
+
+`form` - the action that the user wants to do. 
+If the type of action is rent, the form variable will have the following structure
+
+    form = {
+        type : 'rent',
+        initialDate : timestamp,
+        returnDate : timestamp,
+        rentPrice : 200
+    }
+
+If the type of action is sell, it will have a simple structure
+
+    form = {
+        type : 'sell',
+        sellPrice : 200
+    }
+
+'ownedBook' - book details that the user wants to rent including the book id that points to a record in book collection
+
+    firebaseSrv.lendBook({
+        type : 'sell',
+        sellPrice : 500
+    }, {
+        $id : "-K_sX7wjFIZFfGrM5u4x",
+        title : "Artificial Intelligence"
+    })
+    .then(function(){
+        // reduce opacitiy of the book
+    })
+    .catch(function(err){
+        // display the error and try again
+    })
+
+This function then modifies the secondParty parameter in the book record within the user's bookOwned collection. When the frontend detects this parameter has a value, it blurs the book giving it 50% opacity to indicate that the book is not available in the user's bookshelf. 
+
+## receiveOwnedBook  
+This function counteracts the [lendBook function](#lendbook). Instead of trying to give the book to a second party, this function receives the book and adds its back to the user's book library. This function is only visible when the user presses a book in the bookList page for a long time and presses the return book button. If more than one book has been selected, the button will only appear if all the books selected have been rented/sold to someone else. The funciton receives only one parameter that is ownedBook
+
+`ownedBook` - the book details including the book id, title, etc.
+
+This function removes the secondParty parameter from the book record withing the booksOwned database by setting it to null. 
+
+    firebaseSrv.receiveOwnedBook({
+        $id : "-K_sX7wjFIZFfGrM5u4x",
+        title : "Artificial Intelligence"
+    })
+    .then(function(){
+        // reset the opacity of the book to default
+    })
+    .catch(function(err){
+        // display the error and try again
+    })
+
+When the front end detects that the secondParty parameter is null, it will not change the opacity of the book. 
+
+## addToWishList  
+This function adds a book to the user's wish list. This function is triggered when the user searches for a book in the bookSearch page > user clicks on a book > user presses "wish to read". This function accepts 1 parameter : book. 
+
+`book` - contains all the information and data of a book including its title, author, publisher, etc. It does not need to contain a book id as it may not be stored in the book collection library.
+
+    firebaseSrv.addToWishList({
+        $id : "-K_sX7wjFIZFfGrM5u4x",
+        title : "Artificial Intelligence"
+    })
+    .then(function(){
+        // display that the book has been added successfully
+    })
+    .cathc(fucntion(){
+        // if the book already exists in the user's booksOwned or wishList, display the appropriate message
+        // if there was an error trying to load the bookCollection, booksOwned or wishList, display the error message and try again
+    })
+
+The function first loads all the books in the book collection and compares all the books to the book parameter passed. If any book in the collection contains the same name, then the book id is obtained and added to the user's data under wishList parameter. If the book does not exists in the book collection yet, a new record is created and a book id is obtained and added to the wishList parameter of the user's data. An error is returned if the user already has the book in their booksOwned or wishList library.
+
+## newChat  
+This function establishes a new chat between the current user 1 or more users. It receive an array patameter containing the users' information along with their respective user ids. The function creates a record in the chat database and creates a parameter called user which contains user ids and their names (firstName + lastName). When the currentUser searches for another user in the chatList page and clicks on their name to chat with them, this function is called and a chat is established between the users
+
+    firebaseSrv.newChat([{
+        $id : "Fv9l8YjeigQpKlmOFzMluHYyPwl2",
+        firstName : "Bookmark",
+        lastName : "Developer"
+    }])
+    .then(function(){
+        // display that the chat has been created successfully
+    })
+    .catch(function(err){
+        // display an error that the chat cannot be created and try again
+    })
+
+This function returns an error if the user's data cannot be loaded, chat database cannot be loaded or new chat cannot be establlished.
+
+## getChatRooms  
+A user can chat with multiple users throught the chatList page. All the data regarding the chats are stored in the chat database and referred to as chatRooms. This function loads all the chats in the database and returns only the chats in which the currentUser is involved in. It accepts no parameters and will only return chats belonging to the currentUser. 
+
+    firebaseSrv.getChatRooms()
+    .then(function(chatRooms){
+        // display all the users' chats
+    })
+    .catch(function(err){
+        // display the error in retreiving chats and try again
+    })
+
+This function is loaded when the user enters the chatList page. The return data is an object containing 2 parameters: chatRooms and chatRoomsRef. 
+
+`chatRooms` - sorted array containing all the details of the chats and the users along with the latestMessage
+`chatRoomsRef` - a reference firebaseArray that changes its contents when a new message is received. We can `$watch` this variable for new messages and display it to the user
+
+The function only returns an error if the chat database cannot be loaded
+
+## getChat  
+When the currentUser clicks on a chat that they are involved in, the applcation calls upon this function to receive the firebaseObject of the particular chat. The getChatRooms function returns an array and firebaseArray datatype but these formats take up huge memory when trying to display just one chat. This function receives a chatId variable which refers to the $id of the chat being opened
+
+    firebaseSrv.getChat("-KbtkvwoCTE3FFGTTaSf")
+    .then(function(chat){
+        // display the chat in the chatDetails page and sort the messages based on timestamp
+    })
+    .catch(function(err){
+        // display error in retreiving chat
+    })
+
+## doesChatExist
+This asynchronous function receives a user id parameter and checks if a chat exists between the currentUser and the uid passed to the function. The function is called upon when the currenUser searches for another user to chat and initializes a chat. To avoid redundancies, we prevent 2 users from having multiple chats. So we check if a chat exists before creating a new chat using this funciton
+
+    firebaseSrv.doesChatExist("uZzsXiiTvXQMtUUDvaI04KSCjN52")
+    .then(function(chatExists){
+        // if chatExists.bool == true, load the chatRoom, chatExists.chatRoom
+        // if chatExists.book == false, initialize a new chatRoom
+    })
+    .catch(function(err){
+        // display error and try again
+    })
+
+The function loads the chatRooms database and loops through all the chats that exists; it then compares the users of each chat and finds a chat that exists between the currentUser and the uid being passed. The function retur
+
+## sendMessage  
+This function is called upon when the user is sending a message through the chatDetails page. The function receives 2 parameters: obj and destinationChat. 
+
+`obj` - object containing the user's messages. The structure of obj is as belows. The google_map_obj is returned when the user chooses a location in the map, this is optional only if the currentUser chose a location in the map.
+
+    obj = {
+        text : "insert_message_here" (optional)
+        location : google_map_obj (optional)
+    }
+
+`destinationChat` - the chatRoom id where the user typed the message. 
+
+    firebaseSrv.sendMessage({text : "hi there"}, "KbtkvwoCTE3FFGTTaSf")
+    .then(function(){
+        // reload the chatRoom and display the message sent
+    })
+    .catch(funciton(err){
+        // display the error and try sending the message again
+    })
+
+The sent message will contain the following structure
+
+    message = {
+        timestamp : timestamp_when_function_is_loaded,
+        from : currentUser_id,
+        content : message_text (optional),
+        location : message_location (optional)
+    }
+
+## images  
+Images is an array that points to the address of commonly used images in the device
+
+    var images = {
+        defaultPersonImage : "img/defaultPersonImage.png",
+        inactivePersonImage : "img/inactivePersonImage.png",
+        defaultGroupImage : "img/defaultGroupImage.png"
+    }
+
+This variable is returned to the called and these strings can be used to access these images from outside the firebase service
+
+    firebaseSrv.images.defaultPersonImage
+    
+## getCurrency
+This function returns the currency the currentUser. If the currency is stored in the user data located in  `user>location>currency`. If the user does not have any currency in the location branch, we obtain the currency by passing the country in `user>location>country` onto the countryList service.
+
+    firebaseSrv.getCurrency()
+    .then(function(currency){
+        // use currency to show book prices
+    })
+    .catch(function(err){
+        // display error
+    })
+
+The errors returned by the function provides feedback on whether the user data could be fetched, if the user had a location parameter, if the user specified a country, if the user specified a currency, etc.

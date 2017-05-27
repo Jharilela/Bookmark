@@ -1,0 +1,69 @@
+# Search
+
+# Location
+The location service is a combination of [HTML](#location-html), [location frontend javascript](#location-js) and [location service](#location-srv). These files can be found under [bookmark-ionic/www/pages/location](https://github.com/Jharilela/Bookmark/tree/master/bookmark-ionic/www/pages/location). 
+
+
+
+# CountryList and Currency
+The countryList factory provides services that return country data from the [JSON file](https://github.com/Jharilela/Bookmark/blob/master/bookmark-ionic/www/directives/countryList.json). The file contains a list of country_name, country_code, and country_currency. The format of the country list is as detailed below: 
+
+    {
+        "name" : country_name,
+        "code" : country_code,
+        "currency" : country_currency
+    }
+
+There are 2 functions of the factory  
+1. get the whole JSON object
+2. get the currency for a particular country
+
+The syntax for defining functions within the factory is detailed below
+
+    angular.module('bookmark.controllers')
+    .factory('countryList', function($http, $q) {
+	return{
+            function_name_1 : function(){
+                ........
+            },
+            function_name_2 : function(){
+                ........
+            }
+        } 
+    })
+
+In this case, we will be declaring only 2 functions namely `get()` that returns a JSON object containing the country data and `getCurrency()` which returns the currency code based on the country name specified in the country data JSON object.
+
+## get
+The get method is called when a new user registers for an account. It is used their country of residence. It is called when the user wants to change this data from the profile page. 
+
+No parameter is required when calling the get function. It returns a JSON object with all the contents of the JSON file. The data is obtained using an `$http.get(url_of_file)` method; because of which the data is obtained asynchronously
+
+    get : function(){
+        return $http.get('directives/countryList.json');
+    }
+
+
+## getCurrency
+The getCurrency method can be called anywhere in the program by passing a `country_name` parameter that matches the list of country names in the JSON file. When a user creates an account and chooses their location, the country_name is obtained by matching details of the location with that of the country data and the corresponding country details is stored in Firebase. When the user wants to buy/sell/borrow/rent books, the price unit will be converted to the currency of their location.
+
+The function obtains the country data through the `$http.get(url_of_file)` method which returns a promise. The country data can be obtained from the parameter passed onto the `then` property. Each object name of each country in the list is compared to the country (name) parameter passed to the function. If a match occurred, the currency is directly returned. If no match occurred, an error is passed to the calling function. Since $http.get returns a promise, the getCurrency must return data in the form a promise because the tasks are carried out asynchronously.
+ 
+	getCurrency : function(country){
+		var deferred = $q.defer();
+		console.log('getting currency of ',country);
+
+		$http.get('directives/countryList.json')
+		.then(function(countryList){				
+			angular.forEach(countryList.data, function(countryData){
+				if(countryData.name == country || countryData.code==country){
+					deferred.resolve(countryData.currency);
+				}
+			})
+		})
+		.catch(function(err){
+			console.error("error fetching currency of location "+country+" : ", err);
+			deferred.reject("error fetching currency of location");
+		})
+		return deferred.promise;
+	}

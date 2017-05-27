@@ -1,0 +1,17 @@
+Bookmark is a mobile app that allows book lovers to buy/rent books from people near them.
+
+Bookmark is built on ionic platform making it a hybrid web app. It is currently supported on android and ios.
+
+The app has 4 main pages :
+* chat
+* book list
+* book search
+* profile
+
+Data storage 
+Firebase : data is accessed directly from the client-end point by the app instead of using an external server
+
+There are 4 main services used in Bookmark : 
+* Search - to find a book in Google, Amazon and Goodreads book library
+* location - provide geographical services like determining address, distance between points
+* currency - provides the currency of any country

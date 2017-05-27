@@ -652,7 +652,7 @@ function firebaseSrv (
 			console.error('failed to save messaging token ',error)
 		})
 	}
-	function sendNotification(title, text, uid, messagingToken){
+	function sendNotification(title, text, uid){
 		var deferred = $q.defer();
 		var obj = {
 			"notification": {
