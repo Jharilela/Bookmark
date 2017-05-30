@@ -3,38 +3,18 @@ Bookmark is a a hybrid mobile application that allows bookReaders to share, trad
 
 The bookmark-ionic folder contains the mobile app under developement 
 
-## To build an ios release
+The bookmark-docs folder contains the documentation of the app
 
-Step 1 : `ionic build ios --release` 
+The bookmark-website folder contains the files for editing the [bookmark website](http://jaboski.com/bookmark/index.html)
 
-To debug on device `ionic run ios -l -c -s`
+A shortcut to the bookmark documentation is as follows:
 
-Step 2 : open the xcode file /Users/J/Documents/Bookmark/bookmark-ionic/platforms/ios/bookmark.xcodeproj
+[Build](https://github.com/Jharilela/Bookmark/wiki/Build)
 
-Step 3 : on xcode, go to the info section of bookmark, under Custom ios target properties, add string values ot all the privacy keys
+[Directives](https://github.com/Jharilela/Bookmark/wiki/Directives)
 
-Step 4 : press product -> archive and then upload to itunes store
+[Firebase](https://github.com/Jharilela/Bookmark/wiki/Firebase)
 
-Step 5 : To publish it to the apple store, visit https://itunesconnect.apple.com/ To view all certicificates and provisioning profiles, visit https://developer.apple.com/
+[Pages](https://github.com/Jharilela/Bookmark/wiki/Pages)
 
-
-## To build an android release
-
-Step 1 : `cordova build --release android`
-
-Step 2 : `jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore path/to/bookmark-ionic/release-key.keystore /path/to/bookmark-ionic/platforms/android/build/outputs/apk/android-release-unsigned.apk bookmark`
-
-*password : B..............
-
-Step 3 : 
-`zipalign -v 4 /path/to/bookmark-ionic/platforms/android/build/outputs/apk/android-release-unsigned.apk /path/to/bookmark-ionic/platforms/android/build/outputs/apk/bookmark@version.apk`
-
-if(zipalign is not found)
-
-`alias zipalign=~/Library/Android/sdk/build-tools/23.0.3/zipalign`
-	
-else if Error: spawn EACCES (permision denied to set files in bookmark-ionic)
-
-`sudo chown -R $USER:$GROUP  ~/documents/Bookmark/bookmark-ionic`
-	
-Step 4 : Find the bookmark.apk and upload it to the android play store https://play.google.com/apps/publish
+[Services](https://github.com/Jharilela/Bookmark/wiki/Services)

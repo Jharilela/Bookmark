@@ -1,10 +1,64 @@
 The main pages are as follows:
-chatList
-chatRoom
-bookList
-bookDetails
-search
-currentUser profile
-anotherUser profile
-login
-map
+
+[chatList](#chatlist)
+
+[chatRoom](#chatroom)
+
+[bookList](#booklist)
+
+[bookDetails](#bookdetails)
+
+[search](#search)
+
+[currentUser profile](#currentuser-profile)
+
+[anotherUser profile](#anotherUser-profile)
+
+[login](#login)
+
+[map](#map)
+
+# chatList
+This page displays all the chats the currentUser is in a chat in. The currentUser will be able to search for other users in the bookmark user database and initiate a new chat
+
+![pages_chatList](https://github.com/Jharilela/Bookmark/blob/master/bookmark-docs/pictures/pages_chatList.png)
+
+# chatRoom
+This page displays all the messages between the currentUser and the user in the chatRoom. Location can be sent as a message as well by pressing the location icon at the text bar at the bottom
+
+![pages_chatRoom](https://github.com/Jharilela/Bookmark/blob/master/bookmark-docs/pictures/pages_chatRoom.png)
+
+# bookList
+This page displays all the books the user has added onto their library. Other users can find these books when wanting to buy or borrow the book
+
+![pages_bookList](https://github.com/Jharilela/Bookmark/blob/master/bookmark-docs/pictures/pages_bookList.png)
+
+# bookDetails
+This page displays the details of the book such as the description, author, subtitle (if any), ohter book owners. This page is loaded when any book from the search page or bookList is pressed
+
+![pages_bookDetails](https://github.com/Jharilela/Bookmark/blob/master/bookmark-docs/pictures/pages_bookDetail.png)
+
+# search
+This page can be accessed through the tabs. When the tab is pressed, the books closest to the currentUser will be loaded. When a keyword is typed onto the search bar, the all books is loaded from the search service obtained from amazon, google books and goodreads
+
+![search](https://github.com/Jharilela/Bookmark/blob/master/bookmark-docs/pictures/pages_bookSearch.png)
+
+# currentUser profile
+This page is accessible from the tabs page by pressing the person image. In this page, the user can see their details such as name, phone number, address, profile picture, etc.
+
+![pages_currentUser](https://github.com/Jharilela/Bookmark/blob/master/bookmark-docs/pictures/pages_currentUser.png)
+
+# anotherUser profile
+This page is acessible when the curerntUser is chatting with another user in the chatRoom and presses their name, they can view their profile. In this page, we can see all the books the other user has.
+
+![pages_anotherUser](https://github.com/Jharilela/Bookmark/blob/master/bookmark-docs/pictures/pages_otherUser.png)
+
+# login
+The login page is the first page that the user see after downloading the app. This enables them to log in to their bookmark account via facebook, google plus or simply by email. When a user is logged out or signs out, this page is laoded to allow the currentUser to log in before acessing any of the pages. The bookmark developer can log in by pressing the title of the login page 10 times
+
+![login](https://github.com/Jharilela/Bookmark/blob/master/bookmark-docs/pictures/pages_login.png)
+
+# map
+The map page displays the physical position of any adress being searched. If there is one location passed onto the page, a marker will be added to the map. If 2 locations are passed onto the page, 2 circle shapes will be added to the map. Any adress being searched will generate suggestions and add a marker to the map. If the user wants to save the location, they can press the check mark at the top right corner of the page. to disgard the location, the cross in the top left can be pressed.
+
+![map](https://github.com/Jharilela/Bookmark/blob/master/bookmark-docs/pictures/pages_map.png)
