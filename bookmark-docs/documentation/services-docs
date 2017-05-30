@@ -3,7 +3,57 @@
 # Location
 The location service is a combination of [HTML](#location-html), [location frontend javascript](#location-js) and [location service](#location-srv). These files can be found under [bookmark-ionic/www/pages/location](https://github.com/Jharilela/Bookmark/tree/master/bookmark-ionic/www/pages/location). 
 
+![location_1](https://github.com/Jharilela/Bookmark/blob/master/bookmark-docs/pictures/location_1.png)
+![location_2](https://github.com/Jharilela/Bookmark/blob/master/bookmark-docs/pictures/location_2.png)
+![location_3](https://github.com/Jharilela/Bookmark/blob/master/bookmark-docs/pictures/location_3.png)
 
+## Location HTML
+This HTML ionic file is a simple implementation of the map page displayed above. There is one header bar containing the input search field. A subheader bar is used for location suggestion of a place which is being searched and a main body containing the ng-map along with the shapes if there are any. There are 2 buttons in the map, a close button and a save button
+
+## Location Js
+The location javascript is called upon when the ionic router loads the location controller. When this controller is loaded, the `$stateparams` loads 2 parameters: location and editable. The editable variable defines whether the location on the ng-map can be changed and saved. 
+
+If there is 1 location passed, a marker will be added to the map. The center of the map and enter the current location in the search text field. 
+
+If there are 2 or more location passed, 2 circles will be created encompassing the locations and the center point between the circles will be the center of the map. Any map in address entered to the search text field will add a marker to the adress location
+
+If there are no locations passed, the map will be centered in the center of Hong Kong by default at lat : 22.2783151 and lng : 114.17469499999993. If the address in the search text field changes, the controller will load suggestion results from the location service and load it to the subheader bar for sugestions.
+
+When the close button is called, the markers are reset and the ionic router returns to the previous page. When the finish button is closed, the rootscope is broadcasted with the adress object
+
+## Location Srv
+The location service performs functions that involve location objects. There are 5 main functions provided by the location service : 
+
+1. [searchAddress](#searchaddress)
+2. [getDetails](#getdetails)
+3. [stringToDistance](#stringtodistance)
+4. [inProximity](#inproximity)
+5. [calculateDistance](#calculatedistance)
+
+## searchAddress
+This function accepts a string value as an input parameter. this function gets the places predictions from the autocomplete service by google places. If suggestions of a place has been loaded successfully, the searchAddress function returns an asynchronous object with a suggestion of places.
+
+## getDetails
+This function gets the detail of a place from the detail service. The function accepts a placeId parameter as input and returns the details of the place
+
+## stringToDistance
+The function receives a string paramaeter as input with the suffix of either "km" or "m". If the string parameter contains "km", the number is taken as a substring and multiplied by 1000 to be converted to metre format. If the string parameter contains "m", the number is taken as substring.
+
+## inProximity
+This function determines if the anotherUser is within a proximity of the currentUser. It accepts 3 parameters `currentUser`, `otherUser` and `radius`. If the currentUser or otherUser does not have a location paramater stored in their data, the function returns false. If both users have a location, then the following [calculateDistance](#calculatedistance) is called to determine the distance. If the distance is within the radius, the distance is returned, else the function returns false.
+
+## calculateDistance
+This function determines the distance between 2 markers on the map. it accepts 2 object parameter containing latitude and longitude and uses the google maps sherical object to compute the distance between the positions
+
+	LocationService.calculateDistance({
+		lat : 45.504324,
+		lng : -73.612862
+	}, {
+		lat : 45.508204,
+		lng : -73.664323
+	})
+
+	result = 4.05 (km)
 
 # CountryList and Currency
 The countryList factory provides services that return country data from the [JSON file](https://github.com/Jharilela/Bookmark/blob/master/bookmark-ionic/www/directives/countryList.json). The file contains a list of country_name, country_code, and country_currency. The format of the country list is as detailed below: 
