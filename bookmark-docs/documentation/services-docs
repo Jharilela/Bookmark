@@ -1,14 +1,109 @@
 # Search
 The search service is a combination of [HTML](#search-html), [search frontend javascript](#search-js) and [search service](#search-srv). These files can be found under [bookmark-ionic/www/pages/bookSearch](https://github.com/Jharilela/Bookmark/tree/master/bookmark-ionic/www/pages/bookSearch).
 
+![search_1](https://github.com/Jharilela/Bookmark/blob/master/bookmark-docs/pictures/search_1.png)
+![search_2](https://github.com/Jharilela/Bookmark/blob/master/bookmark-docs/pictures/search_2.png)
+![search_3](https://github.com/Jharilela/Bookmark/blob/master/bookmark-docs/pictures/search_3.png)
+
 ## Search HTML
-The 
+The html implemetation of the search page is very simple. It contains one text bar at the top of the page. A body that either contains search suggestions or search results. It can also contain a `didYouMean` keyword to suggest the user with a search keyword in the case that he mispelled a book while searching for a book. The `no-internet-message` directive is also loaded if the app goes offline.
 
 ## Search Js
-
+A javascript file that is loaded when the router enters the search controller. When the controller is loaded for the first time and the user is logged in, the books nearby are fetched and displayed to the user. As the user types a keyword and searches for it, a search suggestion is loaded and the book title is searched from the service. A progress bar object from search service is responsible to display how much of the books have been fetched. The books are then grouped into columns of 3 using the chunk directive. As the books have been loaded and displayed, the search is logged onto the database
 
 ## Search Srv
+This service is responsible for searching for a book in googleBooks, amazonBooks, goodReadBooks and compiles the results to an array and sorts it using an algorithm. The search service also returns a progressBar that is dynamically updated when books are received and during compilation. 
 
+[book object format](#book-object-format)
+
+[searchGoogleBooks](#searchgooglebooks)
+
+[searchAmazonBooks](#searchamazonbooks)
+
+[searchGoodReadsBooks](#searchgoodreadsbooks)
+
+[searchBookList](#searchbooklist)
+
+[progressbar](#progressbar)
+
+### book object format
+	book : {
+		type : where the book was loaded from ("google", "amazon" and/or "goodReads"),
+		book : book_obj,
+		primeTitle
+		subTitle
+		title : primeTitle + subTitle,
+		description 
+		imageLink 
+		authors : ["author_1", "author_2", ...]
+		ISBN
+		pageCount 
+		publishedYear
+		categories
+		printType
+		publisher 
+		language 
+		averageRating 
+		ratingsCount 
+		countryAccessed 
+		ebookIsAvailable 
+		pdfIsAvailable 
+	}
+
+### searchGoogleBooks
+This function searches for a book title in google books library through the google API. The book title being searched is first formatted and the spaces are converted to "+" based on the API rules. The app is loaded through the `$http.get()` function calling the url at `https://www.googleapis.com/books/v1/volumes` having the parameters of `q` referring to the search querry, `maxResults` referring to the maximum number of this results, in this case it is 10, `apiKey` containing the google api key stored in the constants page. On completition, it formats and returns the resulting array in the format mentioned in the [book object format section](#book-object-format)
+
+	googleBooks = [{
+		type : "google",
+		book : res.data.items[1],
+		googleId : book.id,
+	}]
+
+	other parameters are found in book.volumeInfo
+
+If there was an error retreiving the books from google books api, the function returns an empty array and changes the color of the progress bar to green. During this whole process of retreiving the book, the progressBar is constantly updated through `vm.progressbar`.
+
+### searchAmazonBooks
+This function searches for a book title in amazon webservice api. It receives a parameter of searchItem and loads the book through an angular `$http.get()` function. The search text is first formatted and the spaces are replaced with "%20" to allow the book title being searched based on amazon api rules. The `$http.get()` function also requires a timestamp of the current time but must be formatted to replace the ":" symbol with the "%3A" symbol. Another requirement of amazon api is to encrypt the request parameters with the awsSecretKey and add the signature to the http request url. The resulting bookList is in XML format and is converted to JSON format using yahoo api.
+
+When the bookList is received, it is formatted using the [book object format](#book-object-format). 
+
+	amazonBooks = [{
+		type : "amazon"
+		book : book_obj
+		ASIN : amazon_book_id
+	}]
+
+The time taken for the function is taken. The progress of the search is dynamically updated to the vm.progressbar. If an error is detected, the error is displayed, a blank array is returned and the progressbar color is changed to orange to indicate to the user that somehting may have gone wrong. 
+
+### searchGoodReadsBooks
+This function searches for a book keyword in the goodReads library throught the api. The searchItem is a parameter passed onto the function but must first be formatted before used in the url, the spaces from the search keyword is replaced with "+". The url called in to obtain the bookList just needs 2 parameter, `q` which is the searchItem, `key` which is apiKey of the goodReads. Since the result of the goodReadsApi is in XML format, it has to be converted to a JSON object and is done so through the yahoo api.
+
+When the bookList is received, it is formatted using the [book object format](#book-object-format). 
+
+	goodReadBooks = [{
+		type : "goodReads"
+		book : book_obj
+		goodReadsId : goodRead_book_id
+	}]
+
+The time taken to retrieve the ook is calculated to display to the developer how long it look to load the books. The function returns an array of the books loaded from goodReads and the value of the progressBar is constantly updated. If there was an error in retreiving the books, the color of the progressBar is changed to purple and an empty array is returned.
+
+### searchBookList
+This function is loaded when the user searches for a book title in the search tab. This function receives 2 parameters being `searchItem` which is the search text and `selectedService` which can either be 'amazon', 'goodReads' and 'google' which calles upon the specific search services; however this function is discontinued and any parameter can be passed to the function. 
+
+The function calls upon [searchGoogleBooks](#searchgooglebooks), [searchAmazonBooks](#searchamazonbooks) and [searchGoodReadsBooks](#searchgoodreadsbooks) for the books. Once all the books have been loaded and returned to this function. It also logs the total time taken, google, amazon and goodReads books. All the resulting book arrays are compiled and added together through the addToBookList function. The resulting book list array is sorted based on the following sequence "decsending number of occurence of the book in the various sources", "decsending ratings", "descending books with same words", "descending word sequence". 
+
+Once everything is completed, the bookList array is returned.
+
+### progressbar
+The progress bar is an instance of `ngProgressFactory` with a height of 2px. This progress bar can be acessed through `vm.progressbar`. 
+
+To add value, we can use `vm.progressbar.add(number)`
+
+To change the color, we can use `vm.progressbar.setColor("#RRGGBB")`
+
+To obtain the status, `vm.progressbar.status()`
 
 # Location
 The location service is a combination of [HTML](#location-html), [location frontend javascript](#location-js) and [location service](#location-srv). These files can be found under [bookmark-ionic/www/pages/location](https://github.com/Jharilela/Bookmark/tree/master/bookmark-ionic/www/pages/location). 
