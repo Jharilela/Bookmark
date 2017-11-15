@@ -18,3 +18,6 @@ The bookmark documentation is stored in the wiki tab of github, the link to the 
 [Pages](https://github.com/Jharilela/Bookmark/wiki/Pages)
 
 [Services](https://github.com/Jharilela/Bookmark/wiki/Services)
+
+
+*In order to protect the privacy of the bookmark users, some files containing the credentials to the databass and releasing into the app stores have been kept private and confidential. These files can only be obtained by the developers of bookmark
