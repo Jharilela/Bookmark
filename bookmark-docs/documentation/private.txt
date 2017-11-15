@@ -1,0 +1,2 @@
+
+To sign an android build using Jarsigner, you will be needing a password : Bluecoatxj9
